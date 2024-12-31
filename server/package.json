@@ -1,0 +1,22 @@
+{
+  "name": "messaging-app-server",
+  "version": "1.0.0",
+  "description": "Server for the messaging application using Express.js",
+  "main": "src/app.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "author": "",
+  "license": "ISC"
+}

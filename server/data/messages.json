@@ -1,0 +1,27 @@
+[
+  {
+    "sender": "John Doe",
+    "content": "Hello, this is a test message!",
+    "timestamp": "2023-10-01T12:00:00Z"
+  },
+  {
+    "sender": "admin",
+    "content": "hi"
+  },
+  {
+    "sender": "admin",
+    "content": "hello"
+  },
+  {
+    "sender": "user",
+    "content": "I am here too."
+  },
+  {
+    "sender": "user",
+    "content": "fsdfs"
+  },
+  {
+    "sender": "admin",
+    "content": "Here is a new message"
+  }
+]
