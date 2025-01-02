@@ -7,7 +7,7 @@ const Logout: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    setUser(null);
+    setUser(undefined);
   };
 
   return (

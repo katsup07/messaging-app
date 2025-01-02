@@ -1,31 +1,9 @@
 [
   {
-    "senderId": 2,
-    "time": "2025-01-02T07:37:16.270Z",
-    "sender": "user",
-    "content": "aa",
-    "receiver": {
-      "id": 1,
-      "username": "admin"
-    },
-    "receiverId": 1
-  },
-  {
-    "senderId": 2,
-    "time": "2025-01-02T07:37:19.683Z",
-    "sender": "user",
-    "content": "uu",
-    "receiver": {
-      "id": 2,
-      "username": "user"
-    },
-    "receiverId": 2
-  },
-  {
-    "senderId": 2,
-    "time": "2025-01-02T07:37:23.427Z",
-    "sender": "user",
-    "content": "ll",
+    "senderId": 1,
+    "time": "2025-01-02T16:02:49.757Z",
+    "sender": "admin",
+    "content": "Hi Luke!",
     "receiver": {
       "id": 3,
       "username": "Luke"
@@ -34,13 +12,92 @@
   },
   {
     "senderId": 1,
-    "time": "2025-01-02T15:36:17.331Z",
+    "time": "2025-01-02T16:12:11.881Z",
     "sender": "admin",
-    "content": "aaa",
+    "content": "Hey Lucy!",
     "receiver": {
-      "id": 3,
-      "username": "Luke"
+      "id": 4,
+      "username": "Lucy"
     },
-    "receiverId": 3
+    "receiverId": 4
+  },
+  {
+    "senderId": 4,
+    "time": "2025-01-02T16:13:11.881Z",
+    "sender": "Lucy",
+    "content": "Hi admin. I'm jumping now!",
+    "receiver": {
+      "id": 1,
+      "username": "admin"
+    },
+    "receiverId": 1
+  },
+  {
+    "senderId": 1,
+    "time": "2025-01-02T16:14:58.063Z",
+    "sender": "admin",
+    "content": "Do you need a carrot?",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy"
+    },
+    "receiverId": 4
+  },
+  {
+    "senderId": 2,
+    "time": "2025-01-02T16:12:48.859Z",
+    "sender": "user",
+    "content": "Hello John!",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5
+  },
+  {
+    "senderId": 5,
+    "time": "2025-01-02T16:02:49.757Z",
+    "sender": "John",
+    "content": "Yo user! What's up! This is John!",
+    "receiver": {
+      "id": 2,
+      "username": "user"
+    },
+    "receiverId": 2
+  },
+  {
+    "senderId": 2,
+    "time": "2025-01-02T16:57:19.570Z",
+    "sender": "user",
+    "content": "What are you doing now?",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5
+  },
+  {
+    "senderId": 1,
+    "time": "2025-01-02T17:02:06.814Z",
+    "sender": "admin",
+    "content": "I can give you one!",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy"
+    },
+    "receiverId": 4
+  },
+  {
+    "senderId": 4,
+    "time": "2025-01-02T17:03:06.814Z",
+    "sender": "Lucy",
+    "content": "Yes, please. I would like 7.",
+    "receiver": {
+      "id": 1,
+      "username": "admin"
+    },
+    "receiverId": 1
   }
 ]

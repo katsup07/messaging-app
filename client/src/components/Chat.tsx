@@ -7,8 +7,11 @@ import React from 'react';
 import { Friend } from './FriendsList';
 
 interface Message {
+  senderId: number;
   sender: string;
   content: string;
+  receiverId: number;
+  time: string; // ISO string
 }
 
 interface Props {
@@ -25,7 +28,9 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
   useEffect(() => {
     const fetchMessages = async () => {
       const fetchedMessages = await apiService.getMessages();
-      setMessages(fetchedMessages);
+      const sortedMessages = fetchedMessages.sort((a: Message, b: Message) => new Date(a.time).getTime() - new Date(b.time).getTime());
+      console.log('fetchedMessages', sortedMessages);
+      setMessages(sortedMessages);
     };
 
     fetchMessages();
@@ -49,11 +54,17 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
       setNewMessage('');
   };
 
+  const isFriendSenderOrReceiver = (message: Message) => {
+    const isFriendSender = message.senderId === selectedFriend?.id;
+    const isFriendReceiver = message.receiverId === selectedFriend?.id;
+    return isFriendSender || isFriendReceiver;
+  }
+
   return (
     <div className="chat-container">
    
     <div className="messages-container">
-      {messages.map((message, index) => (
+      {messages.filter(isFriendSenderOrReceiver).map((message, index) => (
         <Message key={index} sender={message.sender} content={message.content} />
       ))}
     </div>

@@ -15,7 +15,7 @@ export default class ApiService {
 
   async getMessages(): Promise<any> {
     try {
-      console.log('Fetching messages for user: ', this.user.id);
+      console.log('Fetching messages for user: ', `${this.baseMessageUrl}/${this.user.id}`);
       const response = await fetch(`${this.baseMessageUrl}/${this.user.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch messages');
