@@ -3,12 +3,13 @@ const path = require('path');
 
 const messagesFilePath = path.join(__dirname, '../../data/messages.json');
 
-async function getMessages(_, res) {
-  console.log('Getting messages...');
+async function getMessages(req, res) {
+  const { userId } = req.params;
+  console.log('Getting messages...', req.params.id);
   try {
     const data = await fs.readFile(messagesFilePath, 'utf8');
-    console.log('User retrieved: ', data);
-    res.json(JSON.parse(data));
+    const filteredMessages = JSON.parse(data).filter((message) => message.id.toString() === userId);
+    res.json(filteredMessages);
   } catch (err) {
     res.status(500).json({ error: 'Failed to read user' });
   }

@@ -1,32 +1,46 @@
 [
   {
-    "sender": "admin",
-    "content": "hi",
-    "receiver": "Lucy"
+    "senderId": 2,
+    "time": "2025-01-02T07:37:16.270Z",
+    "sender": "user",
+    "content": "aa",
+    "receiver": {
+      "id": 1,
+      "username": "admin"
+    },
+    "receiverId": 1
   },
   {
-    "sender": "admin",
-    "content": "ho",
-    "receiver": "Lucy"
+    "senderId": 2,
+    "time": "2025-01-02T07:37:19.683Z",
+    "sender": "user",
+    "content": "uu",
+    "receiver": {
+      "id": 2,
+      "username": "user"
+    },
+    "receiverId": 2
   },
   {
-    "sender": "admin",
-    "content": "yo",
-    "receiver": "John"
+    "senderId": 2,
+    "time": "2025-01-02T07:37:23.427Z",
+    "sender": "user",
+    "content": "ll",
+    "receiver": {
+      "id": 3,
+      "username": "Luke"
+    },
+    "receiverId": 3
   },
   {
+    "senderId": 1,
+    "time": "2025-01-02T15:36:17.331Z",
     "sender": "admin",
-    "content": "Hey",
-    "receiver": "John"
-  },
-  {
-    "sender": "admin",
-    "content": "akljfda",
-    "receiver": "Lucy"
-  },
-  {
-    "sender": "admin",
-    "content": "asfdasdfas",
-    "receiver": "John"
+    "content": "aaa",
+    "receiver": {
+      "id": 3,
+      "username": "Luke"
+    },
+    "receiverId": 3
   }
 ]

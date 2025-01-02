@@ -121,3 +121,11 @@ button:focus-visible {
   background-color: #535bf2;
   color: white;
 }
+
+.friend-item {
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #4c5287;
+  cursor: pointer;
+}

@@ -4,6 +4,7 @@ import { userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
 import Message from './Message';
 import React from 'react';
+import { Friend } from './FriendsList';
 
 interface Message {
   sender: string;
@@ -11,7 +12,7 @@ interface Message {
 }
 
 interface Props {
-  selectedFriend: string | null;
+  selectedFriend: Friend | null;
 }
 
 const Chat: React.FC<Props> = ({ selectedFriend}) => {
@@ -19,7 +20,7 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
   const [newMessage, setNewMessage] = useState<string>('');
   const user = useAtomValue(userAtom);
 
-  const apiService = useMemo(() => new ApiService(), []);
+  const apiService = useMemo(() => new ApiService(user), [user]);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -34,9 +35,12 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
     if (!newMessage.trim() || !selectedFriend || !user) return;
 
       const messageData = { 
+        senderId: user.id,
+        time: new Date().toISOString(),
         sender: user.username, 
         content: newMessage, 
-        receiver: selectedFriend 
+        receiver: selectedFriend, 
+        receiverId: selectedFriend.id,
       };
 
       console.log(messageData);

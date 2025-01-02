@@ -1,20 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import ApiService from '../services/ApiService';
+import { User } from '../atoms/userAtom';
 
 export interface Friend {
   id: number;
-  name: string;
+  username: string;
 }
 
 interface FriendsListProps {
-  friends: Friend[];
-  onSelectFriend: (friendName: string) => void;
-  selectedFriend: string | null;
+  onSelectFriend: (friend: Friend) => void;
+  selectedFriend: Friend | null;
+  user: User;
 }
 
-const FriendsList: React.FC<FriendsListProps> = ({ friends, onSelectFriend, selectedFriend }) => {
+const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFriend, user }) => {
+  const [friends, setFriends] = useState<Friend[]>([]);
+
+  useEffect(() => {
+    const fetchFriends = async () => {
+      const apiService = new ApiService(user);
+      const data = await apiService.getFriends();
+      setFriends(data);
+      onSelectFriend(data[0]);
+    };
+
+    fetchFriends();
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  , []);
   
-  const handleClick = (friendName: string) => {
-    onSelectFriend(friendName);
+  const handleClick = (friend: Friend) => {
+    onSelectFriend(friend);
   };
 
   return (
@@ -23,17 +39,10 @@ const FriendsList: React.FC<FriendsListProps> = ({ friends, onSelectFriend, sele
       {friends.map(friend => (
         <div
           key={friend.id}
-          className={`friend-item ${selectedFriend === friend.name ? 'active' : ''}`}
-          onClick={() => handleClick(friend.name)}
-          style={{
-            cursor: 'pointer',
-            marginBottom: '5px',
-            border: '1px solid #4c5287',
-            padding: '5px',
-            borderRadius: '5px'
-          }}
+          className={`friend-item ${selectedFriend?.username === friend.username ? 'active' : 'no-name'}`}
+          onClick={() => handleClick({id: friend.id, username: friend.username})}
         >
-          {friend.name}
+          {friend.username}
         </div>
       ))}
     </div>

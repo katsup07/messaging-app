@@ -49,6 +49,7 @@ const Login: React.FC = () => {
     localStorage.setItem('user', JSON.stringify(fetchedUser));
 
     const user: User = { 
+      id: fetchedUser.id,
       username: fetchedUser.username, 
       email: fetchedUser.email 
     };

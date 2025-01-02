@@ -1,17 +1,22 @@
+import { User } from "../atoms/userAtom";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default class ApiService {
-  private baseMessageUrl: string;
-  private baseAuthUrl: string;
+  private baseFriendsUrl = 'http://localhost:5000/api/friends';
+  private baseMessageUrl = 'http://localhost:5000/api/messages';
+  private baseAuthUrl = 'http://localhost:5000/api/auth';
+  private user: User;
 
-  constructor() {
-    this.baseMessageUrl = 'http://localhost:5000/api/messages';
-    this.baseAuthUrl = 'http://localhost:5000/api/auth';
+  constructor(user?: User) {
+    const anonymousUser = { id: 0, username: 'anon-user', email: 'anon-user@email.com' };
+
+    this.user = user || anonymousUser;
   }
 
   async getMessages(): Promise<any> {
     try {
-      console.log('Fetching messages');
-      const response = await fetch(this.baseMessageUrl);
+      console.log('Fetching messages for user: ', this.user.id);
+      const response = await fetch(`${this.baseMessageUrl}/${this.user.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch messages');
       }
@@ -57,6 +62,20 @@ export default class ApiService {
       return response.json();
     } catch (error) {
       console.error('Error getting user:', error);
+      throw error;
+    }
+  }
+
+  async getFriends(): Promise<any> {
+    try {
+      console.log("Getting friends for: ", this.user.id);
+      const response = await fetch(`${this.baseFriendsUrl}/${this.user.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch friends');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching friends:', error);
       throw error;
     }
   }
