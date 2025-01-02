@@ -17,6 +17,7 @@ function App() {
   return (
    <div className="app-container">
      <Logout />
+     <hr></hr>
     <h1>Messenger</h1>
     <FriendsList 
     onSelectFriend={setSelectedFriend}

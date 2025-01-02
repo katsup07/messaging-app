@@ -39,7 +39,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       {friends.map(friend => (
         <div
           key={friend.id}
-          className={`friend-item ${selectedFriend?.username === friend.username ? 'active' : 'no-name'}`}
+          className={`friend-item ${selectedFriend?.username === friend.username ? 'active' : 'not-active'}`}
           onClick={() => handleClick({id: friend.id, username: friend.username})}
         >
           {friend.username}
