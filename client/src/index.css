@@ -116,3 +116,8 @@ button:focus-visible {
   font-weight: 700;
   color:#535bf2
 }
+
+.friend-item.active {
+  background-color: #535bf2;
+  color: white;
+}

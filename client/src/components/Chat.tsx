@@ -1,15 +1,20 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAtomValue } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
 import Message from './Message';
+import React from 'react';
 
 interface Message {
   sender: string;
   content: string;
 }
 
-const Chat: React.FC = () => {
+interface Props {
+  selectedFriend: string | null;
+}
+
+const Chat: React.FC<Props> = ({ selectedFriend}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const user = useAtomValue(userAtom);
@@ -26,13 +31,18 @@ const Chat: React.FC = () => {
   }, [apiService]);
 
   const handleSendMessage = async () => {
-    if (newMessage.trim() && user) {
-      const message = { sender: user.username, content: newMessage };
+    if (!newMessage.trim() || !selectedFriend || !user) return;
 
-      await apiService.sendMessage(message);
-      setMessages([...messages, message]);
+      const messageData = { 
+        sender: user.username, 
+        content: newMessage, 
+        receiver: selectedFriend 
+      };
+
+      console.log(messageData);
+      await apiService.sendMessage(messageData);
+      setMessages([...messages, messageData]);
       setNewMessage('');
-    }
   };
 
   return (

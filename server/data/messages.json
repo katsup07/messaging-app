@@ -1,27 +1,32 @@
 [
   {
-    "sender": "John Doe",
-    "content": "Hello, this is a test message!",
-    "timestamp": "2023-10-01T12:00:00Z"
+    "sender": "admin",
+    "content": "hi",
+    "receiver": "Lucy"
   },
   {
     "sender": "admin",
-    "content": "hi"
+    "content": "ho",
+    "receiver": "Lucy"
   },
   {
     "sender": "admin",
-    "content": "hello"
-  },
-  {
-    "sender": "user",
-    "content": "I am here too."
-  },
-  {
-    "sender": "user",
-    "content": "fsdfs"
+    "content": "yo",
+    "receiver": "John"
   },
   {
     "sender": "admin",
-    "content": "Here is a new message"
+    "content": "Hey",
+    "receiver": "John"
+  },
+  {
+    "sender": "admin",
+    "content": "akljfda",
+    "receiver": "Lucy"
+  },
+  {
+    "sender": "admin",
+    "content": "asfdasdfas",
+    "receiver": "John"
   }
 ]
