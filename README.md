@@ -8,7 +8,8 @@
 <br/>npm start
 
 <br>Note: The database is currently only JSON files saved locally.
-[Demo](https://youtu.be/5UC28JgiGUI)
+<br/>
+[Demo Youtube Video](https://youtu.be/5UC28JgiGUI)
 
 ### Friends List and Chat
 ![Vite-React-TS-02-09-2025_08_21_PM](https://github.com/user-attachments/assets/87b9bd1a-fea4-40c4-aa43-0782120ba75b)
