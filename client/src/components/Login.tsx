@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useSetAtom } from 'jotai';
 import { userAtom, User } from '../atoms/userAtom';
-import { validateEmail, validatePassword, validateUsername } from '../helpers/validation-utils';
+import { validateEmail, validatePassword } from '../helpers/validation-utils';
 import ApiService from '../services/ApiService';
+import { MdLogin } from 'react-icons/md';
 
-const validateLogin = (username: string, email: string, password: string): boolean => {
+const validateLogin = (email: string, password: string): boolean => {
   const isValidEmail = validateEmail(email);
   if (!isValidEmail) {
-    alert('Invalid email');
+    alert('Invalid email format');
     return false;
   }
   const isValidPassword = validatePassword(password);
   if (!isValidPassword) {
     alert('Password must be at least 6 characters long');
-    return false;
-  }
-  const isValidUsername = validateUsername(username);
-  if (!isValidUsername) {
-    alert('Username must be at least 3 characters long');
     return false;
   }
   return true;
@@ -26,25 +22,26 @@ const validateLogin = (username: string, email: string, password: string): boole
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
   const setUser = useSetAtom(userAtom);
 
-  // Initialize current
   useEffect(() => {
     const user = localStorage.getItem('user');
     if (user) 
       setUser(JSON.parse(user));
-
-    }, [setUser] )
-
+  }, [setUser]);
 
   const handleLogin = async() => {
-    const isValid = validateLogin(username, email, password);
+    const isValid = validateLogin(email, password);
     if(!isValid)
       return;
 
     const apiService = new ApiService();
-    const fetchedUser = await apiService.findUser({username, email, password});
+    const fetchedUser = await apiService.findUser({ email, password });
+
+    if (!fetchedUser) {
+      alert('Invalid email or password');
+      return;
+    }
 
     localStorage.setItem('user', JSON.stringify(fetchedUser));
 
@@ -56,28 +53,39 @@ const Login: React.FC = () => {
     setUser(user);
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
+
   return (
-    <div>
-      <h2>Login</h2>
-      <input
-        type="text"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        placeholder="Username"
-      />
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-      />
-      <button onClick={handleLogin}>Login</button>
+    <div className="login-container">
+      <div className="login-form">
+        <h2>Welcome Back</h2>
+        <div className="login-input-group">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="login-input"
+            onKeyPress={handleKeyPress}
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="login-input"
+            onKeyPress={handleKeyPress}
+          />
+        </div>
+        <button className="login-button" onClick={handleLogin}>
+          <MdLogin size={20} />
+          Sign In
+        </button>
+      </div>
     </div>
   );
 };

@@ -46,23 +46,29 @@ export default class ApiService {
     }
   }
 
-  async findUser( user: { username: string; email: string, password: string }): Promise<any> {
+  async findUser(credentials: { email: string; password: string }) {
     try {
-      const response = await fetch(this.baseAuthUrl, {
+      const response = await fetch(`${this.baseAuthUrl}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(user),
+        body: JSON.stringify(credentials),
       });
-      console.log(response);
-      if (!response.ok)
-        throw new Error('Failed to get user');
-  
-      return response.json();
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        return null;
+      }
+
+      return data;
     } catch (error) {
-      console.error('Error getting user:', error);
-      throw error;
+      console.error('Error during login:', error);
+      return null;
     }
   }
 

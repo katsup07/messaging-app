@@ -99,5 +99,93 @@
       "username": "admin"
     },
     "receiverId": 1
+  },
+  {
+    "senderId": 1,
+    "time": "2025-02-09T08:42:13.581Z",
+    "sender": "admin",
+    "content": "Hello",
+    "receiver": {
+      "id": 3,
+      "username": "Luke"
+    },
+    "receiverId": 3
+  },
+  {
+    "senderId": 1,
+    "time": "2025-02-09T08:42:19.644Z",
+    "sender": "admin",
+    "content": "Hey there!",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy"
+    },
+    "receiverId": 4
+  },
+  {
+    "senderId": 2,
+    "time": "2025-02-09T09:59:00.839Z",
+    "sender": "user",
+    "content": "Hey Lucy!",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy"
+    },
+    "receiverId": 4
+  },
+  {
+    "senderId": 2,
+    "time": "2025-02-09T09:59:12.780Z",
+    "sender": "user",
+    "content": "Hello Luke!",
+    "receiver": {
+      "id": 3,
+      "username": "Luke"
+    },
+    "receiverId": 3
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-09T10:07:02.549Z",
+    "sender": "Lucy",
+    "content": "Thank you for the message user. Who are you?",
+    "receiver": {
+      "id": 2,
+      "username": "user"
+    },
+    "receiverId": 2
+  },
+  {
+    "senderId": 2,
+    "time": "2025-02-09T10:08:34.493Z",
+    "sender": "user",
+    "content": "I am user!!",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy"
+    },
+    "receiverId": 4
+  },
+  {
+    "senderId": 2,
+    "time": "2025-02-09T11:00:35.609Z",
+    "sender": "user",
+    "content": "Are you still there?",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy"
+    },
+    "receiverId": 4
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-09T11:00:55.807Z",
+    "sender": "Lucy",
+    "content": "Yes, I am still here!!!",
+    "receiver": {
+      "id": 2,
+      "username": "user"
+    },
+    "receiverId": 2
   }
 ]

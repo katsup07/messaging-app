@@ -35,7 +35,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
 
   return (
     <div className="friends-list" style={{ width: '200px', padding: '10px' }}>
-      <h3>Friends</h3>
+      <h3><span>{user.username}</span>'s Friends</h3>
       {friends.map(friend => (
         <div
           key={friend.id}

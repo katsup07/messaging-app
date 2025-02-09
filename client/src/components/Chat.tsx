@@ -62,23 +62,30 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
 
   return (
     <div className="chat-container">
-   
-    <div className="messages-container">
-      {messages.filter(isFriendSenderOrReceiver).map((message, index) => (
-        <Message key={index} sender={message.sender} content={message.content} />
-      ))}
+      <div className="messages-container">
+        {messages.filter(isFriendSenderOrReceiver).map((message, index) => (
+          <Message key={index} sender={message.sender} content={message.content} />
+        ))}
+      </div>
+      <div className="message-input-container">
+        <textarea
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Type your message"
+          className="message-input"
+          onKeyPress={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSendMessage();
+            }
+          }}
+          rows={1}
+        />
+        <button onClick={handleSendMessage} className="send-button">
+          Send
+        </button>
+      </div>
     </div>
-    <input
-      type="text"
-      value={newMessage}
-      onChange={(e) => setNewMessage(e.target.value)}
-      placeholder="Type your message"
-      className="message-input"
-    />
-    <button onClick={handleSendMessage} className="send-button">
-      Send
-    </button>
-  </div>
   );
 };
 

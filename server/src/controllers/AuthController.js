@@ -4,15 +4,14 @@ const path = require('path');
 const authFilePath = path.join(__dirname, '../../data/auth.json');
 
 async function findUser(req, res) {
-  const { email, password, username } = req.body;
+  const { email, password } = req.body;
   console.log('Finding user...', req.body);
   try {
     const data = await fs.readFile(authFilePath, 'utf8');
     const users = JSON.parse(data);
     const user = users.find((user) => 
       user.email === email &&
-      user.password === password &&
-      user.username === username
+      user.password === password
     );
 
     console.log(user);
@@ -21,7 +20,6 @@ async function findUser(req, res) {
       return;
     }
 
- 
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: 'Failed to read user' });
@@ -39,20 +37,4 @@ async function getUsers(req, res) {
   }
 }
 
-// async function saveMessage(req, res) {
-//   console.log('Saving message...');
-//   const newMessage = req.body;
-
-//   try {
-//     const data = await fs.readFile(authFilePath, 'utf8');
-//     const messages = JSON.parse(data);
-//     messages.push(newMessage);
-
-//     await fs.writeFile(authFilePath, JSON.stringify(messages, null, 2));
-//     res.status(201).json(newMessage);
-//   } catch (err) {
-//     res.status(500).json({ error: 'Failed to save message' });
-//   }
-// }
-
-module.exports = { getUsers, findUser};
+module.exports = { getUsers, findUser };
