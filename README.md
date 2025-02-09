@@ -8,4 +8,4 @@
 <br/>npm start
 
 <br>Note: The database is currently only JSON files saved locally.
-[Demo](https://github.com/user-attachments/assets/6c682e10-4609-4ae0-ace2-6b290f6f7d07)
+[Demo](https://youtu.be/5UC28JgiGUI)
