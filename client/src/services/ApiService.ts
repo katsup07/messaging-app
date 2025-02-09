@@ -15,7 +15,6 @@ export default class ApiService {
 
   async getMessages(): Promise<any> {
     try {
-      console.log('Fetching messages for user: ', `${this.baseMessageUrl}/${this.user.id}`);
       const response = await fetch(`${this.baseMessageUrl}/${this.user.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch messages');
@@ -74,7 +73,6 @@ export default class ApiService {
 
   async getFriends(): Promise<any> {
     try {
-      console.log("Getting friends for: ", this.user.id);
       const response = await fetch(`${this.baseFriendsUrl}/${this.user.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch friends');

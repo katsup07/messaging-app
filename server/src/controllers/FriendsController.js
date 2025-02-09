@@ -4,15 +4,20 @@ const path = require('path');
 const friendsFile = path.join(__dirname, '../../data/friends.json');
 
 async function getFriends(req, res) {
-  console.log('Getting friends in backend...');
-
+  const { userId } = req.params;
   try {
     const data = await fs.readFile(friendsFile, 'utf8');
-    const allUsersFriends = JSON.parse(data);
-    const userData = allUsersFriends.find((u) => u.user.id.toString() === req.params.userId) || { friends: [] };
-    res.json(userData.friends);
+    const friends = JSON.parse(data);
+    const userFriends = friends.find(f => f.user.id.toString() === userId);
+    
+    if (!userFriends) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    res.json(userFriends.friends);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to read users' });
+    res.status(500).json({ error: 'Failed to read friends' });
   }
 }
 

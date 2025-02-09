@@ -9,5 +9,5 @@ app.use(json());
 setMessageRoutes(app);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  // Server is running
 });

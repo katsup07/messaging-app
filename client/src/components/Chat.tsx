@@ -29,7 +29,6 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
     const fetchMessages = async () => {
       const fetchedMessages = await apiService.getMessages();
       const sortedMessages = fetchedMessages.sort((a: Message, b: Message) => new Date(a.time).getTime() - new Date(b.time).getTime());
-      console.log('fetchedMessages', sortedMessages);
       setMessages(sortedMessages);
     };
 
@@ -48,7 +47,6 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
         receiverId: selectedFriend.id,
       };
 
-      console.log(messageData);
       await apiService.sendMessage(messageData);
       setMessages([...messages, messageData]);
       setNewMessage('');
