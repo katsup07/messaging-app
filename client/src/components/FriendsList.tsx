@@ -5,6 +5,7 @@ import { User } from '../atoms/userAtom';
 export interface Friend {
   id: number;
   username: string;
+  email: string;
 }
 
 interface FriendsListProps {
@@ -40,7 +41,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
         <div
           key={friend.id}
           className={`friend-item ${selectedFriend?.username === friend.username ? 'active' : 'not-active'}`}
-          onClick={() => handleClick({id: friend.id, username: friend.username})}
+          onClick={() => handleClick(friend)}
         >
           {friend.username}
         </div>

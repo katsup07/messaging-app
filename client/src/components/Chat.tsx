@@ -32,8 +32,13 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
       setMessages(sortedMessages);
     };
 
-    fetchMessages();
-  }, [apiService]);
+    if (selectedFriend) {
+      apiService.setSelectedFriend(selectedFriend);
+      fetchMessages();
+    } else {
+      setMessages([]);
+    }
+  }, [apiService, selectedFriend]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedFriend || !user) return;

@@ -1,13 +1,9 @@
-const fs = require('fs').promises;
-const path = require('path');
-
-const authFilePath = path.join(__dirname, '../../data/auth.json');
+const FileService = require('../services/FileService');
 
 async function findUser(req, res) {
   const { email, password } = req.body;
   try {
-    const data = await fs.readFile(authFilePath, 'utf8');
-    const users = JSON.parse(data);
+    const users = await FileService.getUsers();
     const user = users.find((user) => 
       user.email === email &&
       user.password === password
@@ -26,8 +22,8 @@ async function findUser(req, res) {
 
 async function getUsers(req, res) {
   try {
-    const data = await fs.readFile(authFilePath, 'utf8');
-    res.json(JSON.parse(data));
+    const users = await FileService.getUsers();
+    res.json(users);
   } catch (err) {
     res.status(500).json({ error: 'Failed to read users' });
   }

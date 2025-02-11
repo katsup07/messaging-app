@@ -6,6 +6,7 @@ export default class ApiService {
   private baseMessageUrl = 'http://localhost:5000/api/messages';
   private baseAuthUrl = 'http://localhost:5000/api/auth';
   private user: User;
+  private selectedFriend: User | null = null;
 
   constructor(user?: User) {
     const anonymousUser = { id: 0, username: 'anon-user', email: 'anon-user@email.com' };
@@ -13,9 +14,16 @@ export default class ApiService {
     this.user = user || anonymousUser;
   }
 
+  setSelectedFriend(friend: User | null) {
+    this.selectedFriend = friend;
+  }
+
   async getMessages(): Promise<any> {
+    if (!this.selectedFriend) {
+      return [];
+    }
     try {
-      const response = await fetch(`${this.baseMessageUrl}/${this.user.id}`);
+      const response = await fetch(`${this.baseMessageUrl}/${this.user.id}?friendId=${this.selectedFriend.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch messages');
       }

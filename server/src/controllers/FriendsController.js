@@ -1,13 +1,9 @@
-const fs = require('fs').promises;
-const path = require('path');
-
-const friendsFile = path.join(__dirname, '../../data/friends.json');
+const FileService = require('../services/FileService');
 
 async function getFriends(req, res) {
   const { userId } = req.params;
   try {
-    const data = await fs.readFile(friendsFile, 'utf8');
-    const friends = JSON.parse(data);
+    const friends = await FileService.getFriends();
     const userFriends = friends.find(f => f.user.id.toString() === userId);
     
     if (!userFriends) {
@@ -21,4 +17,4 @@ async function getFriends(req, res) {
   }
 }
 
-module.exports = { getFriends};
+module.exports = { getFriends };
