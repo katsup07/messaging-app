@@ -15,15 +15,10 @@ const Message: React.FC<MessageProps> = ({ content, sender, time, isRead = false
   
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
-    const now = new Date();
-    const isToday = date.toDateString() === now.toDateString();
-    
-    if (isToday) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    return date.toLocaleDateString([], { 
+    return date.toLocaleString([], { 
       month: 'short', 
-      day: 'numeric',
+      day: 'numeric', 
+      year: 'numeric', 
       hour: '2-digit', 
       minute: '2-digit' 
     });

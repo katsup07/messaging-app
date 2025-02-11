@@ -151,7 +151,6 @@
 }
 
 .friends-list {
-  width: 100%;
   padding: 0;
 }
 
@@ -170,11 +169,11 @@
 .friends-header {
   display: flex;
   justify-content: flex-start;
-  align-items: center;
+  align-items: stretch;
   margin-bottom: 1.25rem;
-  padding: 0.75rem 0.5rem;
+  padding: 0.5rem 0.5rem;
   background-color: var(--subtle-bg);
-  border-radius: 0;
+  border-radius: 7px 7px 0 0;
 }
 
 .friends-header h3 {

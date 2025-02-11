@@ -134,17 +134,6 @@
     "receiverId": 4
   },
   {
-    "senderId": 2,
-    "time": "2025-02-09T09:59:12.780Z",
-    "sender": "user",
-    "content": "Hello Luke!",
-    "receiver": {
-      "id": 3,
-      "username": "Luke"
-    },
-    "receiverId": 3
-  },
-  {
     "senderId": 4,
     "time": "2025-02-09T10:07:02.549Z",
     "sender": "Lucy",
@@ -600,6 +589,19 @@
       "email": "Luke@email.com"
     },
     "receiverId": 3,
+    "isRead": false
+  },
+  {
+    "senderId": 3,
+    "time": "2025-02-11T15:58:18.712Z",
+    "sender": "Luke",
+    "content": "That is good to hear!",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5,
     "isRead": false
   }
 ]

@@ -198,18 +198,24 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
             Loading messages...
           </div>
         ) : (
-          <>
-            {messages.filter(isFriendSenderOrReceiver).map((message) => (
-              <Message 
-                key={`${message.senderId}-${message.time}`} 
-                sender={message.sender} 
-                content={message.content}
-                time={message.time}
-                isRead={message.isRead}
-              />
-            ))}
-            <div ref={messagesEndRef} />
-          </>
+          messages.length === 0 ? (
+            <div className="no-messages">
+              <em>No message history exists.</em>
+            </div>
+          ) : (
+            <>
+              {messages.filter(isFriendSenderOrReceiver).map((message) => (
+                <Message 
+                  key={`${message.senderId}-${message.time}`} 
+                  sender={message.sender} 
+                  content={message.content}
+                  time={message.time}
+                  isRead={message.isRead}
+                />
+              ))}
+              <div ref={messagesEndRef} />
+            </>
+          )
         )}
       </div>
       <div className="message-input-container">
