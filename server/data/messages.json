@@ -233,5 +233,29 @@
       "email": "user@email.com"
     },
     "receiverId": 2
+  },
+  {
+    "senderId": 2,
+    "time": "2025-02-11T02:42:08.634Z",
+    "sender": "user",
+    "content": "Thank-you! That is nice!",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5
+  },
+  {
+    "senderId": 5,
+    "time": "2025-02-11T02:42:46.109Z",
+    "sender": "John",
+    "content": "I am so nice!",
+    "receiver": {
+      "id": 2,
+      "username": "user",
+      "email": "user@email.com"
+    },
+    "receiverId": 2
   }
 ]
