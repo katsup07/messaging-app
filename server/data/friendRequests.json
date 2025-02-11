@@ -1,0 +1,18 @@
+[
+  {
+    "id": "4-5-1739284472913",
+    "fromUserId": 4,
+    "toUserId": 5,
+    "status": "accepted",
+    "createdAt": "2025-02-11T14:34:32.913Z",
+    "respondedAt": "2025-02-11T14:34:45.933Z"
+  },
+  {
+    "id": "5-3-1739285480429",
+    "fromUserId": 5,
+    "toUserId": 3,
+    "status": "accepted",
+    "createdAt": "2025-02-11T14:51:20.429Z",
+    "respondedAt": "2025-02-11T14:51:29.817Z"
+  }
+]

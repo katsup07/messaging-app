@@ -40,7 +40,6 @@ function App() {
               <rect x="2" y="6" width="20" height="12" rx="6" className={isDarkMode ? 'switch-track-dark' : 'switch-track'} />
               <circle cx={isDarkMode ? "16" : "8"} cy="12" r="4" fill="currentColor" />
             </svg>
-            <span className="tooltip">Color theme</span>
           </button>
           <Logout />
         </div>

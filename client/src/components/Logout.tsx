@@ -28,7 +28,6 @@ const Logout: React.FC = () => {
       <button className="icon-button" onClick={() => setShowModal(true)} aria-label="Logout">
         <MdLogout size={24} />
         <span>Logout</span>
-        <span className="tooltip">Logout</span>
       </button>
 
       {showModal && (

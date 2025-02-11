@@ -11,25 +11,27 @@
   /* Light mode variables */
   --bg-main: #f0f2f5;
   --bg-surface: #ffffff;
-  --border-color: #e4e6eb;
+  --border-color: rgba(0, 0, 0, 0.08);
   --text-primary: #050505;
   --text-secondary: #65676b;
   --primary-color: #1877f2;
   --primary-hover: #166fe5;
   --input-bg: #f0f2f5;
   --focus-purple: #8e44ad;
+  --subtle-bg: rgba(0, 0, 0, 0.08);
 }
 
 [data-theme='dark'] {
   --bg-main: #18191a;
   --bg-surface: #242526;
-  --border-color: #3e4042;
+  --border-color: rgba(255, 255, 255, 0.08);
   --text-primary: #e4e6eb;
   --text-secondary: #b0b3b8;
   --primary-color: #2374e1;
   --primary-hover: #2d7fec;
   --input-bg: #3a3b3c;
   --focus-purple: #9b59b6;
+  --subtle-bg: rgba(255, 255, 255, 0.08);
 }
 
 .app-container {
@@ -139,7 +141,7 @@
 .friends-container {
   width: 280px;
   min-width: 250px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--subtle-bg);
   overflow-y: auto;
   background-color: var(--bg-surface);
   flex-shrink: 0;
@@ -150,7 +152,7 @@
 
 .friends-list {
   width: 100%;
-  padding: 1rem;
+  padding: 0;
 }
 
 .friends-list h3 {
@@ -162,23 +164,69 @@
 
 .friends-list h3 span {
   color: var(--text-primary);
-  font-weight: 600;
+  font-weight: 400;
+}
+
+.friends-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 0.5rem;
+  background-color: var(--subtle-bg);
+  border-radius: 0;
+}
+
+.friends-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.friends-header .icon-button {
+  color: var(--focus-purple);
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.friends-header .icon-button:hover {
+  background-color: var(--input-bg);
+  transform: translateY(-1px);
+}
+
+.friends-header .icon-button .tooltip {
+  display: none;
+}
+
+.friends-list-items {
+  overflow-x: hidden;
+  padding: 0;
 }
 
 .friend-item {
-  padding: 0.75rem 1rem;
-  margin: 0.25rem 0;
+  padding: 0.75rem 0.5rem;
+  margin: 0.25rem 0.5rem;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: calc(100% - 2rem);
+  box-sizing: border-box;
 }
 
 .friend-item::before {
   content: '';
-  width: 8px;
+  min-width: 8px;
   height: 8px;
   border-radius: 50%;
   background-color: #ccc;
@@ -206,7 +254,7 @@
   background-color: var(--bg-surface);
   min-height: 0;
   border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--subtle-bg);
   box-shadow: none;
   transition: all 0.3s ease;
 }
@@ -229,14 +277,14 @@
   gap: 0.5rem;
   padding: 1rem;
   background-color: var(--bg-surface);
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--subtle-bg);
   flex-shrink: 0;
 }
 
 .message-input {
   flex: 1;
   padding: 0.625rem 0.875rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--subtle-bg);
   border-radius: 20px;
   font-size: 0.95rem;
   background-color: var(--input-bg);
@@ -331,7 +379,7 @@
   padding: 0 1rem;
   background-color: var(--bg-surface);
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--subtle-bg);
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -603,7 +651,7 @@
   padding: 0.75rem 1.25rem;
   background-color: var(--bg-surface);
   border-radius: 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--subtle-bg);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   max-width: 85%;
   font-size: 1rem;
@@ -629,7 +677,7 @@
   display: block;
   color: var(--focus-purple);
   font-weight: 500;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--subtle-bg);
 }
 
 .message .sender.current-user {
@@ -791,7 +839,7 @@ body {
   outline: none;
 }
 
-.tooltip {
+.icon-button .tooltip {
   position: absolute;
   top: -25px;
   left: 50%;
@@ -803,7 +851,7 @@ body {
   font-size: 11px;
   white-space: nowrap;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--subtle-bg);
   opacity: 0;
   visibility: hidden;
   transition: all 0.2s ease;
@@ -898,7 +946,7 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 320px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--subtle-bg);
 }
 
 .login-form h2 {
@@ -918,7 +966,7 @@ body {
 
 .login-input {
   padding: 0.75rem 1rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--subtle-bg);
   border-radius: 6px;
   background-color: var(--input-bg);
   color: var(--text-primary);
@@ -1025,4 +1073,107 @@ body {
 
 .message-sent .message-status.read {
   color: white;
+}
+
+.add-friend-form {
+  padding: 1rem;
+  background-color: var(--input-bg);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.friend-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--subtle-bg);
+  border-radius: 4px;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.send-request-button {
+  padding: 0.5rem 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.send-request-button:hover {
+  background-color: var(--primary-hover);
+}
+
+.send-request-button:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+.pending-requests {
+  padding: 1rem;
+  background-color: var(--input-bg);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.pending-requests h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.friend-request {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: var(--bg-surface);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.friend-request:last-child {
+  margin-bottom: 0;
+}
+
+.request-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.accept-button,
+.reject-button {
+  padding: 0.25rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-size: 0.9rem;
+}
+
+.accept-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.reject-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.accept-button:hover,
+.reject-button:hover {
+  opacity: 0.9;
+}
+
+.error-message {
+  color: #f44336;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: rgba(244, 67, 54, 0.1);
+  border-radius: 4px;
+  font-size: 0.9rem;
 }

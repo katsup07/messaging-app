@@ -380,5 +380,174 @@
     },
     "receiverId": 3,
     "isRead": false
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T14:24:55.388Z",
+    "sender": "Lucy",
+    "content": "Hi John!",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5,
+    "isRead": false
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T14:25:12.257Z",
+    "sender": "Lucy",
+    "content": "What are you doing?",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5,
+    "isRead": false
+  },
+  {
+    "senderId": 5,
+    "time": "2025-02-11T14:25:30.646Z",
+    "sender": "John",
+    "content": "I am not doing much. How about you?",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy",
+      "email": "Lucy@email.com"
+    },
+    "receiverId": 4,
+    "isRead": false
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T14:26:47.749Z",
+    "sender": "Lucy",
+    "content": "Same here!",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5,
+    "isRead": false
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T14:47:54.732Z",
+    "sender": "Lucy",
+    "content": "How about you?",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T14:48:10.651Z",
+    "sender": "Lucy",
+    "content": "Are you still there?",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
+  },
+  {
+    "senderId": 2,
+    "time": "2025-02-11T14:49:56.882Z",
+    "sender": "user",
+    "content": "Hey Lucy!",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy",
+      "email": "Lucy@email.com"
+    },
+    "receiverId": 4,
+    "isRead": false
+  },
+  {
+    "senderId": 5,
+    "time": "2025-02-11T14:50:37.062Z",
+    "sender": "John",
+    "content": "What are you doing now?",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy",
+      "email": "Lucy@email.com"
+    },
+    "receiverId": 4,
+    "isRead": false
+  },
+  {
+    "senderId": 3,
+    "time": "2025-02-11T14:51:53.422Z",
+    "sender": "Luke",
+    "content": "Yo! John!",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5,
+    "isRead": false
+  },
+  {
+    "senderId": 5,
+    "time": "2025-02-11T15:16:28.467Z",
+    "sender": "John",
+    "content": "Hello Luke!",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
+  },
+  {
+    "senderId": 3,
+    "time": "2025-02-11T15:16:41.011Z",
+    "sender": "Luke",
+    "content": "What are you doing?",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5,
+    "isRead": false
+  },
+  {
+    "senderId": 5,
+    "time": "2025-02-11T15:18:17.505Z",
+    "sender": "John",
+    "content": "Nothing much. How about you?",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
+  },
+  {
+    "senderId": 3,
+    "time": "2025-02-11T15:18:29.464Z",
+    "sender": "Luke",
+    "content": "Same here.",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5,
+    "isRead": false
   }
 ]

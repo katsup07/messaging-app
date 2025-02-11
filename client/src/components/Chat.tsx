@@ -32,6 +32,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const errorTimeoutRef = useRef<NodeJS.Timeout>();
   const user = useAtomValue(userAtom);
 
   const apiService = useMemo(() => new ApiService(user), [user]);
@@ -76,6 +77,12 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
 
       setConnectionStatus('connecting');
       setIsLoading(true);
+      
+      // Clear any existing error timeout
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+        errorTimeoutRef.current = undefined;
+      }
       setError(null);
 
       // Create EventSource connection
@@ -98,14 +105,21 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
       // Handle connection error
       eventSource.onerror = () => {
         setConnectionStatus('disconnected');
-        setError('Connection lost. Reconnecting...');
         eventSource?.close();
         retryCount.current += 1;
         
+        // Only show error message if we've failed multiple times or reached max retries
+        if (retryCount.current >= MAX_RETRY_ATTEMPTS) {
+          setError('Maximum reconnection attempts reached. Please refresh the page.');
+        } else if (retryCount.current > 1) {
+          // Set error after a delay to prevent flashing during quick reconnects
+          errorTimeoutRef.current = setTimeout(() => {
+            setError('Connection lost. Reconnecting...');
+          }, 2000);
+        }
+        
         if (retryCount.current < MAX_RETRY_ATTEMPTS) {
           setTimeout(connectToSSE, RETRY_DELAY);
-        } else {
-          setError('Maximum reconnection attempts reached. Please refresh the page.');
         }
       };
     };
@@ -121,6 +135,9 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
 
     // Cleanup: close SSE connection when component unmounts or friend changes
     return () => {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
       if (eventSource) {
         eventSource.close();
       }
@@ -130,7 +147,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedFriend || !user) return;
 
-    setError(null);
+    const currentConnectionStatus = connectionStatus;
     try {
       const messageData = { 
         senderId: user.id,
@@ -149,6 +166,12 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
       const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
       setError(errorMessage);
       console.error('Error sending message:', error);
+      // Only update connection status if there's an actual connection error
+      if (error instanceof Error && error.message.includes('connection')) {
+        setConnectionStatus('disconnected');
+      } else {
+        setConnectionStatus(currentConnectionStatus);
+      }
     }
   };
 

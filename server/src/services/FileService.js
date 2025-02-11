@@ -7,7 +7,8 @@ class FileService {
     this.paths = {
       messages: path.join(this.dataPath, 'messages.json'),
       auth: path.join(this.dataPath, 'auth.json'),
-      friends: path.join(this.dataPath, 'friends.json')
+      friends: path.join(this.dataPath, 'friends.json'),
+      friendRequests: path.join(this.dataPath, 'friendRequests.json')
     };
     this.initializeFiles();
   }
@@ -17,6 +18,7 @@ class FileService {
       await this.ensureFileExists(this.paths.messages, '[]');
       await this.ensureFileExists(this.paths.auth, '[]');
       await this.ensureFileExists(this.paths.friends, '[]');
+      await this.ensureFileExists(this.paths.friendRequests, '[]');
     } catch (error) {
       console.error('Error initializing files:', error);
     }
@@ -81,6 +83,18 @@ class FileService {
 
   async saveUsers(users) {
     return this.writeJsonFile(this.paths.auth, users);
+  }
+
+  async getFriendRequests() {
+    return this.readJsonFile(this.paths.friendRequests);
+  }
+
+  async saveFriendRequests(requests) {
+    return this.writeJsonFile(this.paths.friendRequests, requests);
+  }
+
+  async saveFriends(friends) {
+    return this.writeJsonFile(this.paths.friends, friends);
   }
 }
 

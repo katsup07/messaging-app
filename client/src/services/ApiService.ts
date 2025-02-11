@@ -5,6 +5,7 @@ export default class ApiService {
   private readonly _baseFriendsUrl = 'http://localhost:5000/api/friends';
   private readonly _baseMessageUrl = 'http://localhost:5000/api/messages';
   private readonly _baseAuthUrl = 'http://localhost:5000/api/auth';
+  private readonly _baseFriendRequestUrl = 'http://localhost:5000/api/friend-requests';
   private user: User;
   private selectedFriend: User | null = null;
 
@@ -16,6 +17,10 @@ export default class ApiService {
 
   get baseMessageUrl(): string {
     return this._baseMessageUrl;
+  }
+
+  get baseFriendRequestUrl(): string {
+    return this._baseFriendRequestUrl;
   }
 
   setSelectedFriend(friend: User | null) {
@@ -119,6 +124,61 @@ export default class ApiService {
       }
     } catch (error) {
       console.error('Error during logout:', error);
+      throw error;
+    }
+  }
+
+  async getPendingFriendRequests(): Promise<any> {
+    try {
+      const response = await fetch(`${this._baseFriendRequestUrl}/pending/${this.user.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch pending friend requests');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching pending friend requests:', error);
+      throw error;
+    }
+  }
+
+  async sendFriendRequest(toUserId: number): Promise<any> {
+    try {
+      const response = await fetch(`${this._baseFriendRequestUrl}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fromUserId: this.user.id,
+          toUserId
+        }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to send friend request');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      throw error;
+    }
+  }
+
+  async respondToFriendRequest(requestId: string, accept: boolean): Promise<any> {
+    try {
+      const response = await fetch(`${this._baseFriendRequestUrl}/${requestId}/respond`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accept }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to respond to friend request');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error responding to friend request:', error);
       throw error;
     }
   }
