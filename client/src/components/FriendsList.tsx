@@ -6,6 +6,7 @@ export interface Friend {
   id: number;
   username: string;
   email: string;
+  isLoggedIn?: boolean;
 }
 
 interface FriendsListProps {
@@ -16,19 +17,42 @@ interface FriendsListProps {
 
 const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFriend, user }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [onlineStatus, setOnlineStatus] = useState<{[key: number]: boolean}>({});
 
   useEffect(() => {
     const fetchFriends = async () => {
       const apiService = new ApiService(user);
-      const data = await apiService.getFriends();
-      setFriends(data);
-      onSelectFriend(data[0]);
+      const friendsData = await apiService.getFriends();
+      const usersData = await apiService.getUsers();
+      
+      // Create a map of user IDs to their login status
+      const statusMap = usersData.reduce((acc: {[key: number]: boolean}, user: Friend) => {
+        acc[user.id] = user.isLoggedIn || false;
+        return acc;
+      }, {});
+      
+      setOnlineStatus(statusMap);
+      setFriends(friendsData);
+      if (friendsData.length > 0 && !selectedFriend) {
+        onSelectFriend(friendsData[0]);
+      }
     };
 
     fetchFriends();
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  , []);
+    
+    // Poll for online status updates
+    const interval = setInterval(async () => {
+      const apiService = new ApiService(user);
+      const usersData = await apiService.getUsers();
+      const statusMap = usersData.reduce((acc: {[key: number]: boolean}, user: Friend) => {
+        acc[user.id] = user.isLoggedIn || false;
+        return acc;
+      }, {});
+      setOnlineStatus(statusMap);
+    }, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [user, onSelectFriend, selectedFriend]);
   
   const handleClick = (friend: Friend) => {
     onSelectFriend(friend);
@@ -40,7 +64,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       {friends.map(friend => (
         <div
           key={friend.id}
-          className={`friend-item ${selectedFriend?.username === friend.username ? 'active' : 'not-active'}`}
+          className={`friend-item ${selectedFriend?.id === friend.id ? 'active' : ''} ${onlineStatus[friend.id] ? 'online' : ''}`}
           onClick={() => handleClick(friend)}
         >
           {friend.username}

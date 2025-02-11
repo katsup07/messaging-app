@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
@@ -11,38 +11,127 @@ interface Message {
   sender: string;
   content: string;
   receiverId: number;
-  time: string; // ISO string
+  time: string;
+  isRead?: boolean;
 }
 
 interface Props {
   selectedFriend: Friend | null;
 }
 
-const Chat: React.FC<Props> = ({ selectedFriend}) => {
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_DELAY = 5000;
+
+const Chat: React.FC<Props> = ({ selectedFriend }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
+  const retryCount = useRef(0);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const user = useAtomValue(userAtom);
 
   const apiService = useMemo(() => new ApiService(user), [user]);
 
+  const scrollToBottom = () => {
+    if (shouldAutoScroll) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleScroll = () => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+      const isScrolledToBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10;
+      setShouldAutoScroll(isScrolledToBottom);
+    }
+  };
+
+  // Scroll to bottom when messages update
   useEffect(() => {
-    const fetchMessages = async () => {
-      const fetchedMessages = await apiService.getMessages();
-      const sortedMessages = fetchedMessages.sort((a: Message, b: Message) => new Date(a.time).getTime() - new Date(b.time).getTime());
-      setMessages(sortedMessages);
+    scrollToBottom();
+  }, [messages]);
+
+  // Reset scroll state and scroll to bottom when switching friends
+  useEffect(() => {
+    setShouldAutoScroll(true);
+    // Use a small delay to ensure the messages are rendered before scrolling
+    setTimeout(scrollToBottom, 100);
+  }, [selectedFriend]);
+
+  // Set up SSE connection when friend is selected
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
+
+    const connectToSSE = () => {
+      if (!selectedFriend || !user) return;
+      if (retryCount.current >= MAX_RETRY_ATTEMPTS) {
+        setError('Maximum reconnection attempts reached. Please refresh the page.');
+        setConnectionStatus('disconnected');
+        return;
+      }
+
+      setConnectionStatus('connecting');
+      setIsLoading(true);
+      setError(null);
+
+      // Create EventSource connection
+      const url = `${apiService.baseMessageUrl}/stream/${user.id}/${selectedFriend.id}`;
+      eventSource = new EventSource(url);
+
+      // Handle connection open
+      eventSource.onopen = () => {
+        setConnectionStatus('connected');
+        retryCount.current = 0;
+      };
+
+      // Handle incoming messages
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        setMessages(data);
+        setIsLoading(false);
+      };
+
+      // Handle connection error
+      eventSource.onerror = () => {
+        setConnectionStatus('disconnected');
+        setError('Connection lost. Reconnecting...');
+        eventSource?.close();
+        retryCount.current += 1;
+        
+        if (retryCount.current < MAX_RETRY_ATTEMPTS) {
+          setTimeout(connectToSSE, RETRY_DELAY);
+        } else {
+          setError('Maximum reconnection attempts reached. Please refresh the page.');
+        }
+      };
     };
 
     if (selectedFriend) {
       apiService.setSelectedFriend(selectedFriend);
-      fetchMessages();
+      connectToSSE();
     } else {
       setMessages([]);
+      setError(null);
+      setConnectionStatus('disconnected');
     }
-  }, [apiService, selectedFriend]);
+
+    // Cleanup: close SSE connection when component unmounts or friend changes
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+    };
+  }, [apiService, selectedFriend, user]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedFriend || !user) return;
 
+    setError(null);
+    try {
       const messageData = { 
         senderId: user.id,
         time: new Date().toISOString(),
@@ -50,11 +139,17 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
         content: newMessage, 
         receiver: selectedFriend, 
         receiverId: selectedFriend.id,
+        isRead: false,
       };
 
       await apiService.sendMessage(messageData);
-      setMessages([...messages, messageData]);
       setNewMessage('');
+      setShouldAutoScroll(true);  // Enable auto-scroll when sending a new message
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
+      setError(errorMessage);
+      console.error('Error sending message:', error);
+    }
   };
 
   const isFriendSenderOrReceiver = (message: Message) => {
@@ -65,10 +160,34 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
 
   return (
     <div className="chat-container">
-      <div className="messages-container">
-        {messages.filter(isFriendSenderOrReceiver).map((message, index) => (
-          <Message key={index} sender={message.sender} content={message.content} />
-        ))}
+      <div 
+        className="messages-container" 
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+      >
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+        {isLoading ? (
+          <div className="loading-spinner">
+            Loading messages...
+          </div>
+        ) : (
+          <>
+            {messages.filter(isFriendSenderOrReceiver).map((message) => (
+              <Message 
+                key={`${message.senderId}-${message.time}`} 
+                sender={message.sender} 
+                content={message.content}
+                time={message.time}
+                isRead={message.isRead}
+              />
+            ))}
+            <div ref={messagesEndRef} />
+          </>
+        )}
       </div>
       <div className="message-input-container">
         <textarea
@@ -76,6 +195,7 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type your message"
           className="message-input"
+          disabled={isLoading || connectionStatus === 'disconnected'}
           onKeyPress={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -84,7 +204,11 @@ const Chat: React.FC<Props> = ({ selectedFriend}) => {
           }}
           rows={1}
         />
-        <button onClick={handleSendMessage} className="send-button">
+        <button 
+          onClick={handleSendMessage} 
+          className="send-button"
+          disabled={isLoading || !newMessage.trim() || connectionStatus === 'disconnected'}
+        >
           Send
         </button>
       </div>

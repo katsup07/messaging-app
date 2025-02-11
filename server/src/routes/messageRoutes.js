@@ -1,8 +1,14 @@
-const { getMessages, saveMessage } = require('../controllers/MessageController');
+const express = require('express');
+const MessageController = require('../controllers/MessageController');
 
 function setMessageRoutes(app) {
-  app.get('/api/messages/:userId', getMessages);
-  app.post('/api/messages', saveMessage);
+  const router = express.Router();
+
+  router.get('/:userId', MessageController.getMessages);
+  router.post('/', MessageController.saveMessage);
+  router.get('/stream/:userId/:friendId', MessageController.initMessageStream);
+
+  app.use('/api/messages', router);
 }
 
 module.exports = { setMessageRoutes };

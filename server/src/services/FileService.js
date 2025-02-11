@@ -9,13 +9,47 @@ class FileService {
       auth: path.join(this.dataPath, 'auth.json'),
       friends: path.join(this.dataPath, 'friends.json')
     };
+    this.initializeFiles();
+  }
+
+  async initializeFiles() {
+    try {
+      await this.ensureFileExists(this.paths.messages, '[]');
+      await this.ensureFileExists(this.paths.auth, '[]');
+      await this.ensureFileExists(this.paths.friends, '[]');
+    } catch (error) {
+      console.error('Error initializing files:', error);
+    }
+  }
+
+  async ensureFileExists(filePath, defaultContent) {
+    try {
+      await fs.access(filePath);
+      // Check if file is empty
+      const stats = await fs.stat(filePath);
+      if (stats.size === 0) {
+        await fs.writeFile(filePath, defaultContent, 'utf8');
+      }
+    } catch (error) {
+      // File doesn't exist, create it
+      await fs.writeFile(filePath, defaultContent, 'utf8');
+    }
   }
 
   async readJsonFile(filePath) {
     try {
       const data = await fs.readFile(filePath, 'utf8');
+      if (!data.trim()) {
+        // If file is empty or only whitespace, return empty array
+        return [];
+      }
       return JSON.parse(data);
     } catch (error) {
+      if (error instanceof SyntaxError) {
+        console.error(`Invalid JSON in file ${filePath}:`, error);
+        // Return empty array for invalid JSON
+        return [];
+      }
       throw new Error(`Failed to read file: ${error.message}`);
     }
   }
@@ -43,6 +77,10 @@ class FileService {
 
   async getFriends() {
     return this.readJsonFile(this.paths.friends);
+  }
+
+  async saveUsers(users) {
+    return this.writeJsonFile(this.paths.auth, users);
   }
 }
 

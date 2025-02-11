@@ -257,5 +257,128 @@
       "email": "user@email.com"
     },
     "receiverId": 2
+  },
+  {
+    "senderId": 2,
+    "time": "2025-02-11T02:52:15.854Z",
+    "sender": "user",
+    "content": "what are you doing?",
+    "receiver": {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@email.com"
+    },
+    "receiverId": 1
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T13:00:21.130Z",
+    "sender": "Lucy",
+    "content": "Hey Luke! Are you busy?",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3
+  },
+  {
+    "senderId": 3,
+    "time": "2025-02-11T13:01:19.409Z",
+    "sender": "Luke",
+    "content": "Yes, I am very busy. Why do you ask?",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy",
+      "email": "Lucy@email.com"
+    },
+    "receiverId": 4
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T13:05:57.027Z",
+    "sender": "Lucy",
+    "content": "I was just wondering.",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3
+  },
+  {
+    "senderId": 3,
+    "time": "2025-02-11T13:06:15.995Z",
+    "sender": "Luke",
+    "content": "I see. That's nice!",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy",
+      "email": "Lucy@email.com"
+    },
+    "receiverId": 4
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T13:14:02.252Z",
+    "sender": "Lucy",
+    "content": "Yes, it is nice.",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3
+  },
+  {
+    "senderId": 3,
+    "time": "2025-02-11T13:14:15.922Z",
+    "sender": "Luke",
+    "content": "I think so too.",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy",
+      "email": "Lucy@email.com"
+    },
+    "receiverId": 4
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T13:49:24.868Z",
+    "sender": "Lucy",
+    "content": "What are you doing tonight?",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
+  },
+  {
+    "senderId": 3,
+    "time": "2025-02-11T13:49:45.151Z",
+    "sender": "Luke",
+    "content": "I am not doing much. How about you?",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy",
+      "email": "Lucy@email.com"
+    },
+    "receiverId": 4,
+    "isRead": false
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T13:51:27.662Z",
+    "sender": "Lucy",
+    "content": "I am just watching Netflix.",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
   }
 ]

@@ -14,6 +14,10 @@ async function findUser(req, res) {
       return;
     }
 
+    // Update user's login status
+    user.isLoggedIn = true;
+    await FileService.saveUsers(users);
+
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: 'Failed to read user' });
@@ -29,4 +33,24 @@ async function getUsers(req, res) {
   }
 }
 
-module.exports = { getUsers, findUser };
+async function logout(req, res) {
+  const { userId } = req.params;
+  try {
+    const users = await FileService.getUsers();
+    const user = users.find(u => u.id.toString() === userId);
+    
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    user.isLoggedIn = false;
+    await FileService.saveUsers(users);
+    
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to logout user' });
+  }
+}
+
+module.exports = { getUsers, findUser, logout };

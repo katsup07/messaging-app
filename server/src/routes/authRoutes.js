@@ -1,8 +1,14 @@
-const { getUsers, findUser, getFriends } = require('../controllers/AuthController');
+const express = require('express');
+const AuthController = require('../controllers/AuthController');
 
 function setAuthRoutes(app) {
-  app.get('/api/auth', getUsers);
-  app.post('/api/auth', findUser);
+  const router = express.Router();
+
+  router.get('/users', AuthController.getUsers);
+  router.post('/', AuthController.findUser);
+  router.post('/logout/:userId', AuthController.logout);
+
+  app.use('/api/auth', router);
 }
 
 module.exports = { setAuthRoutes };

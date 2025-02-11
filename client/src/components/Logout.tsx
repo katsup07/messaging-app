@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
-import { useSetAtom } from 'jotai';
+import { useSetAtom, useAtomValue } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
 import { MdLogout } from 'react-icons/md';
+import ApiService from '../services/ApiService';
 
 const Logout: React.FC = () => {
   const setUser = useSetAtom(userAtom);
+  const user = useAtomValue(userAtom);
   const [showModal, setShowModal] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (user) {
+      try {
+        const apiService = new ApiService(user);
+        await apiService.logout();
+      } catch (error) {
+        console.error('Error during logout:', error);
+      }
+    }
     localStorage.removeItem('user');
     setUser(undefined);
     setShowModal(false);

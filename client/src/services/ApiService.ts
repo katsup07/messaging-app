@@ -2,9 +2,9 @@ import { User } from "../atoms/userAtom";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default class ApiService {
-  private baseFriendsUrl = 'http://localhost:5000/api/friends';
-  private baseMessageUrl = 'http://localhost:5000/api/messages';
-  private baseAuthUrl = 'http://localhost:5000/api/auth';
+  private readonly _baseFriendsUrl = 'http://localhost:5000/api/friends';
+  private readonly _baseMessageUrl = 'http://localhost:5000/api/messages';
+  private readonly _baseAuthUrl = 'http://localhost:5000/api/auth';
   private user: User;
   private selectedFriend: User | null = null;
 
@@ -12,6 +12,10 @@ export default class ApiService {
     const anonymousUser = { id: 0, username: 'anon-user', email: 'anon-user@email.com' };
 
     this.user = user || anonymousUser;
+  }
+
+  get baseMessageUrl(): string {
+    return this._baseMessageUrl;
   }
 
   setSelectedFriend(friend: User | null) {
@@ -55,7 +59,7 @@ export default class ApiService {
 
   async findUser(credentials: { email: string; password: string }) {
     try {
-      const response = await fetch(`${this.baseAuthUrl}`, {
+      const response = await fetch(`${this._baseAuthUrl}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,13 +85,40 @@ export default class ApiService {
 
   async getFriends(): Promise<any> {
     try {
-      const response = await fetch(`${this.baseFriendsUrl}/${this.user.id}`);
+      const response = await fetch(`${this._baseFriendsUrl}/${this.user.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch friends');
       }
       return response.json();
     } catch (error) {
       console.error('Error fetching friends:', error);
+      throw error;
+    }
+  }
+
+  async getUsers(): Promise<any> {
+    try {
+      const response = await fetch(`${this._baseAuthUrl}/users`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error;
+    }
+  }
+
+  async logout(): Promise<void> {
+    try {
+      const response = await fetch(`${this._baseAuthUrl}/logout/${this.user.id}`, {
+        method: 'POST'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to logout');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
       throw error;
     }
   }
