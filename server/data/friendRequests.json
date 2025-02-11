@@ -14,5 +14,21 @@
     "status": "accepted",
     "createdAt": "2025-02-11T14:51:20.429Z",
     "respondedAt": "2025-02-11T14:51:29.817Z"
+  },
+  {
+    "id": "3-4-1739288420181",
+    "fromUserId": 3,
+    "toUserId": 4,
+    "status": "rejected",
+    "createdAt": "2025-02-11T15:40:20.181Z",
+    "respondedAt": "2025-02-11T15:40:33.744Z"
+  },
+  {
+    "id": "3-4-1739288444489",
+    "fromUserId": 3,
+    "toUserId": 4,
+    "status": "accepted",
+    "createdAt": "2025-02-11T15:40:44.489Z",
+    "respondedAt": "2025-02-11T15:40:54.232Z"
   }
 ]

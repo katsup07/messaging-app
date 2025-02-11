@@ -549,5 +549,57 @@
     },
     "receiverId": 5,
     "isRead": false
+  },
+  {
+    "senderId": 3,
+    "time": "2025-02-11T15:31:42.726Z",
+    "sender": "Luke",
+    "content": "Are you okay?",
+    "receiver": {
+      "id": 5,
+      "username": "John",
+      "email": "John@email.com"
+    },
+    "receiverId": 5,
+    "isRead": false
+  },
+  {
+    "senderId": 5,
+    "time": "2025-02-11T15:32:57.518Z",
+    "sender": "John",
+    "content": "Yes, I am fine!",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
+  },
+  {
+    "senderId": 3,
+    "time": "2025-02-11T15:41:21.081Z",
+    "sender": "Luke",
+    "content": "Yes! I am!@!",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy",
+      "email": "Lucy@email.com"
+    },
+    "receiverId": 4,
+    "isRead": false
+  },
+  {
+    "senderId": 4,
+    "time": "2025-02-11T15:41:29.042Z",
+    "sender": "Lucy",
+    "content": "Why?",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
   }
 ]

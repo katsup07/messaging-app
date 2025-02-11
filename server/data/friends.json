@@ -70,6 +70,11 @@
         "id": 5,
         "username": "John",
         "email": "John@email.com"
+      },
+      {
+        "id": 4,
+        "username": "Lucy",
+        "email": "Lucy@email.com"
       }
     ]
   },
@@ -90,14 +95,14 @@
         "email": "user@email.com"
       },
       {
-        "id": 3,
-        "username": "Luke",
-        "email": "Luke@email.com"
-      },
-      {
         "id": 5,
         "username": "John",
         "email": "John@email.com"
+      },
+      {
+        "id": 3,
+        "username": "Luke",
+        "email": "Luke@email.com"
       }
     ]
   },

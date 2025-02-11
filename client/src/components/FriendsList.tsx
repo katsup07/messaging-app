@@ -235,7 +235,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
             className="send-request-button"
             disabled={!newFriendId}
           >
-            Next
+            Request
           </button>
         </div>
       )}
