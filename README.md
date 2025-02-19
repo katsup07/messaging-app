@@ -9,7 +9,7 @@
 
 <br>Note: The database is currently only JSON files saved locally.
 <br/>
-
+[Demo Video](https://youtu.be/mEsYUYDX8vM)
 ### Friends List and Chat
 ![Vite-React-TS-02-16-2025_07_04_PM](https://github.com/user-attachments/assets/cf701d83-cea5-4475-a957-8f7521141339)
 ### Invite Friends
