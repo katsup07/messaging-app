@@ -1,55 +1,39 @@
-const FileService = require('../services/FileService');
+const AuthService = require('../application/AuthService');
 
 async function findUser(req, res) {
   const { email, password } = req.body;
   try {
-    const users = await FileService.getUsers();
-    const user = users.find((user) => 
-      user.email === email &&
-      user.password === password
-    );
-
-    if (!user) {
-      res.status(404).json({ error: 'User not found' });
-      return;
-    }
-
-    // Update user's login status
-    user.isLoggedIn = true;
-    await FileService.saveUsers(users);
-
+    const user = await AuthService.login(email, password);
     res.json(user);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to read user' });
+    if (err.message.includes('Invalid credentials')) {
+      res.status(401).json({ error: err.message });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
   }
 }
 
 async function getUsers(req, res) {
   try {
-    const users = await FileService.getUsers();
+    const users = await AuthService.getAllUsers();
     res.json(users);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to read users' });
+    res.status(500).json({ error: err.message });
   }
 }
 
 async function logout(req, res) {
   const { userId } = req.params;
   try {
-    const users = await FileService.getUsers();
-    const user = users.find(u => u.id.toString() === userId);
-    
-    if (!user) {
-      res.status(404).json({ error: 'User not found' });
-      return;
-    }
-
-    user.isLoggedIn = false;
-    await FileService.saveUsers(users);
-    
+    await AuthService.logout(userId);
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to logout user' });
+    if (err.message.includes('not found')) {
+      res.status(404).json({ error: err.message });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
   }
 }
 

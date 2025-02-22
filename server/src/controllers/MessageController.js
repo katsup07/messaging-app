@@ -1,7 +1,12 @@
-const FileService = require('../services/FileService');
+const MessageService = require('../application/MessageService');
 
 // Store active SSE clients
 const clients = new Map();
+
+// Send keep-alive ping to prevent connection timeout
+function sendKeepAlive(res) {
+  res.write(': ping\n\n');
+}
 
 async function initMessageStream(req, res) {
   const { userId, friendId } = req.params;
@@ -11,26 +16,42 @@ async function initMessageStream(req, res) {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive'
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'X-Accel-Buffering': 'no'  // Disable nginx buffering
   });
   res.write('\n');
 
   // Store the client connection
   clients.set(clientId, res);
 
-  // Send initial messages
-  const messages = await FileService.getMessages();
-  const conversationMessages = messages.filter(message => 
-    (message.senderId.toString() === userId && message.receiverId.toString() === friendId) ||
-    (message.senderId.toString() === friendId && message.receiverId.toString() === userId)
-  );
-  
-  res.write(`data: ${JSON.stringify(conversationMessages)}\n\n`);
+  // Setup keep-alive ping
+  const pingInterval = setInterval(() => sendKeepAlive(res), 30000); // Send ping every 30 seconds
 
-  // Remove client on connection close
-  req.on('close', () => {
+  try {
+    // Send initial messages
+    const conversationMessages = await MessageService.getConversation(userId, friendId);
+    res.write(`data: ${JSON.stringify(conversationMessages)}\n\n`);
+
+    // Remove client and clear interval on connection close
+    req.on('close', () => {
+      clearInterval(pingInterval);
+      clients.delete(clientId);
+    });
+
+    // Handle errors
+    req.on('error', (error) => {
+      console.error('SSE error:', error);
+      clearInterval(pingInterval);
+      clients.delete(clientId);
+      res.end();
+    });
+  } catch (error) {
+    console.error('Error in message stream:', error);
+    clearInterval(pingInterval);
     clients.delete(clientId);
-  });
+    res.end();
+  }
 }
 
 async function getMessages(req, res) {
@@ -38,44 +59,59 @@ async function getMessages(req, res) {
   const { friendId } = req.query;
 
   try {
-    const messages = await FileService.getMessages();
-    const conversationMessages = messages.filter(message => 
-      (message.senderId.toString() === userId && message.receiverId.toString() === friendId) ||
-      (message.senderId.toString() === friendId && message.receiverId.toString() === userId)
-    );
+    const conversationMessages = await MessageService.getConversation(userId, friendId);
     res.json(conversationMessages);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to read messages' });
+    res.status(500).json({ error: err.message });
   }
 }
 
 async function saveMessage(req, res) {
   try {
-    const messages = await FileService.getMessages();
-    const newMessage = req.body;
-    messages.push(newMessage);
-    await FileService.saveMessages(messages);
+    const newMessage = await MessageService.saveMessage(req.body);
 
     // Notify relevant clients about the new message
     const senderId = newMessage.senderId.toString();
     const receiverId = newMessage.receiverId.toString();
     const clientIds = [`${senderId}-${receiverId}`, `${receiverId}-${senderId}`];
 
-    clientIds.forEach(clientId => {
+    for (const clientId of clientIds) {
       const client = clients.get(clientId);
       if (client) {
-        const conversationMessages = messages.filter(message => 
-          (message.senderId.toString() === senderId && message.receiverId.toString() === receiverId) ||
-          (message.senderId.toString() === receiverId && message.receiverId.toString() === senderId)
+        const conversationMessages = await MessageService.getConversation(
+          senderId,
+          receiverId
         );
         client.write(`data: ${JSON.stringify(conversationMessages)}\n\n`);
       }
-    });
+    }
 
     res.json(newMessage);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to save message' });
+    res.status(500).json({ error: err.message });
   }
 }
 
-module.exports = { getMessages, saveMessage, initMessageStream };
+async function deleteMessagesBetweenUsers(req, res) {
+  const { user1Id, user2Id } = req.params;
+  
+  try {
+    await MessageService.deleteMessagesBetweenUsers(user1Id, user2Id);
+    
+    // Notify clients about the deletion
+    const clientIds = [`${user1Id}-${user2Id}`, `${user2Id}-${user1Id}`];
+    for (const clientId of clientIds) {
+      const client = clients.get(clientId);
+      if (client) {
+        const conversationMessages = await MessageService.getConversation(user1Id, user2Id);
+        client.write(`data: ${JSON.stringify(conversationMessages)}\n\n`);
+      }
+    }
+    
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+module.exports = { getMessages, saveMessage, initMessageStream, deleteMessagesBetweenUsers };

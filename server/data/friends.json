@@ -118,14 +118,14 @@
         "email": "user@email.com"
       },
       {
-        "id": 4,
-        "username": "Lucy",
-        "email": "Lucy@email.com"
-      },
-      {
         "id": 3,
         "username": "Luke",
         "email": "Luke@email.com"
+      },
+      {
+        "id": 4,
+        "username": "Lucy",
+        "email": "Lucy@email.com"
       }
     ]
   }

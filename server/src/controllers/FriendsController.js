@@ -1,19 +1,12 @@
-const FileService = require('../services/FileService');
+const FriendService = require('../application/FriendService');
 
 async function getFriends(req, res) {
   const { userId } = req.params;
   try {
-    const friends = await FileService.getFriends();
-    const userFriends = friends.find(f => f.user.id.toString() === userId);
-    
-    if (!userFriends) {
-      res.status(404).json({ error: 'User not found' });
-      return;
-    }
-
-    res.json(userFriends.friends);
+    const friends = await FriendService.getFriendsList(userId);
+    res.json(friends);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to read friends' });
+    res.status(500).json({ error: err.message });
   }
 }
 

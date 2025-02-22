@@ -1,7 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-class FileService {
+class DataRepository {
   constructor() {
     this.dataPath = path.join(__dirname, '../../data');
     this.paths = {
@@ -98,4 +98,4 @@ class FileService {
   }
 }
 
-module.exports = new FileService(); 
+module.exports = new DataRepository(); 
