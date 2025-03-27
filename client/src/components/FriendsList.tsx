@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import ApiService from '../services/ApiService';
 import { User } from '../atoms/userAtom';
 import { MdPersonAdd } from 'react-icons/md';
@@ -38,35 +38,32 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const MAX_RETRY_ATTEMPTS = 3;
   const RETRY_DELAY = 5000;
 
-  useEffect(() => {
-    const fetchFriends = async () => {
-      const apiService = new ApiService(user);
-      const friendsData = await apiService.getFriends();
-      const usersData = await apiService.getUsers();
-      
-      // Create a map of user IDs to their login status and user data
-      const statusMap = usersData.reduce((acc: {[key: number]: boolean}, user: Friend) => {
-        acc[user.id] = user.isLoggedIn || false;
-        return acc;
-      }, {});
-
-      const usersMap = usersData.reduce((acc: {[key: number]: Friend}, user: Friend) => {
-        acc[user.id] = user;
-        return acc;
-      }, {});
-      
-      setOnlineStatus(statusMap);
-      setUsers(usersMap);
-      setFriends(friendsData);
-
-      if (friendsData.length > 0 && !selectedFriend) {
-        onSelectFriend(friendsData[0]);
-      }
-    };
-
-    fetchFriends();
+  const fetchFriends = useCallback(async () => {
+    const apiService = new ApiService(user);
+    const friendsData = await apiService.getFriends();
+    const usersData = await apiService.getUsers();
     
-    // Poll for online status updates
+    // Create a map of user IDs to their login status and user data
+    const statusMap = usersData.reduce((acc: {[key: number]: boolean}, user: Friend) => {
+      acc[user.id] = user.isLoggedIn || false;
+      return acc;
+    }, {});
+
+    const usersMap = usersData.reduce((acc: {[key: number]: Friend}, user: Friend) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+    
+    setOnlineStatus(statusMap);
+    setUsers(usersMap);
+    setFriends(friendsData);
+
+    if (friendsData.length > 0 && !selectedFriend) {
+      onSelectFriend(friendsData[0]);
+    }
+  },[user, onSelectFriend, selectedFriend]);
+
+  const pollForOnlineStatusUpdates = useCallback(async () => {
     const interval = setInterval(async () => {
       const apiService = new ApiService(user);
       const usersData = await apiService.getUsers();
@@ -84,12 +81,12 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       setOnlineStatus(statusMap);
       setUsers(usersMap);
     }, 10000); // Poll every 10 seconds
+    
 
     return () => clearInterval(interval);
-  }, [user, onSelectFriend, selectedFriend]);
+  }, [user]);
 
-  // Set up SSE connection for friend requests
-  useEffect(() => {
+  const setUpFriendsRequestSSE = useCallback(() => {
     let eventSource: EventSource | null = null;
 
     const connectToSSE = () => {
@@ -143,8 +140,18 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       if (eventSource) {
         eventSource.close();
       }
-    };
-  }, [user]);
+    }},[user]);
+
+  // Fetch friends and poll for online status updates on mount
+  useEffect(() => {
+    fetchFriends();
+    pollForOnlineStatusUpdates();
+  }, [fetchFriends, pollForOnlineStatusUpdates]);
+
+  // Set up SSE connection for friend requests
+  useEffect(() => {
+   setUpFriendsRequestSSE();
+  }, [setUpFriendsRequestSSE]);
   
   const handleClick = (friend: Friend) => {
     onSelectFriend(friend);
