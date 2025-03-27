@@ -1,4 +1,4 @@
-const MessageService = require('../application/MessageService');
+const { messageService } = require('../diContainer');
 
 // Store active SSE clients
 const clients = new Map();
@@ -30,7 +30,7 @@ async function initMessageStream(req, res) {
 
   try {
     // Send initial messages
-    const conversationMessages = await MessageService.getConversation(userId, friendId);
+    const conversationMessages = await messageService.getConversation(userId, friendId);
     res.write(`data: ${JSON.stringify(conversationMessages)}\n\n`);
 
     // Remove client and clear interval on connection close
@@ -59,7 +59,7 @@ async function getMessages(req, res) {
   const { friendId } = req.query;
 
   try {
-    const conversationMessages = await MessageService.getConversation(userId, friendId);
+    const conversationMessages = await messageService.getConversation(userId, friendId);
     res.json(conversationMessages);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -68,7 +68,7 @@ async function getMessages(req, res) {
 
 async function saveMessage(req, res) {
   try {
-    const newMessage = await MessageService.saveMessage(req.body);
+    const newMessage = await messageService.saveMessage(req.body);
 
     // Notify relevant clients about the new message
     const senderId = newMessage.senderId.toString();
@@ -78,7 +78,7 @@ async function saveMessage(req, res) {
     for (const clientId of clientIds) {
       const client = clients.get(clientId);
       if (client) {
-        const conversationMessages = await MessageService.getConversation(
+        const conversationMessages = await messageService.getConversation(
           senderId,
           receiverId
         );
@@ -96,14 +96,14 @@ async function deleteMessagesBetweenUsers(req, res) {
   const { user1Id, user2Id } = req.params;
   
   try {
-    await MessageService.deleteMessagesBetweenUsers(user1Id, user2Id);
+    await messageService.deleteMessagesBetweenUsers(user1Id, user2Id);
     
     // Notify clients about the deletion
     const clientIds = [`${user1Id}-${user2Id}`, `${user2Id}-${user1Id}`];
     for (const clientId of clientIds) {
       const client = clients.get(clientId);
       if (client) {
-        const conversationMessages = await MessageService.getConversation(user1Id, user2Id);
+        const conversationMessages = await messageService.getConversation(user1Id, user2Id);
         client.write(`data: ${JSON.stringify(conversationMessages)}\n\n`);
       }
     }

@@ -5,7 +5,7 @@ class MessageService {
     this.dataRepository = dataRepository;
   }
 
-  async getConversation(userId, friendId) {
+  async                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            getConversation(userId, friendId) {
     try {
       const messages = await this.dataRepository.getMessages();
       return messages.filter(message => 
@@ -87,4 +87,4 @@ class MessageService {
   }
 }
 
-module.exports = new MessageService(DataRepository); 
+module.exports = MessageService;

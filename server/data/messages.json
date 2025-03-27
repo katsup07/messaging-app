@@ -544,5 +544,70 @@
     },
     "receiverId": 4,
     "isRead": false
+  },
+  {
+    "senderId": 4,
+    "time": "2025-03-27T08:36:38.229Z",
+    "sender": "Lucy",
+    "content": "Luke, are you there?",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
+  },
+  {
+    "senderId": 3,
+    "time": "2025-03-27T08:36:49.253Z",
+    "sender": "Luke",
+    "content": "Yup, I am.",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy",
+      "email": "Lucy@email.com"
+    },
+    "receiverId": 4,
+    "isRead": false
+  },
+  {
+    "senderId": 4,
+    "time": "2025-03-27T08:36:59.957Z",
+    "sender": "Lucy",
+    "content": "Nice!",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
+  },
+  {
+    "senderId": 3,
+    "time": "2025-03-27T11:01:22.876Z",
+    "sender": "Luke",
+    "content": "Yes, very nice!!",
+    "receiver": {
+      "id": 4,
+      "username": "Lucy",
+      "email": "Lucy@email.com"
+    },
+    "receiverId": 4,
+    "isRead": false
+  },
+  {
+    "senderId": 4,
+    "time": "2025-03-27T11:01:37.372Z",
+    "sender": "Lucy",
+    "content": "Yup yp!!",
+    "receiver": {
+      "id": 3,
+      "username": "Luke",
+      "email": "Luke@email.com"
+    },
+    "receiverId": 3,
+    "isRead": false
   }
 ]

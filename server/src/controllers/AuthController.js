@@ -1,9 +1,9 @@
-const AuthService = require('../application/AuthService');
+const { authService } = require('../diContainer');
 
 async function findUser(req, res) {
   const { email, password } = req.body;
   try {
-    const user = await AuthService.login(email, password);
+    const user = await authService.login(email, password);
     res.json(user);
   } catch (err) {
     if (err.message.includes('Invalid credentials')) {
@@ -16,7 +16,7 @@ async function findUser(req, res) {
 
 async function getUsers(req, res) {
   try {
-    const users = await AuthService.getAllUsers();
+    const users = await authService.getAllUsers();
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -26,7 +26,7 @@ async function getUsers(req, res) {
 async function logout(req, res) {
   const { userId } = req.params;
   try {
-    await AuthService.logout(userId);
+    await authService.logout(userId);
     res.json({ success: true });
   } catch (err) {
     if (err.message.includes('not found')) {

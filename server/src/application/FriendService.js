@@ -170,4 +170,4 @@ class FriendService {
   }
 }
 
-module.exports = new FriendService(DataRepository); 
+module.exports = FriendService;

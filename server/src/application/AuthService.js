@@ -76,4 +76,4 @@ class AuthService {
   }
 }
 
-module.exports = new AuthService(DataRepository); 
+module.exports = AuthService;

@@ -1,4 +1,4 @@
-const FriendService = require('../application/FriendService');
+const { friendService } = require('../diContainer');
 
 // Store active SSE clients
 const clients = new Map();
@@ -29,7 +29,7 @@ async function initFriendRequestStream(req, res) {
 
   try {
     // Send initial friend requests
-    const pendingRequests = await FriendService.getPendingRequests(userId);
+    const pendingRequests = await friendService.getPendingRequests(userId);
     res.write(`data: ${JSON.stringify({
       type: 'requests',
       data: pendingRequests
@@ -59,12 +59,12 @@ async function initFriendRequestStream(req, res) {
 async function sendFriendRequest(req, res) {
   const { fromUserId, toUserId } = req.body;
   try {
-    const newRequest = await FriendService.sendFriendRequest(fromUserId, toUserId);
+    const newRequest = await friendService.sendFriendRequest(fromUserId, toUserId);
 
     // Notify the recipient about the new request
     const recipientClient = clients.get(toUserId.toString());
     if (recipientClient) {
-      const pendingRequests = await FriendService.getPendingRequests(toUserId);
+      const pendingRequests = await friendService.getPendingRequests(toUserId);
       recipientClient.write(`data: ${JSON.stringify({
         type: 'requests',
         data: pendingRequests
@@ -86,7 +86,7 @@ async function sendFriendRequest(req, res) {
 async function getPendingRequests(req, res) {
   const { userId } = req.params;
   try {
-    const pendingRequests = await FriendService.getPendingRequests(userId);
+    const pendingRequests = await friendService.getPendingRequests(userId);
     res.json(pendingRequests);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -98,14 +98,14 @@ async function respondToRequest(req, res) {
   const { accept } = req.body;
   
   try {
-    const updatedRequest = await FriendService.respondToFriendRequest(requestId, accept);
+    const updatedRequest = await friendService.respondToFriendRequest(requestId, accept);
 
     // Notify both users about the updated requests and friend lists
     const recipientClient = clients.get(updatedRequest.toUserId.toString());
     const senderClient = clients.get(updatedRequest.fromUserId.toString());
 
     if (recipientClient) {
-      const pendingRequests = await FriendService.getPendingRequests(updatedRequest.toUserId);
+      const pendingRequests = await friendService.getPendingRequests(updatedRequest.toUserId);
       recipientClient.write(`data: ${JSON.stringify({
         type: 'requests',
         data: pendingRequests
@@ -134,4 +134,4 @@ async function respondToRequest(req, res) {
   }
 }
 
-module.exports = { sendFriendRequest, getPendingRequests, respondToRequest, initFriendRequestStream }; 
+module.exports = { sendFriendRequest, getPendingRequests, respondToRequest, initFriendRequestStream };
