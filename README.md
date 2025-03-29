@@ -15,4 +15,6 @@
 ### Invite Friends
 ![Vite-React-TS-02-16-2025_07_09_PM](https://github.com/user-attachments/assets/be4d376b-47c1-4eae-a6f8-a93b388d7971)
 ### Login Screen
-![Vite-React-TS-02-09-2025_08_22_PM (1)](https://github.com/user-attachments/assets/7b7e228b-6a18-44fb-8624-0417e526867f)
+![new-signup-screen](https://github.com/user-attachments/assets/0e0b44ca-c163-4580-bf0e-ef02276a6b65)
+### Light Theme
+![light-theme](https://github.com/user-attachments/assets/9c55bc1f-01ca-4dd8-801d-0d6bfc8141bd)
