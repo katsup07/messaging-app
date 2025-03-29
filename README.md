@@ -17,4 +17,4 @@
 ### Login Screen
 ![new-signup-screen](https://github.com/user-attachments/assets/0e0b44ca-c163-4580-bf0e-ef02276a6b65)
 ### Light Theme
-![light-theme](https://github.com/user-attachments/assets/9c55bc1f-01ca-4dd8-801d-0d6bfc8141bd)
+![light-theme](https://github.com/user-attachments/assets/f7f44c83-363c-45b4-8ed4-06508ac88d39)
