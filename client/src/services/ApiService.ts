@@ -62,9 +62,10 @@ export default class ApiService {
     }
   }
 
-  async findUser(credentials: { email: string; password: string }) {
+  async auth(credentials: { email: string; password: string, isSignup: boolean }) {
+    const authUrl = this._baseAuthUrl + (credentials.isSignup ? '/signup' : '/login');
     try {
-      const response = await fetch(`${this._baseAuthUrl}`, {
+      const response = await fetch(`${authUrl}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -103,6 +103,11 @@
         "id": 3,
         "username": "Luke",
         "email": "Luke@email.com"
+      },
+      {
+        "id": "1743225473719",
+        "username": "William",
+        "email": "William@email.com"
       }
     ]
   },
@@ -122,6 +127,19 @@
         "username": "Luke",
         "email": "Luke@email.com"
       },
+      {
+        "id": 4,
+        "username": "Lucy",
+        "email": "Lucy@email.com"
+      }
+    ]
+  },
+  {
+    "user": {
+      "id": "1743225473719",
+      "username": "William"
+    },
+    "friends": [
       {
         "id": 4,
         "username": "Lucy",

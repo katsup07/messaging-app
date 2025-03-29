@@ -5,6 +5,31 @@ class AuthService {
     this.dataRepository = dataRepository;
   }
 
+  async signup(email, password){
+    try {
+      const users = await this.dataRepository.getUsers();
+      const existingUser = users.find(user => user.email === email);
+
+      if (existingUser)
+        throw new Error('Email already in use');
+
+      const newUser = {
+        id: `${Date.now()}`,
+        username: email.split('@')[0],
+        email,
+        password,
+        isLoggedIn: false
+      };
+
+      users.push(newUser);
+      await this.dataRepository.saveUsers(users);
+
+      return await this.login(email, password);
+    } catch (error) {
+      throw new Error(`Signup failed: ${error.message}`);
+    }
+  }
+
   async login(email, password) {
     try {
       const users = await this.dataRepository.getUsers();
@@ -13,11 +38,9 @@ class AuthService {
         user.password === password
       );
 
-      if (!user) {
+      if (!user)
         throw new Error('Invalid credentials');
-      }
 
-      // Update user's login status
       user.isLoggedIn = true;
       await this.dataRepository.saveUsers(users);
       return user;

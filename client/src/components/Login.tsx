@@ -22,6 +22,7 @@ const validateLogin = (email: string, password: string): boolean => {
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [isSignup, setIsSignup] = useState<boolean>(false);
   const setUser = useSetAtom(userAtom);
 
   useEffect(() => {
@@ -36,8 +37,8 @@ const Login: React.FC = () => {
       return;
 
     const apiService = new ApiService();
-    const fetchedUser = await apiService.findUser({ email, password });
-
+    const fetchedUser = await apiService.auth({ email, password, isSignup });
+    console.log('fetched user: ', fetchedUser);
     if (!fetchedUser) {
       alert('Invalid email or password');
       return;
@@ -53,7 +54,7 @@ const Login: React.FC = () => {
     setUser(user);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleLogin();
     }
@@ -62,7 +63,7 @@ const Login: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-form">
-        <h2>Welcome Back</h2>
+        <h2>{ isSignup ? 'Create Account' : 'Welcome Back'}</h2>
         <div className="login-input-group">
           <input
             type="email"
@@ -70,7 +71,7 @@ const Login: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             className="login-input"
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
           />
           <input
             type="password"
@@ -78,12 +79,17 @@ const Login: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             className="login-input"
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
           />
         </div>
         <button className="login-button" onClick={handleLogin}>
           <MdLogin size={20} />
-          Sign In
+          { isSignup ? 'Register' : 'Login' }
+        </button>
+        <button className="toggle-login-button">
+          <span onClick={() => setIsSignup(!isSignup)}>
+            {isSignup ? 'Login' : 'Create Account'}
+          </span>
         </button>
       </div>
     </div>

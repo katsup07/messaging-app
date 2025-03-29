@@ -11,14 +11,20 @@ import Header from './components/Header';
 function App() {
   const user = useAtomValue(userAtom);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
- 
+  const isLoggedIn = !!user;
 
   if (!user)
-    return <Login />;
+    return (
+      <div className="app-container">
+        <Header isLoggedIn={isLoggedIn}/>
+        <Login />;
+      </div>
+    )
+    
 
   return (
     <div className="app-container">
-      <Header />
+      <Header isLoggedIn={isLoggedIn}/>
       <div className="main-content">
         <div className="friends-container">
           <FriendsList 

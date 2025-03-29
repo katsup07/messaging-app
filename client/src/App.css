@@ -1006,6 +1006,17 @@ body {
   gap: 0.5rem;
 }
 
+.toggle-login-button {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--subtle-bg);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 1rem;
+  padding: 0.2rem 0.7rem;
+}
+
 .login-button:hover {
   background-color: var(--primary-hover);
 }
