@@ -1,11 +1,12 @@
-const DataRepository = require('../repositories/DataRepository');
+
 
 class MessageService {
-  constructor(dataRepository) {
+  constructor(dataRepository, messageRepository) {
     this.dataRepository = dataRepository;
+    // this.messageRepository = messageRepository;
   }
 
-  async                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            getConversation(userId, friendId) {
+  async getConversation(userId, friendId) {
     try {
       const messages = await this.dataRepository.getMessages();
       return messages.filter(message => 
@@ -16,28 +17,50 @@ class MessageService {
       throw new Error(`Failed to get conversation: ${error.message}`);
     }
   }
+  
 
   async saveMessage(message) {
+    console.log('Saving message:', message);
     try {
-      const messages = await this.dataRepository.getMessages();
-      
       // Validate message format
-      if (!this.isValidMessage(message)) {
+      if (!this.isValidMessage(message))
         throw new Error('Invalid message format');
-      }
 
       // Add timestamp if not present
       if (!message.time) {
         message.time = new Date().toISOString();
       }
 
-      messages.push(message);
-      await this.dataRepository.saveMessages(messages);
-      return message;
+      const savedMessage = await this.messageRepository.saveMessage(message);
+      console.log('Message saved:', savedMessage);
+      return savedMessage;
     } catch (error) {
       throw new Error(`Failed to save message: ${error.message}`);
     }
   }
+
+  // TODO: delete this method when the new one is implemented above
+  // async saveMessage(message) {
+  //   try {
+  //     const messages = await this.dataRepository.getMessages();
+      
+  //     // Validate message format
+  //     if (!this.isValidMessage(message)) {
+  //       throw new Error('Invalid message format');
+  //     }
+
+  //     // Add timestamp if not present
+  //     if (!message.time) {
+  //       message.time = new Date().toISOString();
+  //     }
+
+  //     messages.push(message);
+  //     await this.dataRepository.saveMessages(messages);
+  //     return message;
+  //   } catch (error) {
+  //     throw new Error(`Failed to save message: ${error.message}`);
+  //   }
+  // }
 
   async deleteMessagesBetweenUsers(user1Id, user2Id) {
     try {
