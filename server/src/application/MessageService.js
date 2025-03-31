@@ -1,14 +1,13 @@
 
 
 class MessageService {
-  constructor(dataRepository, messageRepository) {
-    this.dataRepository = dataRepository;
-    // this.messageRepository = messageRepository;
+  constructor(messageRepository) {
+    this.messageRepository = messageRepository;
   }
 
   async getConversation(userId, friendId) {
     try {
-      const messages = await this.dataRepository.getMessages();
+      const messages = await this.messageRepository.getMessages();
       return messages.filter(message => 
         (message.senderId.toString() === userId.toString() && message.receiverId.toString() === friendId.toString()) ||
         (message.senderId.toString() === friendId.toString() && message.receiverId.toString() === userId.toString())
@@ -18,87 +17,22 @@ class MessageService {
     }
   }
   
-
   async saveMessage(message) {
-    console.log('Saving message:', message);
     try {
-      // Validate message format
       if (!this.isValidMessage(message))
         throw new Error('Invalid message format');
-
       // Add timestamp if not present
-      if (!message.time) {
+      if (!message.time)
         message.time = new Date().toISOString();
-      }
 
       const savedMessage = await this.messageRepository.saveMessage(message);
-      console.log('Message saved:', savedMessage);
       return savedMessage;
     } catch (error) {
       throw new Error(`Failed to save message: ${error.message}`);
     }
   }
 
-  // TODO: delete this method when the new one is implemented above
-  // async saveMessage(message) {
-  //   try {
-  //     const messages = await this.dataRepository.getMessages();
-      
-  //     // Validate message format
-  //     if (!this.isValidMessage(message)) {
-  //       throw new Error('Invalid message format');
-  //     }
-
-  //     // Add timestamp if not present
-  //     if (!message.time) {
-  //       message.time = new Date().toISOString();
-  //     }
-
-  //     messages.push(message);
-  //     await this.dataRepository.saveMessages(messages);
-  //     return message;
-  //   } catch (error) {
-  //     throw new Error(`Failed to save message: ${error.message}`);
-  //   }
-  // }
-
-  async deleteMessagesBetweenUsers(user1Id, user2Id) {
-    try {
-      const messages = await this.dataRepository.getMessages();
-      const filteredMessages = messages.filter(message => 
-        !(
-          (message.senderId.toString() === user1Id.toString() && message.receiverId.toString() === user2Id.toString()) ||
-          (message.senderId.toString() === user2Id.toString() && message.receiverId.toString() === user1Id.toString())
-        )
-      );
-      await this.dataRepository.saveMessages(filteredMessages);
-    } catch (error) {
-      throw new Error(`Failed to delete messages: ${error.message}`);
-    }
-  }
-
-  async markMessagesAsRead(userId, friendId) {
-    try {
-      const messages = await this.dataRepository.getMessages();
-      let hasChanges = false;
-
-      messages.forEach(message => {
-        if (message.receiverId.toString() === userId.toString() && 
-            message.senderId.toString() === friendId.toString() && 
-            !message.isRead) {
-          message.isRead = true;
-          hasChanges = true;
-        }
-      });
-
-      if (hasChanges) {
-        await this.dataRepository.saveMessages(messages);
-      }
-    } catch (error) {
-      throw new Error(`Failed to mark messages as read: ${error.message}`);
-    }
-  }
-
+  // helper
   isValidMessage(message) {
     return (
       message &&
@@ -111,3 +45,41 @@ class MessageService {
 }
 
 module.exports = MessageService;
+
+// TODO: Implement these features with DB, not old file system
+  // async deleteMessagesBetweenUsers(user1Id, user2Id) {
+  //   try {
+  //     const messages = await this.dataRepository.getMessages();
+  //     const filteredMessages = messages.filter(message => 
+  //       !(
+  //         (message.senderId.toString() === user1Id.toString() && message.receiverId.toString() === user2Id.toString()) ||
+  //         (message.senderId.toString() === user2Id.toString() && message.receiverId.toString() === user1Id.toString())
+  //       )
+  //     );
+  //     await this.dataRepository.saveMessages(filteredMessages);
+  //   } catch (error) {
+  //     throw new Error(`Failed to delete messages: ${error.message}`);
+  //   }
+  // }
+
+  // async markMessagesAsRead(userId, friendId) {
+  //   try {
+  //     const messages = await this.dataRepository.getMessages();
+  //     let hasChanges = false;
+
+  //     messages.forEach(message => {
+  //       if (message.receiverId.toString() === userId.toString() && 
+  //           message.senderId.toString() === friendId.toString() && 
+  //           !message.isRead) {
+  //         message.isRead = true;
+  //         hasChanges = true;
+  //       }
+  //     });
+
+  //     if (hasChanges) {
+  //       await this.dataRepository.saveMessages(messages);
+  //     }
+  //   } catch (error) {
+  //     throw new Error(`Failed to mark messages as read: ${error.message}`);
+  //   }
+  // }

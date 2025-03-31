@@ -1,25 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
-const { client } = require('../../mongoDBclient');
 
-class MessageRepository {
-  constructor() {
-    this.collection = client.db("messaging-app").collection("messages");
-  }
-
-  async getMessages() {
-    return await this.collection.find({}).toArray();
-  }
-
-  async saveMessage(message) {
-    console.log("inserting one message in collection...", message);
-    return await this.collection.insertOne(message);
-  }
-
-  async findById(id) {
-    return await this.collection.findOne({ _id: id });
-  }
-}
 
 // Old code for file-based storage. 
 // TODO: Remove this when MongoDB is fully integrated.
@@ -86,15 +67,6 @@ class DataRepository {
     }
   }
 
-  // Helper methods for specific data files
-  async getMessages() {
-    return this.readJsonFile(this.paths.messages);
-  }
-
-  async saveMessages(messages) {
-    return this.writeJsonFile(this.paths.messages, messages);
-  }
-
   async getUsers() {
     return this.readJsonFile(this.paths.auth);
   }
@@ -122,7 +94,6 @@ class DataRepository {
 
 module.exports = {
   DataRepository: new DataRepository(),
-  MessageRepository: new MessageRepository()
 }
 
 //previously
