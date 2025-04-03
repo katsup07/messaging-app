@@ -85,11 +85,6 @@
     },
     "friends": [
       {
-        "id": 1,
-        "username": "admin",
-        "email": "admin@email.com"
-      },
-      {
         "id": 2,
         "username": "user",
         "email": "user@email.com"
@@ -108,6 +103,11 @@
         "id": "1743225473719",
         "username": "William",
         "email": "William@email.com"
+      },
+      {
+        "id": 1,
+        "username": "admin",
+        "email": "Admin@email.com"
       }
     ]
   },

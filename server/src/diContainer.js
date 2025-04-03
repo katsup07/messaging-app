@@ -1,11 +1,13 @@
-const { DataRepository} = require('./repositories/DataRepository');
-const { MessageRepository } = require('./repositories/MessageRepository');
+const { dataRepository} = require('./repositories/DataRepository');
+const { messageRepository } = require('./repositories/MessageRepository');
+const { friendRepository } = require('./repositories/FriendRepository');
+
 const AuthService = require('./application/AuthService');
 const MessageService = require('./application/MessageService');
 const FriendService = require('./application/FriendService');
 
-const authService = new AuthService(DataRepository);
-const messageService = new MessageService(MessageRepository);
-const friendService = new FriendService(DataRepository);
+const authService = new AuthService(dataRepository);
+const messageService = new MessageService(messageRepository);
+const friendService = new FriendService(dataRepository, friendRepository);
 
 module.exports = { authService, messageService, friendService };

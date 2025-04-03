@@ -71,10 +71,6 @@ class DataRepository {
     return this.readJsonFile(this.paths.auth);
   }
 
-  async getFriends() {
-    return this.readJsonFile(this.paths.friends);
-  }
-
   async saveUsers(users) {
     return this.writeJsonFile(this.paths.auth, users);
   }
@@ -87,13 +83,17 @@ class DataRepository {
     return this.writeJsonFile(this.paths.friendRequests, requests);
   }
 
+  async getFriends() {
+    return this.readJsonFile(this.paths.friends);
+  }
+
   async saveFriends(friends) {
     return this.writeJsonFile(this.paths.friends, friends);
   }
 }
 
 module.exports = {
-  DataRepository: new DataRepository(),
+  dataRepository: new DataRepository(),
 }
 
 //previously

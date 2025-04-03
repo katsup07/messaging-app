@@ -1,7 +1,6 @@
 const { client } = require('../../mongoDBclient');
 
 const messageFields = {
-  id: 1,
   senderId: 1, 
   time: 1, 
   sender: 1, 
@@ -26,7 +25,7 @@ class MessageRepository {
   async saveMessage(message) {
     const result = await this.collection.insertOne(message);
     // saved message
-    return this.findById(result.insertedId)
+    return this.findById(result.insertedId);
     
   }
 
@@ -35,4 +34,4 @@ class MessageRepository {
   }
 }
 
-module.exports = { MessageRepository: new MessageRepository() }
+module.exports = { messageRepository: new MessageRepository() }

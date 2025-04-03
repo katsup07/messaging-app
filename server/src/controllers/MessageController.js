@@ -67,7 +67,6 @@ async function getMessages(req, res) {
 }
 
 async function saveMessage(req, res) {
-  console.log("saving message:", req.body);
   try {
     const newMessage = await messageService.saveMessage(req.body);
 
