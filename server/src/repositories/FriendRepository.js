@@ -22,9 +22,7 @@ class FriendRepository {
 
   async saveFriendRequests(friendRequests) {
     const result = await this.friendRequestsCollection.insertMany(friendRequests);
-    console.log(`Inserted ${result.insertedCount} friend requests`);
-    console.log('result in saveFriendRequests:', result.insertedIds[0]);
-    return result.insertedIds[0];
+    return result.insertedIds.map(id => this.findById(id));
   }
 
   async findById(id) {
@@ -33,22 +31,17 @@ class FriendRepository {
 
   async saveFriends(friends) {
     const result = await this.friendsCollection.insertMany(friends);
-    console.log(`Inserted ${result.insertedCount} friends`);
-    console.log('result in saveFriends:', result);
     return result.insertedIds.map(id => this.findById(id));
   }
 
   async getFriends() {
     const friendResults = await this.friendsCollection.find({}).toArray();
-    console.log('Fetched friends:', friendResults);
     return friendResults ? friendResults : []; // Return empty array if no results found
   }
 
   // New: Insert a single friend request
   async insertFriendRequest(request) {
-    const result = await this.friendRequestsCollection.insertOne(request);
-    // minimal logging
-    console.log(`Inserted friend request with id ${request.id}`);
+    await this.friendRequestsCollection.insertOne(request);
     return request;
   }
 
@@ -70,7 +63,6 @@ class FriendRepository {
   // New: Find a friend request by its id
   async findFriendRequestById(requestId) {
     const result = await this.friendRequestsCollection.findOne({ id: requestId });
-    console.log('findFriendRequestById result:', result);
     return result ? result : null; // Return null if no results found
   }
 }

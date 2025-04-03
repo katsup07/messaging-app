@@ -1,4 +1,3 @@
-const DataRepository = require('../repositories/DataRepository');
 
 // TODO: Delete dataRespository after friendRepository is fully implemented
 class FriendService {
@@ -63,7 +62,6 @@ class FriendService {
   async getPendingRequests(userId) {
     try {
       const requests = await this.friendRepository.getFriendRequests();
-      console.log('Fetching pending requests...', requests);
       return requests.filter(
         r => r.toUserId.toString() === userId.toString() && r.status === 'pending'
       );
@@ -103,9 +101,6 @@ class FriendService {
   }
 
   async addFriendship(friends, user1, user2) {
-    console.log('friendship:', friends);
-    console.log('Adding friendship...');
-    console.log(`From: ${user1.username}, To: ${user2.username}`);
     try {
       // Add to user1's friends
       let user1Friends = friends.find(f => f.user.id.toString() === user1.id.toString());

@@ -1,7 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-
 // Old code for file-based storage. 
 // TODO: Remove this when MongoDB is fully integrated.
 class DataRepository {

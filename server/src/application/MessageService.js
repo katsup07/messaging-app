@@ -1,5 +1,4 @@
 
-
 class MessageService {
   constructor(messageRepository) {
     this.messageRepository = messageRepository;

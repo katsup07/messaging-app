@@ -60,7 +60,6 @@ async function sendFriendRequest(req, res) {
   const { fromUserId, toUserId } = req.body;
   try {
     const newRequest = await friendService.sendFriendRequest(fromUserId, toUserId);
-
     // Notify the recipient about the new request
     const recipientClient = clients.get(toUserId.toString());
     if (recipientClient) {

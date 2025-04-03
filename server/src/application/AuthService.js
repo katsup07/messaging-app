@@ -1,17 +1,21 @@
-const DataRepository = require('../repositories/DataRepository');
 
+// TODO: Decide whether both _id and id are needed in the user object
+// TODO: Use jwt and decrypt the password before saving it to the database
 class AuthService {
-  constructor(dataRepository) {
-    this.dataRepository = dataRepository;
+  constructor(authRepository) {
+    this.authRepository = authRepository;
+    this.authRepository = authRepository;
   }
 
   async signup(email, password){
     try {
-      const users = await this.dataRepository.getUsers();
+      const users = await this.authRepository.getUsers();
       const existingUser = users.find(user => user.email === email);
 
-      if (existingUser)
+      if (existingUser){
+        console.log('Email already in use:', email);
         throw new Error('Email already in use');
+      }
 
       const newUser = {
         id: `${Date.now()}`,
@@ -21,45 +25,40 @@ class AuthService {
         isLoggedIn: false
       };
 
-      users.push(newUser);
-      await this.dataRepository.saveUsers(users);
+      await this.authRepository.saveUser(newUser);
 
       return await this.login(email, password);
     } catch (error) {
       throw new Error(`Signup failed: ${error.message}`);
     }
   }
-
+ // TODO: Use jwt and decrypt the password before saving it to the database
   async login(email, password) {
+    console.log('Logging in...')
     try {
-      const users = await this.dataRepository.getUsers();
-      const user = users.find((user) => 
-        user.email === email &&
-        user.password === password
-      );
+      const user = await this.authRepository.findByEmail(email);
 
-      if (!user)
+      if (!user || user.email !== email)
         throw new Error('Invalid credentials');
 
       user.isLoggedIn = true;
-      await this.dataRepository.saveUsers(users);
-      return user;
+      const updatedUser = await this.authRepository.updateUser({userId: user._id, updateFields: { isLoggedIn: true} });
+      return updatedUser;
     } catch (error) {
       throw new Error(`Login failed: ${error.message}`);
     }
   }
 
+  // TODO: Fix so that logged out user data is properly updated in the database. It only updates the user object in memory, not in the database currently.
   async logout(userId) {
     try {
-      const users = await this.dataRepository.getUsers();
-      const user = users.find(u => u.id.toString() === userId.toString());
+      const user = await this.authRepository.findById(userId);
       
-      if (!user) {
+      if (!user)
         throw new Error('User not found');
-      }
 
       user.isLoggedIn = false;
-      await this.dataRepository.saveUsers(users);
+      await this.authRepository.updateUser({userId: user._id, updateFields: { isLoggedIn: false} });
       return true;
     } catch (error) {
       throw new Error(`Logout failed: ${error.message}`);
@@ -68,7 +67,7 @@ class AuthService {
 
   async getAllUsers() {
     try {
-      return await this.dataRepository.getUsers();
+      return await this.authRepository.getUsers();
     } catch (error) {
       throw new Error(`Failed to get users: ${error.message}`);
     }
@@ -76,7 +75,7 @@ class AuthService {
 
   async getUserById(userId) {
     try {
-      const users = await this.dataRepository.getUsers();
+      const users = await this.authRepository.getUsers();
       const user = users.find(u => u.id.toString() === userId.toString());
       
       if (!user) {
