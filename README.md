@@ -7,7 +7,7 @@
 <br/>`npm install`
 <br/>`npm start`
 
-<br>Note: The database is currently only JSON files saved locally.
+<br>Note: The database was previously stored as JSON files locally for quick development of the API/Client, but the JSON files are now being replaced by MongoDB."
 <br/>
 [Demo Video](https://youtu.be/mEsYUYDX8vM)
 ### Friends List and Chat
