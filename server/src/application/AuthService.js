@@ -1,5 +1,8 @@
 
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET
+const JWT_EXPIRATION = process.env.JWT_EXPIRES_IN || '1h';
 
 // TODO: Fix error messages to be more user-friendly on client-side, like "Invalid email or password"
 // TODO: Decide whether both _id and id are needed in the user object
@@ -8,6 +11,18 @@ class AuthService {
   constructor(authRepository) {
     this.authRepository = authRepository;
     this.saltRounds = 10; // Rounds for password hashing
+  }
+
+  async verifyToken(token) {
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const user = await this.authRepository.findById(decoded.id);
+      if (!user) return null;
+      console.log('user found in verifyToken on server: ', user._id)
+      return { userId: user._id };
+    } catch (error) {
+      return null;
+    }
   }
 
   async signup(email, password){
@@ -26,8 +41,7 @@ class AuthService {
         id: `${Date.now()}`,
         username: email.split('@')[0],
         email,
-        passwordHash,
-        isLoggedIn: false
+        passwordHash
       };
 
       await this.authRepository.saveUser(newUser);
@@ -48,12 +62,11 @@ class AuthService {
       const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
       if (!isPasswordValid)
         throw new Error('Invalid credentials');
+  
+      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
 
-      user.isLoggedIn = true;
-      const updatedUser = await this.authRepository.updateUser({userId: user._id, updateFields: { isLoggedIn: true} });
-
-      const { passwordHash, ...userWithoutPasswordHash } = updatedUser;
-      return userWithoutPasswordHash;
+      const { passwordHash, ...userWithoutPasswordHash } = user;
+      return { user: userWithoutPasswordHash, token };
     } catch (error) {
       throw new Error(`Login failed: ${error.message}`);
     }
@@ -66,8 +79,6 @@ class AuthService {
       if (!user)
         throw new Error('User not found');
 
-      user.isLoggedIn = false;
-      await this.authRepository.updateUser({userId, updateFields: { isLoggedIn: false} });
       return true;
     } catch (error) {
       throw new Error(`Logout failed: ${error.message}`);
@@ -94,15 +105,6 @@ class AuthService {
       return user;
     } catch (error) {
       throw new Error(`Failed to get user: ${error.message}`);
-    }
-  }
-
-  async validateUser(userId) {
-    try {
-      const user = await this.getUserById(userId);
-      return user.isLoggedIn === true;
-    } catch (error) {
-      return false;
     }
   }
 

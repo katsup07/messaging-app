@@ -8,6 +8,7 @@ function setAuthRoutes(app) {
   router.post('/login', AuthController.login);
   router.post('/logout/:userId', AuthController.logout);
   router.post('/signup', AuthController.signup);
+  router.post('/verify-token', AuthController.verifyToken);
 
   app.use('/api/auth', router);
 }

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useSetAtom, useAtomValue } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
 import { MdLogout } from 'react-icons/md';
-import ApiService from '../services/ApiService';
+import useAuth from '../helpers/useAuth';
 
 const Logout: React.FC = () => {
+  const { logout }  = useAuth();
   const setUser = useSetAtom(userAtom);
   const user = useAtomValue(userAtom);
   const [showModal, setShowModal] = useState(false);
@@ -13,8 +14,7 @@ const Logout: React.FC = () => {
     if (user) {
       console.log('Logging out user in component:', user);
       try {
-        const apiService = new ApiService(user);
-        await apiService.logout();
+        logout();
       } catch (error) {
         console.error('Error during logout:', error);
       }

@@ -87,6 +87,27 @@ export default class ApiService {
     }
   }
 
+  async verifyToken(token: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this._baseAuthUrl}/verify-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+  
+      if (!response.ok)
+        throw new Error('Failed to verify token');
+      
+      const data = await response.json();
+      return data.isValid;
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      return false;
+    }
+  }
+
   async getFriends(): Promise<any> {
     try {
       const response = await fetch(`${this._baseFriendsUrl}/${this.user.id}`);

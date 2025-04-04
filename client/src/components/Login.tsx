@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSetAtom } from 'jotai';
-import { userAtom, User } from '../atoms/userAtom';
+import { userAtom } from '../atoms/userAtom';
 import { validateEmail, validatePassword } from '../helpers/validation-utils';
 import ApiService from '../services/ApiService';
 import { MdLogin } from 'react-icons/md';
@@ -33,26 +33,31 @@ const Login: React.FC = () => {
 
   const handleLogin = async() => {
     const isValid = validateLogin(email, password);
+    console.log('isValid', isValid);
     if(!isValid)
       return;
 
     const apiService = new ApiService();
-    const fetchedUser = await apiService.auth({ email, password, isSignup });
-    console.log('fetched user: ', fetchedUser);
-    if (!fetchedUser) {
+    console.log('email', email, 'password', password, 'isSignup', isSignup);
+    const response = await apiService.auth({ email, password, isSignup });
+    console.log('response', response);
+
+    if (!response || !response.token) {
       alert('Invalid email or password');
       return;
     }
 
-    localStorage.setItem('user', JSON.stringify(fetchedUser));
+    localStorage.setItem('token', response.token);
 
-    const user: User = { 
-      _id: fetchedUser._id,
-      id: fetchedUser.id,
-      username: fetchedUser.username, 
-      email: fetchedUser.email 
+    const userData = { 
+      _id: response.user._id,
+      id: response.user.id,
+      username: response.user.username, 
+      email: response.user.email 
     };
-    setUser(user);
+    localStorage.setItem('user', JSON.stringify(userData));
+    console.log('Settig user in state', userData);
+    setUser(userData);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

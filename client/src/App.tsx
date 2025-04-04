@@ -7,11 +7,16 @@ import Login from './components/Login';
 import FriendsList, { Friend } from './components/FriendsList';
 import { useState } from 'react';
 import Header from './components/Header';
+import useAuth from './helpers/useAuth';
 
 function App() {
+  const { isLoading } = useAuth();
   const user = useAtomValue(userAtom);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const isLoggedIn = !!user;
+
+  if(isLoading)
+    return <div className="loading">Loading...</div>;
 
   if (!user)
     return (
