@@ -1,4 +1,5 @@
 const { client } = require('../../mongoDBclient');
+const { ObjectId } = require('mongodb');
 
 class AuthRepository {
   constructor() {
@@ -16,13 +17,14 @@ class AuthRepository {
   }
 
   async updateUser({userId, updateFields}) {
-    console.log('Updating user:', userId, updateFields);
-    await this.userCollection.updateOne({ _id: userId }, { $set: updateFields });
-    return await this.userCollection.findOne({ _id: userId });
+    const objectUserId = new ObjectId(userId);
+    await this.userCollection.updateOne({ _id: objectUserId }, { $set: updateFields });
+    return await this.userCollection.findOne({ _id: objectUserId });
   }
 
   async findById(id) {
-    return await this.userCollection.findOne({ _id: id });
+    const user = await this.userCollection.findOne({ _id: new ObjectId(id) });
+    return user;
   }
 
   async findByEmail(email) {

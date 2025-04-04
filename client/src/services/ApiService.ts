@@ -10,7 +10,7 @@ export default class ApiService {
   private selectedFriend: User | null = null;
 
   constructor(user?: User) {
-    const anonymousUser = { id: 0, username: 'anon-user', email: 'anon-user@email.com' };
+    const anonymousUser = { _id:0, id: 0, username: 'anon-user', email: 'anon-user@email.com' };
 
     this.user = user || anonymousUser;
   }
@@ -73,15 +73,13 @@ export default class ApiService {
         body: JSON.stringify(credentials),
       });
 
-      if (!response.ok) {
+      if (!response.ok)
         return null;
-      }
 
       const data = await response.json();
-      if (data.error) {
+      if (data.error)
         return null;
-      }
-
+      console.log('User authenticated:', data);
       return data;
     } catch (error) {
       console.error('Error during login:', error);
@@ -117,7 +115,8 @@ export default class ApiService {
 
   async logout(): Promise<void> {
     try {
-      const response = await fetch(`${this._baseAuthUrl}/logout/${this.user.id}`, {
+      console.log('Logging out user:', this.user);
+      const response = await fetch(`${this._baseAuthUrl}/logout/${this.user._id}`, {
         method: 'POST'
       });
       if (!response.ok) {

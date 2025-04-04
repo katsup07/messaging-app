@@ -12,10 +12,8 @@ class AuthService {
       const users = await this.authRepository.getUsers();
       const existingUser = users.find(user => user.email === email);
 
-      if (existingUser){
-        console.log('Email already in use:', email);
+      if (existingUser)
         throw new Error('Email already in use');
-      }
 
       const newUser = {
         id: `${Date.now()}`,
@@ -34,7 +32,6 @@ class AuthService {
   }
  // TODO: Use jwt and decrypt the password before saving it to the database
   async login(email, password) {
-    console.log('Logging in...')
     try {
       const user = await this.authRepository.findByEmail(email);
 
@@ -49,7 +46,6 @@ class AuthService {
     }
   }
 
-  // TODO: Fix so that logged out user data is properly updated in the database. It only updates the user object in memory, not in the database currently.
   async logout(userId) {
     try {
       const user = await this.authRepository.findById(userId);
@@ -58,7 +54,7 @@ class AuthService {
         throw new Error('User not found');
 
       user.isLoggedIn = false;
-      await this.authRepository.updateUser({userId: user._id, updateFields: { isLoggedIn: false} });
+      await this.authRepository.updateUser({userId, updateFields: { isLoggedIn: false} });
       return true;
     } catch (error) {
       throw new Error(`Logout failed: ${error.message}`);

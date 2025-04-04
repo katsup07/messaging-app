@@ -4,6 +4,7 @@ import { User } from '../atoms/userAtom';
 import { MdPersonAdd } from 'react-icons/md';
 
 export interface Friend {
+  _id: number;
   id: number;
   username: string;
   email: string;

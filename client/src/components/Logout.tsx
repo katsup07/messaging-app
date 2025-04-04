@@ -11,6 +11,7 @@ const Logout: React.FC = () => {
 
   const handleLogout = async () => {
     if (user) {
+      console.log('Logging out user in component:', user);
       try {
         const apiService = new ApiService(user);
         await apiService.logout();
