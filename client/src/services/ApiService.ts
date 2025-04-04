@@ -79,7 +79,7 @@ export default class ApiService {
       const data = await response.json();
       if (data.error)
         return null;
-      console.log('User authenticated:', data);
+
       return data;
     } catch (error) {
       console.error('Error during login:', error);
@@ -136,7 +136,6 @@ export default class ApiService {
 
   async logout(): Promise<void> {
     try {
-      console.log('Logging out user:', this.user);
       const response = await fetch(`${this._baseAuthUrl}/logout/${this.user._id}`, {
         method: 'POST'
       });

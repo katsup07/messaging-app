@@ -4,7 +4,6 @@ async function signup(req, res) {
 
   const { email, password } = req.body;
   try {
-    console.log('Signing up with email: ', email);
     const user = await authService.signup(email, password);
     res.json(user);
   }

@@ -18,7 +18,7 @@ class AuthService {
       const decoded = jwt.verify(token, JWT_SECRET);
       const user = await this.authRepository.findById(decoded.id);
       if (!user) return null;
-      console.log('user found in verifyToken on server: ', user._id)
+  
       return { userId: user._id };
     } catch (error) {
       return null;
