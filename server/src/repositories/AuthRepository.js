@@ -8,7 +8,6 @@ class AuthRepository {
 
   async getUsers() {
     const userResults = await this.userCollection.find({}).toArray();
-    console.log("Fetched users in repo:", userResults); 
     return userResults ? userResults : [];
   }
 

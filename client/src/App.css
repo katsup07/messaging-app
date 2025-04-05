@@ -11,6 +11,7 @@
   /* Light mode variables */
   --bg-main: #f0f2f5;
   --bg-surface: #ffffff;
+  --bg-disabled: #d1d1d1;
   --border-color: rgba(0, 0, 0, 0.08);
   --text-primary: #050505;
   --text-secondary: #65676b;
@@ -245,6 +246,34 @@
   background-color: var(--input-bg);
   font-weight: 500;
 }
+.pending-text{
+  font-weight: 100;
+  font-style: italic;
+}
+.friend-item.pending-requests {
+  background-color: rgba(95, 69, 212, 0.05); /* Much more muted background */
+  border-left: 2px solid rgba(95, 69, 212, 0.3); /* Softer border */
+  opacity: 0.9;
+  position: relative;
+  box-shadow: inset 0 0 3px rgba(95, 69, 212, 0.1); /* Subtle inner glow */
+}
+
+.friend-item.pending-requests::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(95, 69, 212, 0.04),
+    rgba(95, 69, 212, 0.04) 10px,
+    rgba(95, 69, 212, 0.08) 10px,
+    rgba(95, 69, 212, 0.08) 20px
+  );
+  pointer-events: none;
+}
 
 .chat-container {
   flex: 1;
@@ -389,7 +418,7 @@
   align-items: center;
 }
 
-send-button:focus {
+.send-button:focus {
   outline: none !important;
   box-shadow: none;
 }
@@ -453,6 +482,11 @@ send-button:focus {
   .friend-item {
     padding: 0.625rem 0.875rem;
     font-size: 0.95rem;
+  }
+
+  .pending-requests {
+    background-color: var(--bg-disabled) !important;
+    border-color: var(--bg-disabled) !important;
   }
 
   .messages-container {
@@ -775,41 +809,6 @@ body {
   overflow: hidden;
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-.logo {
-  display: none;
-}
-
-.logo:hover {
-  display: none;
-}
-
-.logo.react:hover {
-  display: none;
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    display: none;
-  }
-}
-
-.card {
-  display: none;
-}
-
-.read-the-docs {
-  display: none;
 }
 
 .icon-button {

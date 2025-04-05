@@ -47,7 +47,7 @@ class FriendRepository {
     return true;
   }
 
-  async areAlreadyFriends(userId, friendId) {
+  async _areAlreadyFriends(userId, friendId) {
     const retrievedFriend = await this.friendsCollection.findOne({ "user._id": new ObjectId(userId) });
     if (!retrievedFriend) return false; // No friends found for the user
   
@@ -55,8 +55,8 @@ class FriendRepository {
   }
 
   async areFriends(userId, friendId) {
-    const fromUserFriends = await this.areAlreadyFriends(userId, friendId);
-    const toUserFriends = await this.areAlreadyFriends(friendId, userId);
+    const fromUserFriends = await this._areAlreadyFriends(userId, friendId);
+    const toUserFriends = await this._areAlreadyFriends(friendId, userId);
     return fromUserFriends || toUserFriends;
   }
 
@@ -85,16 +85,34 @@ class FriendRepository {
     return result ? result : null; // Return null if no results found
   }
 
-  async updateOrCreateFriendship(userId, friendData) {
-    const query = { "user._id": userId };
-    const update = {
-      $setOnInsert: { user: { _id: userId, username: friendData.username } },
-      $addToSet: { friends: friendData }
-    };
-    const options = { upsert: true };
-    
-    await this.friendsCollection.updateOne(query, update, options);
-    return true;
+  async updateOrCreateFriendship(userId, username, friendData) {
+    // First, check if the user document exists
+    const userDoc = await this.friendsCollection.findOne({ "user._id": userId });
+    if (!userDoc){
+    // If user doesn't exist, create new document with initial friend
+    await this.friendsCollection.insertOne({
+      user: { _id: userId, username },
+      friends: [friendData]
+    });
+    return;
+  }
+    // If user exists, check if the friend already exists in their friends array
+    const friendExists = userDoc.friends && userDoc.friends.some(
+      friend => friend._id.toString() === friendData._id.toString()
+    );
+    if (friendExists) {
+    // Update the existing friend entry
+      await this.friendsCollection.updateOne(
+        { "user._id": userId, "friends._id": friendData._id },
+        { $set: { "friends.$": friendData } }
+      );
+    } else {
+      // Friend does not exists, so add as a new friend
+      await this.friendsCollection.updateOne(
+        { "user._id": userId },
+        { $addToSet: { friends: friendData } }
+       );
+    }
   }
 }
 

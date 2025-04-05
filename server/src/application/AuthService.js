@@ -3,8 +3,7 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET
 const JWT_EXPIRATION = process.env.JWT_EXPIRES_IN || '1h';
 
-// TODO: Fix error messages to be more user-friendly on client-side, like "Invalid email or password"
-// TODO: Use jwt and decrypt the password before saving it to the database
+// TODO: Check for auth token upon every request. Add middleware to check for token in headers and validate it.
 class AuthService {
   constructor(authRepository) {
     this.authRepository = authRepository;

@@ -8,6 +8,8 @@ export interface Friend {
   username: string;
   email: string;
   isLoggedIn?: boolean;
+  isPending?: boolean;
+  isRejected?: boolean;
 }
 
 interface FriendRequest {
@@ -217,7 +219,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   return (
     <div className="friends-list">
       <div className="friends-header">
-        <h3><span>{user.username}</span>'s Friends</h3>
+        <h3>{user.username}'s Friends</h3>
         <button 
           className="icon-button"
           onClick={() => setShowAddFriend(!showAddFriend)}
@@ -300,13 +302,13 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       )}
 
       <div className="friends-list-items">
-        {friends.map(friend => (
+        {friends.filter(f => !f.isRejected).map(friend => (
           <div
             key={friend._id}
-            className={`friend-item ${selectedFriend?._id === friend._id ? 'active' : ''} ${onlineStatus[friend._id] ? 'online' : ''}`}
+            className={`friend-item ${selectedFriend?._id === friend._id && !friend.isPending ? 'active' : ''} ${onlineStatus[friend._id] ? 'online' : ''} ${friend.isPending ? 'pending-requests' : ''}`}
             onClick={() => handleClick(friend)}
           >
-            {friend.username}
+            {friend.username}<span className="pending-text">{friend.isPending ? '(Pending)' : ''}</span>
           </div>
         ))}
       </div>

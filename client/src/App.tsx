@@ -9,6 +9,7 @@ import { useState } from 'react';
 import Header from './components/Header';
 import useAuth from './helpers/useAuth';
 
+// TODO: Update isLoggedIn to use the jwt token
 function App() {
   const { isLoading } = useAuth();
   const user = useAtomValue(userAtom);
