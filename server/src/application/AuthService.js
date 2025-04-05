@@ -95,12 +95,12 @@ class AuthService {
 
   async getUserById(userId) {
     try {
-      const users = await this.authRepository.getUsers();
-      const user = users.find(u => u.id.toString() === userId.toString());
-      
-      if (!user) {
+      console.log("Getting user by ID in AuthService:", userId); // Debugging line
+      const user = await this.authRepository.findById(userId);
+
+      if (!user)
         throw new Error('User not found');
-      }
+      
 
       return user;
     } catch (error) {

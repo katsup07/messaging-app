@@ -57,7 +57,10 @@ async function initFriendRequestStream(req, res) {
 }
 
 async function sendFriendRequest(req, res) {
+  console.log('received request to send friend request in SendFriendRequest...');
   const { fromUserId, toUserId } = req.body;
+  console.log('fromUserId:', fromUserId);
+  console.log('toUserId:', toUserId);
   try {
     const newRequest = await friendService.sendFriendRequest(fromUserId, toUserId);
     // Notify the recipient about the new request

@@ -5,6 +5,7 @@ function setAuthRoutes(app) {
   const router = express.Router();
 
   router.get('/users', AuthController.getUsers);
+  router.get('/user/:userId', AuthController.findUserById);
   router.post('/login', AuthController.login);
   router.post('/logout/:userId', AuthController.logout);
   router.post('/signup', AuthController.signup);

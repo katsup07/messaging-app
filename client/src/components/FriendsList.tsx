@@ -4,17 +4,17 @@ import { User } from '../atoms/userAtom';
 import { MdPersonAdd } from 'react-icons/md';
 
 export interface Friend {
-  _id: number;
-  id: number;
+  _id: number | string;
+  // id: number | string;
   username: string;
   email: string;
   isLoggedIn?: boolean;
 }
 
 interface FriendRequest {
-  id: string;
-  fromUserId: number;
-  toUserId: number;
+  _id: number | string;
+  fromUserId: number | string;
+  toUserId: number | string;
   status: 'pending' | 'accepted' | 'rejected';
   createdAt: string;
 }
@@ -27,14 +27,14 @@ interface FriendsListProps {
 
 const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFriend, user }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [onlineStatus, setOnlineStatus] = useState<{[key: number]: boolean}>({});
+  const [onlineStatus, setOnlineStatus] = useState<{[key: number | string]: boolean}>({});
   const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [newFriendId, setNewFriendId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [targetUser, setTargetUser] = useState<Friend | null>(null);
-  const [users, setUsers] = useState<{[key: number]: Friend}>({});
+  const [users, setUsers] = useState<{[key: number | string]: Friend}>({});
   const retryCount = useRef(0);
   const MAX_RETRY_ATTEMPTS = 3;
   const RETRY_DELAY = 5000;
@@ -45,13 +45,13 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     const usersData = await apiService.getUsers();
     
     // Create a map of user IDs to their login status and user data
-    const statusMap = usersData.reduce((acc: {[key: number]: boolean}, user: Friend) => {
-      acc[user.id] = user.isLoggedIn || false;
+    const statusMap = usersData.reduce((acc: {[key: number | string]: boolean}, user: Friend) => {
+      acc[user._id] = user.isLoggedIn || false;
       return acc;
     }, {});
 
-    const usersMap = usersData.reduce((acc: {[key: number]: Friend}, user: Friend) => {
-      acc[user.id] = user;
+    const usersMap = usersData.reduce((acc: {[key: number | string]: Friend}, user: Friend) => {
+      acc[user._id] = user;
       return acc;
     }, {});
     
@@ -69,13 +69,13 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       const apiService = new ApiService(user);
       const usersData = await apiService.getUsers();
       
-      const statusMap = usersData.reduce((acc: {[key: number]: boolean}, user: Friend) => {
-        acc[user.id] = user.isLoggedIn || false;
+      const statusMap = usersData.reduce((acc: {[key: number | string]: boolean}, user: Friend) => {
+        acc[user._id] = user.isLoggedIn || false;
         return acc;
       }, {});
 
-      const usersMap = usersData.reduce((acc: {[key: number]: Friend}, user: Friend) => {
-        acc[user.id] = user;
+      const usersMap = usersData.reduce((acc: {[key: number | string]: Friend}, user: Friend) => {
+        acc[user._id] = user;
         return acc;
       }, {});
       
@@ -98,7 +98,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       }
 
       const apiService = new ApiService(user);
-      const url = `${apiService.baseFriendRequestUrl}/stream/${user.id}`;
+      const url = `${apiService.baseFriendRequestUrl}/stream/${user._id}`;
       eventSource = new EventSource(url);
 
       eventSource.onopen = () => {
@@ -159,20 +159,23 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   };
 
   const validateAndConfirmRequest = async () => {
+    console.log('Calling validateAndConfirmRequest');
     try {
       setError(null);
-      const userId = parseInt(newFriendId);
+      // const userId = parseInt(newFriendId);
       
       // Check if trying to add self
-      if (userId === user.id) {
+      if (newFriendId === user._id) {
         setError("You cannot send a friend request to yourself");
         return;
       }
 
+      // TODO: simplify this logic in API Service and backend
       const apiService = new ApiService(user);
       const users = await apiService.getUsers();
-      const targetUser = users.find((u: Friend) => u.id === userId);
-
+      console.log('users', users);
+      console.log('newFriendId', newFriendId);
+      const targetUser = users.find((u: Friend) => u._id === newFriendId);
       if (!targetUser) {
         setError("User not found");
         return;
@@ -187,9 +190,10 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
 
   const handleSendFriendRequest = async () => {
     try {
+      console.log('Calling handleSendFriendRequest');
       setError(null);
       const apiService = new ApiService(user);
-      await apiService.sendFriendRequest(parseInt(newFriendId));
+      await apiService.sendFriendRequest(newFriendId);
       setNewFriendId('');
       setShowAddFriend(false);
       setShowConfirmation(false);
@@ -199,7 +203,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     }
   };
 
-  const handleRespondToRequest = async (requestId: string, accept: boolean) => {
+  const handleRespondToRequest = async (requestId: string | number, accept: boolean) => {
     try {
       setError(null);
       const apiService = new ApiService(user);
@@ -232,7 +236,6 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       {showAddFriend && (
         <div className="add-friend-form">
           <input
-            type="number"
             value={newFriendId}
             onChange={(e) => setNewFriendId(e.target.value)}
             placeholder="Enter friend's ID"
@@ -252,7 +255,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>Confirm Friend Request</h3>
-            <p>Send friend request to {targetUser.username} (ID: {targetUser.id})?</p>
+            <p>Send friend request to {targetUser.username} (ID: {targetUser._id})?</p>
             <div className="modal-buttons">
               <button 
                 className="modal-button cancel" 
@@ -280,17 +283,17 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
         <div className="pending-requests">
           <h4>Pending Requests</h4>
           {pendingRequests.map(request => (
-            <div key={request.id} className="friend-request">
+            <div key={request._id} className="friend-request">
               <span>From: {users[request.fromUserId]?.username || 'Unknown'}</span>
               <div className="request-buttons">
                 <button 
-                  onClick={() => handleRespondToRequest(request.id, true)}
+                  onClick={() => handleRespondToRequest(request._id, true)}
                   className="accept-button"
                 >
                   Accept
                 </button>
                 <button 
-                  onClick={() => handleRespondToRequest(request.id, false)}
+                  onClick={() => handleRespondToRequest(request._id, false)}
                   className="reject-button"
                 >
                   Reject
@@ -304,8 +307,8 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       <div className="friends-list-items">
         {friends.map(friend => (
           <div
-            key={friend.id}
-            className={`friend-item ${selectedFriend?.id === friend.id ? 'active' : ''} ${onlineStatus[friend.id] ? 'online' : ''}`}
+            key={friend._id}
+            className={`friend-item ${selectedFriend?._id === friend._id ? 'active' : ''} ${onlineStatus[friend._id] ? 'online' : ''}`}
             onClick={() => handleClick(friend)}
           >
             {friend.username}

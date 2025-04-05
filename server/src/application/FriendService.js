@@ -1,9 +1,9 @@
-
 // TODO: Delete dataRespository after friendRepository is fully implemented
 class FriendService {
-  constructor(dataRepository, friendRepository) {
+  constructor(dataRepository, friendRepository, authRepository) {
     this.dataRepository = dataRepository;
     this.friendRepository = friendRepository;
+    this.authRepository = authRepository;
   }
 
   async getFriendsList(userId) {
@@ -19,30 +19,22 @@ class FriendService {
   async sendFriendRequest(fromUserId, toUserId) {
     try {
       // Validate users exist
-      const users = await this.dataRepository.getUsers();
-      const fromUser = users.find(u => u.id.toString() === fromUserId.toString());
-      const toUser = users.find(u => u.id.toString() === toUserId.toString());
-      if (!fromUser || !toUser) {
+      const fromUser = await this.authRepository.findById(fromUserId);
+      const toUser = await this.authRepository.findById(toUserId);
+      if (!fromUser || !toUser)
         throw new Error('One or both users not found');
-      }
 
       // Check if a pending request already exists
       const existingRequest = await this.friendRepository.findPendingRequest(fromUserId, toUserId);
-      if (existingRequest) {
+      if (existingRequest)
         throw new Error('Friend request already sent');
-      }
 
       // Check if they're already friends
-      const friends = await this.friendRepository.getFriends();
-      const areFriends = friends.some(f => 
-        (f.user.id.toString() === fromUserId.toString() && 
-         f.friends.some(fr => fr.id.toString() === toUserId.toString())) ||
-        (f.user.id.toString() === toUserId.toString() && 
-         f.friends.some(fr => fr.id.toString() === fromUserId.toString()))
-      );
-      if (areFriends) {
+      const areAlreadyFriendsFromUser = await this.friendRepository.areAlreadyFriends(fromUserId, toUserId);
+      const areAlreadyFriendsToUser = await this.friendRepository.areAlreadyFriends(toUserId, fromUserId);
+      const areFriends = areAlreadyFriendsFromUser || areAlreadyFriendsToUser;
+      if (areFriends)
         throw new Error('Users are already friends');
-      }
 
       // Create and insert new request
       const newRequest = {

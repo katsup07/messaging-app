@@ -32,7 +32,7 @@ export default class ApiService {
       return [];
     }
     try {
-      const response = await fetch(`${this.baseMessageUrl}/${this.user.id}?friendId=${this.selectedFriend.id}`);
+      const response = await fetch(`${this.baseMessageUrl}/${this.user._id}?friendId=${this.selectedFriend._id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch messages');
       }
@@ -110,7 +110,7 @@ export default class ApiService {
 
   async getFriends(): Promise<any> {
     try {
-      const response = await fetch(`${this._baseFriendsUrl}/${this.user.id}`);
+      const response = await fetch(`${this._baseFriendsUrl}/${this.user._id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch friends');
       }
@@ -124,12 +124,27 @@ export default class ApiService {
   async getUsers(): Promise<any> {
     try {
       const response = await fetch(`${this._baseAuthUrl}/users`);
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error('Failed to fetch users');
+      
+      const users = await response.json();
+      console.log('Fetched users:', users);
+      return users;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error;
+    }
+  }
+
+  async getUserById(userId: number | string): Promise<any> {
+    try {
+      const response = await fetch(`${this._baseAuthUrl}/users/${userId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user');
       }
       return response.json();
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching user:', error);
       throw error;
     }
   }
@@ -150,7 +165,7 @@ export default class ApiService {
 
   async getPendingFriendRequests(): Promise<any> {
     try {
-      const response = await fetch(`${this._baseFriendRequestUrl}/pending/${this.user.id}`);
+      const response = await fetch(`${this._baseFriendRequestUrl}/pending/${this.user._id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch pending friend requests');
       }
@@ -161,15 +176,17 @@ export default class ApiService {
     }
   }
 
-  async sendFriendRequest(toUserId: number): Promise<any> {
+  async sendFriendRequest(toUserId: number | string): Promise<any> {
+    console.log('Sending friend in ApiService', this.user._id, toUserId);
     try {
+      console.log('Sending friend request on client');
       const response = await fetch(`${this._baseFriendRequestUrl}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          fromUserId: this.user.id,
+          fromUserId: this.user._id,
           toUserId
         }),
       });
@@ -184,7 +201,7 @@ export default class ApiService {
     }
   }
 
-  async respondToFriendRequest(requestId: string, accept: boolean): Promise<any> {
+  async respondToFriendRequest(requestId: string | number, accept: boolean): Promise<any> {
     try {
       const response = await fetch(`${this._baseFriendRequestUrl}/${requestId}/respond`, {
         method: 'POST',

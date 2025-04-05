@@ -31,7 +31,20 @@ async function login(req, res) {
 async function getUsers(req, res) {
   try {
     const users = await authService.getAllUsers();
+    console.log('Users in AuthControler getUsers:', users);
     res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+async function findUserById(req, res) {
+  const { userId } = req.params;
+  try {
+    const user = await authService.getUserById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    res.json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -76,4 +89,4 @@ async function verifyToken(req, res) {
   return token;
 }
 
-module.exports = { getUsers, login, signup, logout, verifyToken };
+module.exports = { getUsers, login, signup, logout, verifyToken, findUserById };

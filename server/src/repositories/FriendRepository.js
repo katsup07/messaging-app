@@ -1,4 +1,5 @@
 const { client } = require('../../mongoDBclient');
+const { ObjectId } = require('mongodb');
 
 const friendRequestFields = {
   id: 1,
@@ -39,6 +40,12 @@ class FriendRepository {
     return friendResults ? friendResults : []; // Return empty array if no results found
   }
 
+  async areAlreadyFriends(userId, friendId) {
+    const retrievedFriend = await this.friendsCollection.findOne({ userId: new ObjectId(userId) });
+    if (!retrievedFriend) return false; // No friends found for the user
+    return retrievedFriend.friends.some(friend => friend.id.toString() === friendId.toString());
+  }
+
   // New: Insert a single friend request
   async insertFriendRequest(request) {
     await this.friendRequestsCollection.insertOne(request);
@@ -54,8 +61,8 @@ class FriendRepository {
   // New: Find a pending friend request
   async findPendingRequest(fromUserId, toUserId) {
     return await this.friendRequestsCollection.findOne({ 
-      fromUserId, 
-      toUserId, 
+      fromUserId: new ObjectId(fromUserId),
+      toUserId: new ObjectId(toUserId), 
       status: 'pending' 
     });
   }

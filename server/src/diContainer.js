@@ -9,6 +9,6 @@ const FriendService = require('./application/FriendService');
 
 const authService = new AuthService(authRepository);
 const messageService = new MessageService(messageRepository);
-const friendService = new FriendService(dataRepository, friendRepository);
+const friendService = new FriendService(dataRepository, friendRepository, authRepository);
 
 module.exports = { authService, messageService, friendService };
