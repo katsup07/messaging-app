@@ -7,7 +7,9 @@
 <br/>`npm install`
 <br/>`npm start`
 
-<br>Note: The database was previously stored as JSON files locally for quick development of the API/Client, but the JSON files are now being replaced by MongoDB."
+<br>Note: A mongoDB database needs to be connected to use this project as is. An .env file in the server folder with the following keys is required:
+MONGODB_URI, JWT_SECRET, and JWT_EXPIRATION
+"
 <br/>
 [Demo Video](https://youtu.be/mEsYUYDX8vM)
 ### Friends List and Chat
