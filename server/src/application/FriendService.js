@@ -29,10 +29,8 @@ class FriendService {
       if (existingRequest)
         throw new Error('Friend request already sent');
 
-      // Check if they're already friends
-      const areAlreadyFriendsFromUser = await this.friendRepository.areAlreadyFriends(fromUserId, toUserId);
-      const areAlreadyFriendsToUser = await this.friendRepository.areAlreadyFriends(toUserId, fromUserId);
-      const areFriends = areAlreadyFriendsFromUser || areAlreadyFriendsToUser;
+      // Simplified friendship check using the new areFriends method
+      const areFriends = await this.friendRepository.areFriends(fromUserId, toUserId);
       if (areFriends)
         throw new Error('Users are already friends');
 
@@ -63,28 +61,28 @@ class FriendService {
   }
 
   async respondToFriendRequest(requestId, accept) {
+    console.log('Responding to friend request in application:');
     try {
       // Find the specific request
       const request = await this.friendRepository.findFriendRequestById(requestId);
-      if (!request) {
+      console.log('Request:', request);
+      if (!request)
         throw new Error('Friend request not found');
-      }
       
       // If accepted, add friendship between users
       if (accept) {
-        const users = await this.dataRepository.getUsers();
-        const fromUser = users.find(u => u.id.toString() === request.fromUserId.toString());
-        const toUser = users.find(u => u.id.toString() === request.toUserId.toString());
-        if (!fromUser || !toUser) {
+        const fromUser = await this.authRepository.findById(request.fromUserId);
+        const toUser = await this.authRepository.findById(request.toUserId);
+        if (!fromUser || !toUser)
           throw new Error('One or both users not found');
-        }
+        
         await this.addFriendship(await this.friendRepository.getFriends(), fromUser, toUser);
       }
 
       // Update the friend request status
       const updatedRequest = await this.friendRepository.updateFriendRequest(requestId, {
         status: accept ? 'accepted' : 'rejected',
-        respondedAt: new Date().toISOString()
+        createdAt: new Date().toISOString()
       });
       return updatedRequest;
     } catch (error) {
@@ -92,52 +90,55 @@ class FriendService {
     }
   }
 
-  async addFriendship(friends, user1, user2) {
+  async addFriendship(friendsList, user1, user2) {
+    console.log('Adding friendship in application:');
+    console.log('User1:', user1);
+    console.log('User2:', user2); 
+    console.log('Friends:', friendsList);
     try {
       // Add to user1's friends
-      let user1Friends = friends.find(f => f.user.id.toString() === user1.id.toString());
+      let user1Friends = friendsList.find(f => f.user._id.toString() === user1._id.toString());
       if (!user1Friends) {
         user1Friends = { 
           user: { 
-            id: user1.id, 
+            _id: user1._id, 
             username: user1.username 
           }, 
           friends: [] 
         };
-        friends.push(user1Friends);
+        friendsList.push(user1Friends);
       }
       
-      if (!user1Friends.friends.some(f => f.id.toString() === user2.id.toString())) {
+      if (!user1Friends.friends.some(f => f._id.toString() === user2._id.toString())) {
         user1Friends.friends.push({
-          id: user2.id,
+          _id: user2._id,
           username: user2.username,
           email: user2.email
         });
       }
 
       // Add to user2's friends
-      let user2Friends = friends.find(f => f.user.id.toString() === user2.id.toString());
+      let user2Friends = friendsList.find(f => f.user._id.toString() === user2._id.toString());
       if (!user2Friends) {
         user2Friends = { 
           user: { 
-            id: user2.id, 
+            _id: user2._id, 
             username: user2.username 
           }, 
           friends: [] 
         };
-        friends.push(user2Friends);
+        friendsList.push(user2Friends);
       }
       
-      if (!user2Friends.friends.some(f => f.id.toString() === user1.id.toString())) {
+      if (!user2Friends.friends.some(f => f._id.toString() === user1._id.toString())) {
         user2Friends.friends.push({
-          id: user1.id,
+          _id: user1._id,
           username: user1.username,
           email: user1.email
         });
       }
 
-      // TODO: Currently adds duplicates and cannot accept friend requests. Need to fix.
-      await this.friendRepository.saveFriends(friends);
+       await this.friendRepository.saveFriends(friendsList);
     } catch (error) {
       throw new Error(`Failed to add friendship: ${error.message}`);
     }

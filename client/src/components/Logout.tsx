@@ -12,7 +12,6 @@ const Logout: React.FC = () => {
 
   const handleLogout = async () => {
     if (user) {
-      console.log('Logging out user in component:', user);
       try {
         logout();
       } catch (error) {

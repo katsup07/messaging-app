@@ -39,6 +39,9 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const MAX_RETRY_ATTEMPTS = 3;
   const RETRY_DELAY = 5000;
 
+  console.log('Pending Requests: ', pendingRequests);
+  console.log('Users: ', users);
+
   const fetchFriends = useCallback(async () => {
     const apiService = new ApiService(user);
     const friendsData = await apiService.getFriends();

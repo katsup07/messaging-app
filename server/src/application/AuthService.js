@@ -95,7 +95,6 @@ class AuthService {
 
   async getUserById(userId) {
     try {
-      console.log("Getting user by ID in AuthService:", userId); // Debugging line
       const user = await this.authRepository.findById(userId);
 
       if (!user)

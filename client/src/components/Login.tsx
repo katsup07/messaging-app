@@ -33,14 +33,11 @@ const Login: React.FC = () => {
 
   const handleLogin = async() => {
     const isValid = validateLogin(email, password);
-    console.log('isValid', isValid);
     if(!isValid)
       return;
 
     const apiService = new ApiService();
-    console.log('email', email, 'password', password, 'isSignup', isSignup);
     const response = await apiService.auth({ email, password, isSignup });
-    console.log('response', response);
 
     if (!response || !response.token) {
       alert('Invalid email or password');

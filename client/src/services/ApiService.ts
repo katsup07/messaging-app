@@ -177,9 +177,7 @@ export default class ApiService {
   }
 
   async sendFriendRequest(toUserId: number | string): Promise<any> {
-    console.log('Sending friend in ApiService', this.user._id, toUserId);
     try {
-      console.log('Sending friend request on client');
       const response = await fetch(`${this._baseFriendRequestUrl}`, {
         method: 'POST',
         headers: {
@@ -210,6 +208,7 @@ export default class ApiService {
         },
         body: JSON.stringify({ accept }),
       });
+      console.log('Response from server:', response);
       if (!response.ok) {
         throw new Error('Failed to respond to friend request');
       }

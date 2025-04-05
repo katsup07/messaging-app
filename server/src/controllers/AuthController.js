@@ -31,7 +31,6 @@ async function login(req, res) {
 async function getUsers(req, res) {
   try {
     const users = await authService.getAllUsers();
-    console.log('Users in AuthControler getUsers:', users);
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: err.message });

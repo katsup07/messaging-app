@@ -24,7 +24,6 @@ class AuthRepository {
   }
 
   async findById(id) {
-    console.log("Finding user by ID in AuthRepo:", id); // Debugging line
     const user = await this.userCollection.findOne({ _id: new ObjectId(id) });
     return user;
   }

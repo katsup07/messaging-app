@@ -23,7 +23,8 @@ class FriendRepository {
 
   async saveFriendRequests(friendRequests) {
     const result = await this.friendRequestsCollection.insertMany(friendRequests);
-    return result.insertedIds.map(id => this.findById(id));
+    const FriendsIds = Object.values(result.insertedIds); 
+    return FriendsIds;
   }
 
   async findById(id) {
@@ -32,7 +33,8 @@ class FriendRepository {
 
   async saveFriends(friends) {
     const result = await this.friendsCollection.insertMany(friends);
-    return result.insertedIds.map(id => this.findById(id));
+    const FriendsIds = Object.values(result.insertedIds); 
+    return FriendsIds;
   }
 
   async getFriends() {
@@ -41,9 +43,19 @@ class FriendRepository {
   }
 
   async areAlreadyFriends(userId, friendId) {
-    const retrievedFriend = await this.friendsCollection.findOne({ userId: new ObjectId(userId) });
+    console.log('userId:', userId, 'friendId:', friendId);
+    const retrievedFriend = await this.friendsCollection.findOne({ "user._id": new ObjectId(userId) });
+    console.log('Retrieved friend:', retrievedFriend);
     if (!retrievedFriend) return false; // No friends found for the user
-    return retrievedFriend.friends.some(friend => friend.id.toString() === friendId.toString());
+    return retrievedFriend.friends.some(friend => friend._id.toString() === friendId.toString());
+  }
+
+  // New: Check if two users are friends in either direction
+  async areFriends(userId, friendId) {
+    const fromUserFriends = await this.areAlreadyFriends(userId, friendId);
+    const toUserFriends = await this.areAlreadyFriends(friendId, userId);
+    console.log('Are friends:', fromUserFriends, toUserFriends);
+    return fromUserFriends || toUserFriends;
   }
 
   // New: Insert a single friend request
@@ -54,8 +66,9 @@ class FriendRepository {
 
   // New: Update a friend request by its custom id field
   async updateFriendRequest(requestId, updateFields) {
-    await this.friendRequestsCollection.updateOne({ id: requestId }, { $set: updateFields });
-    return await this.friendRequestsCollection.findOne({ id: requestId });
+    const _id = new ObjectId(requestId);
+    await this.friendRequestsCollection.updateOne({ _id }, { $set: updateFields });
+    return await this.friendRequestsCollection.findOne({ _id });
   }
 
   // New: Find a pending friend request
@@ -69,7 +82,9 @@ class FriendRepository {
 
   // New: Find a friend request by its id
   async findFriendRequestById(requestId) {
-    const result = await this.friendRequestsCollection.findOne({ id: requestId });
+    console.log('Finding friend request by ID:', requestId);
+    const result = await this.friendRequestsCollection.findOne({ _id: new ObjectId(requestId) });
+
     return result ? result : null; // Return null if no results found
   }
 }
