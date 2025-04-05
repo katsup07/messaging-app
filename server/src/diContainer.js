@@ -1,4 +1,3 @@
-const { dataRepository} = require('./repositories/DataRepository');
 const { messageRepository } = require('./repositories/MessageRepository');
 const { friendRepository } = require('./repositories/FriendRepository');
 const { authRepository } = require('./repositories/AuthRepository');
@@ -9,6 +8,6 @@ const FriendService = require('./application/FriendService');
 
 const authService = new AuthService(authRepository);
 const messageService = new MessageService(messageRepository);
-const friendService = new FriendService(dataRepository, friendRepository, authRepository);
+const friendService = new FriendService(friendRepository, authRepository);
 
 module.exports = { authService, messageService, friendService };

@@ -389,7 +389,7 @@
   align-items: center;
 }
 
-.send-button:focus {
+send-button:focus {
   outline: none !important;
   box-shadow: none;
 }
@@ -1196,27 +1196,41 @@ body {
 
 .accept-button,
 .reject-button {
-  padding: 0.25rem 0.75rem;
-  border: none;
-  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.2s ease;
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .accept-button {
-  background-color: #4caf50;
-  color: white;
+  background-color: rgba(142, 68, 173, 0.15); /* Muted/pale version of purple */
+  color: var(--text-primary);
+  border: 1px solid var(--subtle-bg);
+}
+
+.accept-button:hover {
+  background-color: rgba(142, 68, 173, 0.25);
+  border-color: var(--focus-purple);
+  transform: translateY(-1px);
 }
 
 .reject-button {
-  background-color: #f44336;
-  color: white;
+  background-color: rgba(244, 67, 54, 0.15); /* Muted/pale version of red */
+  color: var(--text-primary);
+  border: 1px solid var(--subtle-bg);
 }
 
-.accept-button:hover,
 .reject-button:hover {
-  opacity: 0.9;
+  background-color: rgba(244, 67, 54, 0.25);
+  border-color: rgba(244, 67, 54, 0.5);
+  transform: translateY(-1px);
+}
+
+.accept-button:active,
+.reject-button:active {
+  transform: translateY(1px);
 }
 
 .error-message {

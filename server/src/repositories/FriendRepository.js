@@ -42,7 +42,6 @@ class FriendRepository {
     return friendResults ? friendResults : []; // Return empty array if no results found
   }
 
-  // New method to clear the friends collection before updating
   async clearFriendsCollection() {
     await this.friendsCollection.deleteMany({});
     return true;
@@ -51,30 +50,27 @@ class FriendRepository {
   async areAlreadyFriends(userId, friendId) {
     const retrievedFriend = await this.friendsCollection.findOne({ "user._id": new ObjectId(userId) });
     if (!retrievedFriend) return false; // No friends found for the user
+  
     return retrievedFriend.friends.some(friend => friend._id.toString() === friendId.toString());
   }
 
-  // New: Check if two users are friends in either direction
   async areFriends(userId, friendId) {
     const fromUserFriends = await this.areAlreadyFriends(userId, friendId);
     const toUserFriends = await this.areAlreadyFriends(friendId, userId);
     return fromUserFriends || toUserFriends;
   }
 
-  // New: Insert a single friend request
   async insertFriendRequest(request) {
     await this.friendRequestsCollection.insertOne(request);
     return request;
   }
 
-  // New: Update a friend request by its custom id field
   async updateFriendRequest(requestId, updateFields) {
     const _id = new ObjectId(requestId);
     await this.friendRequestsCollection.updateOne({ _id }, { $set: updateFields });
     return await this.friendRequestsCollection.findOne({ _id });
   }
 
-  // New: Find a pending friend request
   async findPendingRequest(fromUserId, toUserId) {
     return await this.friendRequestsCollection.findOne({ 
       fromUserId: new ObjectId(fromUserId),
@@ -83,14 +79,12 @@ class FriendRepository {
     });
   }
 
-  // New: Find a friend request by its id
   async findFriendRequestById(requestId) {
     const result = await this.friendRequestsCollection.findOne({ _id: new ObjectId(requestId) });
 
     return result ? result : null; // Return null if no results found
   }
 
-  // Update or create a friendship entry for a user
   async updateOrCreateFriendship(userId, friendData) {
     const query = { "user._id": userId };
     const update = {
