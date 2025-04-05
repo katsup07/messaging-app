@@ -86,7 +86,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
       setError(null);
 
       // Create EventSource connection
-      const url = `${apiService.baseMessageUrl}/stream/${user.id}/${selectedFriend.id}`;
+      const url = `${apiService.baseMessageUrl}/stream/${user._id}/${selectedFriend._id}`;
       eventSource = new EventSource(url);
 
       // Handle connection open
@@ -150,12 +150,12 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
     const currentConnectionStatus = connectionStatus;
     try {
       const messageData = { 
-        senderId: user.id,
+        senderId: user._id,
         time: new Date().toISOString(),
         sender: user.username, 
         content: newMessage, 
         receiver: selectedFriend, 
-        receiverId: selectedFriend.id,
+        receiverId: selectedFriend._id,
         isRead: false,
       };
 
@@ -176,8 +176,8 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   };
 
   const isFriendSenderOrReceiver = (message: Message) => {
-    const isFriendSender = message.senderId === selectedFriend?.id;
-    const isFriendReceiver = message.receiverId === selectedFriend?.id;
+    const isFriendSender = message.senderId === selectedFriend?._id;
+    const isFriendReceiver = message.receiverId === selectedFriend?._id;
     return isFriendSender || isFriendReceiver;
   }
 

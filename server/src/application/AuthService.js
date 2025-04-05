@@ -1,11 +1,9 @@
-
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET
 const JWT_EXPIRATION = process.env.JWT_EXPIRES_IN || '1h';
 
 // TODO: Fix error messages to be more user-friendly on client-side, like "Invalid email or password"
-// TODO: Decide whether both _id and id are needed in the user object
 // TODO: Use jwt and decrypt the password before saving it to the database
 class AuthService {
   constructor(authRepository) {
@@ -38,7 +36,6 @@ class AuthService {
       const passwordHash = await bcrypt.hash(password, this.saltRounds);
 
       const newUser = {
-        id: `${Date.now()}`,
         username: email.split('@')[0],
         email,
         passwordHash
@@ -100,7 +97,6 @@ class AuthService {
       if (!user)
         throw new Error('User not found');
       
-
       return user;
     } catch (error) {
       throw new Error(`Failed to get user: ${error.message}`);

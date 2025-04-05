@@ -48,12 +48,10 @@ const Login: React.FC = () => {
 
     const userData = { 
       _id: response.user._id,
-      id: response.user.id,
       username: response.user.username, 
       email: response.user.email 
     };
     localStorage.setItem('user', JSON.stringify(userData));
-    console.log('Settig user in state', userData);
     setUser(userData);
   };
 

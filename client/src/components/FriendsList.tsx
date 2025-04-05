@@ -5,7 +5,6 @@ import { MdPersonAdd } from 'react-icons/md';
 
 export interface Friend {
   _id: number | string;
-  // id: number | string;
   username: string;
   email: string;
   isLoggedIn?: boolean;
@@ -38,9 +37,6 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const retryCount = useRef(0);
   const MAX_RETRY_ATTEMPTS = 3;
   const RETRY_DELAY = 5000;
-
-  console.log('Pending Requests: ', pendingRequests);
-  console.log('Users: ', users);
 
   const fetchFriends = useCallback(async () => {
     const apiService = new ApiService(user);
@@ -162,7 +158,6 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   };
 
   const validateAndConfirmRequest = async () => {
-    console.log('Calling validateAndConfirmRequest');
     try {
       setError(null);
       // const userId = parseInt(newFriendId);
@@ -176,8 +171,6 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       // TODO: simplify this logic in API Service and backend
       const apiService = new ApiService(user);
       const users = await apiService.getUsers();
-      console.log('users', users);
-      console.log('newFriendId', newFriendId);
       const targetUser = users.find((u: Friend) => u._id === newFriendId);
       if (!targetUser) {
         setError("User not found");
@@ -193,7 +186,6 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
 
   const handleSendFriendRequest = async () => {
     try {
-      console.log('Calling handleSendFriendRequest');
       setError(null);
       const apiService = new ApiService(user);
       await apiService.sendFriendRequest(newFriendId);

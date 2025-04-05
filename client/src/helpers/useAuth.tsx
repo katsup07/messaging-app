@@ -40,7 +40,6 @@ export default function useAuth() {
       }
       
       const isValid = await verifyTokenOnServer(token);
-      console.log('Token verification result:', isValid);
       
       if (!isValid) 
         logout();

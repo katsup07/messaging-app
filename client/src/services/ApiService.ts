@@ -10,7 +10,7 @@ export default class ApiService {
   private selectedFriend: User | null = null;
 
   constructor(user?: User) {
-    const anonymousUser = { _id:0, id: 0, username: 'anon-user', email: 'anon-user@email.com' };
+    const anonymousUser = { _id: 0, username: 'anon-user', email: 'anon-user@email.com' };
 
     this.user = user || anonymousUser;
   }
@@ -128,7 +128,7 @@ export default class ApiService {
         throw new Error('Failed to fetch users');
       
       const users = await response.json();
-      console.log('Fetched users:', users);
+
       return users;
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -208,7 +208,6 @@ export default class ApiService {
         },
         body: JSON.stringify({ accept }),
       });
-      console.log('Response from server:', response);
       if (!response.ok) {
         throw new Error('Failed to respond to friend request');
       }

@@ -9,7 +9,7 @@ class FriendService {
   async getFriendsList(userId) {
     try {
       const friends = await this.friendRepository.getFriends();
-      const userFriends = friends.find(f => f.user.id.toString() === userId.toString());
+      const userFriends = friends.find(f => f.user._id.toString() === userId.toString());
       return userFriends ? userFriends.friends : [];
     } catch (error) {
       throw new Error(`Failed to get friends list: ${error.message}`);
@@ -36,7 +36,6 @@ class FriendService {
 
       // Create and insert new request
       const newRequest = {
-        id: `${fromUserId}-${toUserId}-${Date.now()}`,
         fromUserId,
         toUserId,
         status: 'pending',
@@ -61,11 +60,9 @@ class FriendService {
   }
 
   async respondToFriendRequest(requestId, accept) {
-    console.log('Responding to friend request in application:');
     try {
       // Find the specific request
       const request = await this.friendRepository.findFriendRequestById(requestId);
-      console.log('Request:', request);
       if (!request)
         throw new Error('Friend request not found');
       
@@ -82,7 +79,7 @@ class FriendService {
       // Update the friend request status
       const updatedRequest = await this.friendRepository.updateFriendRequest(requestId, {
         status: accept ? 'accepted' : 'rejected',
-        createdAt: new Date().toISOString()
+        respondedAt: new Date().toISOString()
       });
       return updatedRequest;
     } catch (error) {
@@ -90,55 +87,26 @@ class FriendService {
     }
   }
 
-  async addFriendship(friendsList, user1, user2) {
-    console.log('Adding friendship in application:');
-    console.log('User1:', user1);
-    console.log('User2:', user2); 
-    console.log('Friends:', friendsList);
+  async addFriendship(user1, user2) {
+    
     try {
-      // Add to user1's friends
-      let user1Friends = friendsList.find(f => f.user._id.toString() === user1._id.toString());
-      if (!user1Friends) {
-        user1Friends = { 
-          user: { 
-            _id: user1._id, 
-            username: user1.username 
-          }, 
-          friends: [] 
-        };
-        friendsList.push(user1Friends);
-      }
+      // Add user2 to user1's friends
+      const user1FriendData = {
+        _id: user2._id,
+        username: user2.username,
+        email: user2.email
+      };
+      await this.friendRepository.updateOrCreateFriendship(user1._id, user1FriendData);
       
-      if (!user1Friends.friends.some(f => f._id.toString() === user2._id.toString())) {
-        user1Friends.friends.push({
-          _id: user2._id,
-          username: user2.username,
-          email: user2.email
-        });
-      }
-
-      // Add to user2's friends
-      let user2Friends = friendsList.find(f => f.user._id.toString() === user2._id.toString());
-      if (!user2Friends) {
-        user2Friends = { 
-          user: { 
-            _id: user2._id, 
-            username: user2.username 
-          }, 
-          friends: [] 
-        };
-        friendsList.push(user2Friends);
-      }
+      // Add user1 to user2's friends
+      const user2FriendData = {
+        _id: user1._id,
+        username: user1.username,
+        email: user1.email
+      };
+      await this.friendRepository.updateOrCreateFriendship(user2._id, user2FriendData);
       
-      if (!user2Friends.friends.some(f => f._id.toString() === user1._id.toString())) {
-        user2Friends.friends.push({
-          _id: user1._id,
-          username: user1.username,
-          email: user1.email
-        });
-      }
-
-       await this.friendRepository.saveFriends(friendsList);
+      return true;
     } catch (error) {
       throw new Error(`Failed to add friendship: ${error.message}`);
     }

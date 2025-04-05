@@ -2,7 +2,7 @@ const { client } = require('../../mongoDBclient');
 const { ObjectId } = require('mongodb');
 
 const friendRequestFields = {
-  id: 1,
+  _id: 1,
   fromUserId: 1,
   toUserId: 1,
   status: 1,
@@ -42,10 +42,14 @@ class FriendRepository {
     return friendResults ? friendResults : []; // Return empty array if no results found
   }
 
+  // New method to clear the friends collection before updating
+  async clearFriendsCollection() {
+    await this.friendsCollection.deleteMany({});
+    return true;
+  }
+
   async areAlreadyFriends(userId, friendId) {
-    console.log('userId:', userId, 'friendId:', friendId);
     const retrievedFriend = await this.friendsCollection.findOne({ "user._id": new ObjectId(userId) });
-    console.log('Retrieved friend:', retrievedFriend);
     if (!retrievedFriend) return false; // No friends found for the user
     return retrievedFriend.friends.some(friend => friend._id.toString() === friendId.toString());
   }
@@ -54,7 +58,6 @@ class FriendRepository {
   async areFriends(userId, friendId) {
     const fromUserFriends = await this.areAlreadyFriends(userId, friendId);
     const toUserFriends = await this.areAlreadyFriends(friendId, userId);
-    console.log('Are friends:', fromUserFriends, toUserFriends);
     return fromUserFriends || toUserFriends;
   }
 
@@ -82,10 +85,22 @@ class FriendRepository {
 
   // New: Find a friend request by its id
   async findFriendRequestById(requestId) {
-    console.log('Finding friend request by ID:', requestId);
     const result = await this.friendRequestsCollection.findOne({ _id: new ObjectId(requestId) });
 
     return result ? result : null; // Return null if no results found
+  }
+
+  // Update or create a friendship entry for a user
+  async updateOrCreateFriendship(userId, friendData) {
+    const query = { "user._id": userId };
+    const update = {
+      $setOnInsert: { user: { _id: userId, username: friendData.username } },
+      $addToSet: { friends: friendData }
+    };
+    const options = { upsert: true };
+    
+    await this.friendsCollection.updateOne(query, update, options);
+    return true;
   }
 }
 

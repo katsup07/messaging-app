@@ -7,10 +7,11 @@ class MessageService {
   async getConversation(userId, friendId) {
     try {
       const messages = await this.messageRepository.getMessages();
-      return messages.filter(message => 
+      const filteredMessages = messages.filter(message => 
         (message.senderId.toString() === userId.toString() && message.receiverId.toString() === friendId.toString()) ||
         (message.senderId.toString() === friendId.toString() && message.receiverId.toString() === userId.toString())
       );
+      return filteredMessages;
     } catch (error) {
       throw new Error(`Failed to get conversation: ${error.message}`);
     }
@@ -36,7 +37,7 @@ class MessageService {
     return (
       message &&
       typeof message.senderId !== 'undefined' &&
-      typeof message.receiverId !== 'undefined' &&
+      typeof message.receiver._id !== 'undefined' &&
       typeof message.content === 'string' &&
       message.content.trim().length > 0
     );

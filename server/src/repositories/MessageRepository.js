@@ -6,7 +6,6 @@ const messageFields = {
   sender: 1, 
   content: 1, 
   receiver: { 
-    id: 1, 
     username: 1, 
     email: 1 
   }, 
