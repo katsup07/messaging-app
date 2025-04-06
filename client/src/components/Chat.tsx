@@ -1,10 +1,18 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { io } from 'socket.io-client';
+
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
 import Message from './Message';
 import React from 'react';
 import { Friend } from './FriendsList';
+
+const socket = io('http://localhost:5000');
+socket.on('connect', () => {
+  console.log('Connected to socket server with ID:', socket.id);
+}
+);
 
 interface Message {
   senderId: number;
@@ -19,23 +27,31 @@ interface Props {
   selectedFriend: Friend | null;
 }
 
-const MAX_RETRY_ATTEMPTS = 3;
-const RETRY_DELAY = 5000;
-
 const Chat: React.FC<Props> = ({ selectedFriend }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
-  const retryCount = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
-  const errorTimeoutRef = useRef<NodeJS.Timeout>();
   const user = useAtomValue(userAtom);
 
   const apiService = useMemo(() => new ApiService(user), [user]);
+
+  useEffect(() => {
+    if(user)
+      socket.emit('register-user', user._id );
+
+    socket.on('receive-message', (data) => {
+      console.log('Message received:', data);
+      setMessages((prevMessages) => [...prevMessages, data.message]);
+    });
+
+    return () => {
+      socket.off('receive-message');
+    }
+  }, [user]);
 
   const scrollToBottom = () => {
     if (shouldAutoScroll) {
@@ -63,91 +79,39 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
     setTimeout(scrollToBottom, 100);
   }, [selectedFriend]);
 
-  // Set up SSE connection when friend is selected
-  useEffect(() => {
-    let eventSource: EventSource | null = null;
-
-    const connectToSSE = () => {
-      if (!selectedFriend || !user) return;
-      if (retryCount.current >= MAX_RETRY_ATTEMPTS) {
-        setError('Maximum reconnection attempts reached. Please refresh the page.');
-        setConnectionStatus('disconnected');
-        return;
-      }
-
-      setConnectionStatus('connecting');
+  // Fetch messages function
+  const fetchMessages = useCallback(async () => {
+    if (!selectedFriend || !user) return;
+    
+    try {
       setIsLoading(true);
-      
-      // Clear any existing error timeout
-      if (errorTimeoutRef.current) {
-        clearTimeout(errorTimeoutRef.current);
-        errorTimeoutRef.current = undefined;
-      }
+      const fetchedMessages = await apiService.getMessages();
+      setMessages(fetchedMessages);
       setError(null);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      setError('Failed to load messages. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [apiService, selectedFriend, user]);
 
-      // Create EventSource connection
-      const url = `${apiService.baseMessageUrl}/stream/${user._id}/${selectedFriend._id}`;
-      eventSource = new EventSource(url);
-
-      // Handle connection open
-      eventSource.onopen = () => {
-        setConnectionStatus('connected');
-        retryCount.current = 0;
-      };
-
-      // Handle incoming messages
-      eventSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        setMessages(data);
-        setIsLoading(false);
-      };
-
-      // Handle connection error
-      eventSource.onerror = () => {
-        setConnectionStatus('disconnected');
-        eventSource?.close();
-        retryCount.current += 1;
-        
-        // Only show error message if we've failed multiple times or reached max retries
-        if (retryCount.current >= MAX_RETRY_ATTEMPTS) {
-          setError('Maximum reconnection attempts reached. Please refresh the page.');
-        } else if (retryCount.current > 1) {
-          // Set error after a delay to prevent flashing during quick reconnects
-          errorTimeoutRef.current = setTimeout(() => {
-            setError('Connection lost. Reconnecting...');
-          }, 2000);
-        }
-        
-        if (retryCount.current < MAX_RETRY_ATTEMPTS) {
-          setTimeout(connectToSSE, RETRY_DELAY);
-        }
-      };
-    };
-
-    if (selectedFriend) {
+  // Set up when friend is selected
+  useEffect(() => {
+    if (selectedFriend && user) {
       apiService.setSelectedFriend(selectedFriend);
-      connectToSSE();
+      
+      // Initial fetch
+      fetchMessages();
     } else {
       setMessages([]);
       setError(null);
-      setConnectionStatus('disconnected');
     }
-
-    // Cleanup: close SSE connection when component unmounts or friend changes
-    return () => {
-      if (errorTimeoutRef.current) {
-        clearTimeout(errorTimeoutRef.current);
-      }
-      if (eventSource) {
-        eventSource.close();
-      }
-    };
-  }, [apiService, selectedFriend, user]);
+  }, [apiService, selectedFriend, user, fetchMessages]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedFriend || !user) return;
 
-    const currentConnectionStatus = connectionStatus;
     try {
       const messageData = { 
         senderId: user._id,
@@ -160,18 +124,16 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
       };
 
       await apiService.sendMessage(messageData);
+      socket.emit('sent-message', { message: messageData, receiverId: selectedFriend._id });
       setNewMessage('');
       setShouldAutoScroll(true);  // Enable auto-scroll when sending a new message
+      
+      // Fetch messages immediately after sending
+      fetchMessages();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
       setError(errorMessage);
       console.error('Error sending message:', error);
-      // Only update connection status if there's an actual connection error
-      if (error instanceof Error && error.message.includes('connection')) {
-        setConnectionStatus('disconnected');
-      } else {
-        setConnectionStatus(currentConnectionStatus);
-      }
     }
   };
 
@@ -193,7 +155,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
             {error}
           </div>
         )}
-        {isLoading ? (
+        {isLoading && messages.length === 0 ? (
           <div className="loading-spinner">
             Loading messages...
           </div>
@@ -204,9 +166,9 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
             </div>
           ) : (
             <>
-              {messages.filter(isFriendSenderOrReceiver).map((message) => (
+              {messages.filter(isFriendSenderOrReceiver).map((message, index) => (
                 <Message 
-                  key={`${message.senderId}-${message.time}`} 
+                  key={`${message.senderId}-${message.time}-${index}`} 
                   sender={message.sender} 
                   content={message.content}
                   time={message.time}
@@ -224,7 +186,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type your message"
           className="message-input"
-          disabled={isLoading || connectionStatus === 'disconnected'}
+          disabled={isLoading}
           onKeyPress={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -236,7 +198,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
         <button 
           onClick={handleSendMessage} 
           className="send-button"
-          disabled={isLoading || !newMessage.trim() || connectionStatus === 'disconnected'}
+          disabled={isLoading || !newMessage.trim()}
         >
           Send
         </button>

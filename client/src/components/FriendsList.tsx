@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import ApiService from '../services/ApiService';
 import { User } from '../atoms/userAtom';
 import { MdPersonAdd } from 'react-icons/md';
@@ -36,9 +36,6 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [targetUser, setTargetUser] = useState<Friend | null>(null);
   const [users, setUsers] = useState<{[key: number | string]: Friend}>({});
-  const retryCount = useRef(0);
-  const MAX_RETRY_ATTEMPTS = 3;
-  const RETRY_DELAY = 5000;
 
   const fetchFriends = useCallback(async () => {
     const apiService = new ApiService(user);
@@ -65,95 +62,23 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     }
   },[user, onSelectFriend, selectedFriend]);
 
-  const pollForOnlineStatusUpdates = useCallback(async () => {
-    const interval = setInterval(async () => {
+  const fetchPendingRequests = useCallback(async () => {
+    if (!user) return;
+    try {
       const apiService = new ApiService(user);
-      const usersData = await apiService.getUsers();
-      
-      const statusMap = usersData.reduce((acc: {[key: number | string]: boolean}, user: Friend) => {
-        acc[user._id] = user.isLoggedIn || false;
-        return acc;
-      }, {});
-
-      const usersMap = usersData.reduce((acc: {[key: number | string]: Friend}, user: Friend) => {
-        acc[user._id] = user;
-        return acc;
-      }, {});
-      
-      setOnlineStatus(statusMap);
-      setUsers(usersMap);
-    }, 10000); // Poll every 10 seconds
-    
-
-    return () => clearInterval(interval);
+      const requests = await apiService.getPendingFriendRequests();
+      setPendingRequests(requests);
+    } catch (error) {
+      console.error('Failed to fetch pending requests:', error);
+    }
   }, [user]);
 
-  const setUpFriendsRequestSSE = useCallback(() => {
-    let eventSource: EventSource | null = null;
-
-    const connectToSSE = () => {
-      if (!user) return;
-      if (retryCount.current >= MAX_RETRY_ATTEMPTS) {
-        setError('Failed to connect to friend request updates. Please refresh the page.');
-        return;
-      }
-
-      const apiService = new ApiService(user);
-      const url = `${apiService.baseFriendRequestUrl}/stream/${user._id}`;
-      eventSource = new EventSource(url);
-
-      eventSource.onopen = () => {
-        retryCount.current = 0;
-        setError(null);
-      };
-
-      eventSource.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        const apiService = new ApiService(user);
-        
-        switch (message.type) {
-          case 'requests':
-            setPendingRequests(message.data);
-            break;
-          case 'friendsUpdate':
-            // Refresh friends list when a friend request is accepted
-            apiService.getFriends().then(friendsData => {
-              setFriends(friendsData);
-            });
-            break;
-        }
-      };
-
-      eventSource.onerror = () => {
-        eventSource?.close();
-        retryCount.current += 1;
-
-        if (retryCount.current < MAX_RETRY_ATTEMPTS) {
-          setTimeout(connectToSSE, RETRY_DELAY);
-        } else {
-          setError('Failed to connect to friend request updates. Please refresh the page.');
-        }
-      };
-    };
-
-    connectToSSE();
-
-    return () => {
-      if (eventSource) {
-        eventSource.close();
-      }
-    }},[user]);
-
-  // Fetch friends and poll for online status updates on mount
+  // Set up data fetching when component mounts
   useEffect(() => {
+    // Initial data fetch
     fetchFriends();
-    pollForOnlineStatusUpdates();
-  }, [fetchFriends, pollForOnlineStatusUpdates]);
-
-  // Set up SSE connection for friend requests
-  useEffect(() => {
-   setUpFriendsRequestSSE();
-  }, [setUpFriendsRequestSSE]);
+    fetchPendingRequests();
+  }, [fetchFriends, fetchPendingRequests]); // Only depend on the memoized functions
   
   const handleClick = (friend: Friend) => {
     onSelectFriend(friend);
@@ -162,7 +87,6 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const validateAndConfirmRequest = async () => {
     try {
       setError(null);
-      // const userId = parseInt(newFriendId);
       
       // Check if trying to add self
       if (newFriendId === user._id) {
@@ -195,6 +119,10 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       setShowAddFriend(false);
       setShowConfirmation(false);
       setTargetUser(null);
+      
+      // Refresh data after sending request
+      fetchPendingRequests();
+      fetchFriends();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to send friend request');
     }
@@ -206,11 +134,9 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       const apiService = new ApiService(user);
       await apiService.respondToFriendRequest(requestId, accept);
       
-      // Refresh friends list
-      const friendsData = await apiService.getFriends();
-      setFriends(friendsData);
-
-      // No need to manually fetch pending requests since SSE will handle that
+      // Refresh data after responding to request
+      fetchPendingRequests();
+      fetchFriends();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to respond to friend request');
     }
