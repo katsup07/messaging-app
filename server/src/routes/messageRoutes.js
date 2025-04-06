@@ -6,7 +6,6 @@ function setMessageRoutes(app) {
 
   router.get('/:userId', MessageController.getMessages);
   router.post('/', MessageController.saveMessage);
-  router.get('/stream/:userId/:friendId', MessageController.initMessageStream);
 
   app.use('/api/messages', router);
 }
