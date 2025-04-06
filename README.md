@@ -8,12 +8,9 @@
 <br/>`npm start`
 
 ### Notes
-<br> - A mongoDB database needs to be connected to use this project as is. An .env file in the server folder with the following keys is required:
+- A mongoDB database needs to be connected to use this project as is. An .env file in the server folder with the following keys is required:
 MONGODB_URI, JWT_SECRET, and JWT_EXPIRATION
-"<br/>
-<br>
-- Coming Soon: auth requests middleware, logging middleware, and  improved SSE or Websockets.
-<br/>
+- Coming Soon: Middleware for authentication requests, refresh token verification, and logging.
 - [Demo Video](https://youtu.be/mEsYUYDX8vM)
   
 ### Friends List and Chat
