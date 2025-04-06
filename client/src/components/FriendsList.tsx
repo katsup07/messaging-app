@@ -1,7 +1,10 @@
+import { socket } from '../helpers/socket-io-client';
+
 import React, { useEffect, useState, useCallback } from 'react';
 import ApiService from '../services/ApiService';
 import { User } from '../atoms/userAtom';
 import { MdPersonAdd } from 'react-icons/md';
+
 
 export interface Friend {
   _id: number | string;
@@ -72,6 +75,20 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       console.error('Failed to fetch pending requests:', error);
     }
   }, [user]);
+
+   useEffect(() => {
+      if(user)
+        socket.emit('register-user', user._id );
+  
+      socket.on('receive-friend-request', (data) => {
+        console.log('Friend request received:', data);
+        setPendingRequests((prevRequests) => [...prevRequests, data.friendRequest]);
+      });
+  
+      return () => {
+        socket.off('receive-friend-request');
+      }
+    }, [user]);
 
   // Set up data fetching when component mounts
   useEffect(() => {
@@ -205,8 +222,8 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       {pendingRequests.length > 0 && (
         <div className="pending-requests">
           <h4>Pending Requests</h4>
-          {pendingRequests.map(request => (
-            <div key={request._id} className="friend-request">
+          {pendingRequests.map((request, index) => (
+            <div key={request._id + index.toString()} className="friend-request">
               <span>From: {users[request.fromUserId]?.username || 'Unknown'}</span>
               <div className="request-buttons">
                 <button 

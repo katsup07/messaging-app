@@ -1,4 +1,4 @@
-import { io } from 'socket.io-client';
+import { socket } from '../helpers/socket-io-client';
 
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
@@ -8,11 +8,6 @@ import Message from './Message';
 import React from 'react';
 import { Friend } from './FriendsList';
 
-const socket = io('http://localhost:5000');
-socket.on('connect', () => {
-  console.log('Connected to socket server with ID:', socket.id);
-}
-);
 
 interface Message {
   senderId: number;
@@ -53,11 +48,11 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
     }
   }, [user]);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (shouldAutoScroll) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  },[shouldAutoScroll]);
 
   const handleScroll = () => {
     if (messagesContainerRef.current) {
@@ -70,14 +65,14 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   // Scroll to bottom when messages update
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   // Reset scroll state and scroll to bottom when switching friends
   useEffect(() => {
     setShouldAutoScroll(true);
     // Use a small delay to ensure the messages are rendered before scrolling
     setTimeout(scrollToBottom, 100);
-  }, [selectedFriend]);
+  }, [selectedFriend, scrollToBottom]);
 
   // Fetch messages function
   const fetchMessages = useCallback(async () => {
