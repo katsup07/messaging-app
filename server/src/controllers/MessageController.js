@@ -20,7 +20,6 @@ async function saveMessage(req, res) {
     const { senderId, sender, receiverId, content, 
       time, isRead
        } = newMessage;
-       console.log('newMessage:', newMessage);
     const io = socketIoController.getIO();
     const message = {
       senderId,

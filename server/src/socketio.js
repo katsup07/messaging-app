@@ -4,20 +4,20 @@ let io;
 
 const socketIoController = {
   init: (httpServer) => {
-    if (!io) {
+    if (!io)
       io = new Server(httpServer, {
         cors: {
           origin: '*',
           methods: ['GET', 'POST'],
         },
       });
-    }
+    
     return io;
   },
   getIO: () => {
-    if (!io) {
+    if (!io)
       throw new Error('Socket.io not initialized!');
-    }
+
     return io;
   },
 }

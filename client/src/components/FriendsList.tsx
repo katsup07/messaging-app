@@ -69,8 +69,8 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     if (!user) return;
     try {
       const apiService = new ApiService(user);
-      const requests = await apiService.getPendingFriendRequests();
-      setPendingRequests(requests);
+      const results= await apiService.getPendingFriendRequests();
+      setPendingRequests(results);
     } catch (error) {
       console.error('Failed to fetch pending requests:', error);
     }
@@ -80,22 +80,25 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       if(user)
         socket.emit('register-user', user._id );
   
-      socket.on('receive-friend-request', (data) => {
-        console.log('Friend request received:', data);
+      socket.on('received-friend-request', (data) => {
         setPendingRequests((prevRequests) => [...prevRequests, data.friendRequest]);
+      });
+
+      socket.on('accepted-friend-request', () => {
+        fetchFriends();
       });
   
       return () => {
-        socket.off('receive-friend-request');
+        socket.off('received-friend-request');
+        socket.off('accepted-friend-request');
       }
-    }, [user]);
+    }, [user, fetchFriends]);
 
-  // Set up data fetching when component mounts
   useEffect(() => {
     // Initial data fetch
     fetchFriends();
     fetchPendingRequests();
-  }, [fetchFriends, fetchPendingRequests]); // Only depend on the memoized functions
+  }, [fetchFriends, fetchPendingRequests]); 
   
   const handleClick = (friend: Friend) => {
     onSelectFriend(friend);
@@ -222,7 +225,8 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       {pendingRequests.length > 0 && (
         <div className="pending-requests">
           <h4>Pending Requests</h4>
-          {pendingRequests.map((request, index) => (
+          {pendingRequests.map((request, index) => {
+            return(
             <div key={request._id + index.toString()} className="friend-request">
               <span>From: {users[request.fromUserId]?.username || 'Unknown'}</span>
               <div className="request-buttons">
@@ -240,7 +244,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
                 </button>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
 

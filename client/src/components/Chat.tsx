@@ -8,7 +8,6 @@ import Message from './Message';
 import React from 'react';
 import { Friend } from './FriendsList';
 
-
 interface Message {
   senderId: number;
   sender: string;
@@ -27,57 +26,27 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   const [newMessage, setNewMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const user = useAtomValue(userAtom);
 
   const apiService = useMemo(() => new ApiService(user), [user]);
 
   useEffect(() => {
-    if(user)
-      socket.emit('register-user', user._id );
+    if (user) socket.emit('register-user', user._id);
 
     socket.on('receive-message', (data) => {
-      console.log('Message received:', data);
       setMessages((prevMessages) => [...prevMessages, data.message]);
     });
 
     return () => {
       socket.off('receive-message');
-    }
+    };
   }, [user]);
-
-  const scrollToBottom = useCallback(() => {
-    if (shouldAutoScroll) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  },[shouldAutoScroll]);
-
-  const handleScroll = () => {
-    if (messagesContainerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-      const isScrolledToBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10;
-      setShouldAutoScroll(isScrolledToBottom);
-    }
-  };
-
-  // Scroll to bottom when messages update
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
-
-  // Reset scroll state and scroll to bottom when switching friends
-  useEffect(() => {
-    setShouldAutoScroll(true);
-    // Use a small delay to ensure the messages are rendered before scrolling
-    setTimeout(scrollToBottom, 100);
-  }, [selectedFriend, scrollToBottom]);
 
   // Fetch messages function
   const fetchMessages = useCallback(async () => {
     if (!selectedFriend || !user) return;
-    
+
     try {
       setIsLoading(true);
       const fetchedMessages = await apiService.getMessages();
@@ -95,7 +64,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   useEffect(() => {
     if (selectedFriend && user) {
       apiService.setSelectedFriend(selectedFriend);
-      
+
       // Initial fetch
       fetchMessages();
     } else {
@@ -108,12 +77,12 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
     if (!newMessage.trim() || !selectedFriend || !user) return;
 
     try {
-      const messageData = { 
+      const messageData = {
         senderId: user._id,
         time: new Date().toISOString(),
-        sender: user.username, 
-        content: newMessage, 
-        receiver: selectedFriend, 
+        sender: user.username,
+        content: newMessage,
+        receiver: selectedFriend,
         receiverId: selectedFriend._id,
         isRead: false,
       };
@@ -121,8 +90,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
       await apiService.sendMessage(messageData);
       socket.emit('sent-message', { message: messageData, receiverId: selectedFriend._id });
       setNewMessage('');
-      setShouldAutoScroll(true);  // Enable auto-scroll when sending a new message
-      
+
       // Fetch messages immediately after sending
       fetchMessages();
     } catch (error) {
@@ -136,43 +104,30 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
     const isFriendSender = message.senderId === selectedFriend?._id;
     const isFriendReceiver = message.receiverId === selectedFriend?._id;
     return isFriendSender || isFriendReceiver;
-  }
+  };
 
   return (
     <div className="chat-container">
-      <div 
-        className="messages-container" 
-        ref={messagesContainerRef}
-        onScroll={handleScroll}
-      >
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
+      <div className="messages-container" ref={messagesContainerRef}>
+        {error && <div className="error-message">{error}</div>}
         {isLoading && messages.length === 0 ? (
-          <div className="loading-spinner">
-            Loading messages...
+          <div className="loading-spinner">Loading messages...</div>
+        ) : messages.length === 0 ? (
+          <div className="no-messages">
+            <em>No message history exists.</em>
           </div>
         ) : (
-          messages.length === 0 ? (
-            <div className="no-messages">
-              <em>No message history exists.</em>
-            </div>
-          ) : (
-            <>
-              {messages.filter(isFriendSenderOrReceiver).map((message, index) => (
-                <Message 
-                  key={`${message.senderId}-${message.time}-${index}`} 
-                  sender={message.sender} 
-                  content={message.content}
-                  time={message.time}
-                  isRead={message.isRead}
-                />
-              ))}
-              <div ref={messagesEndRef} />
-            </>
-          )
+          <>
+            {messages.filter(isFriendSenderOrReceiver).map((message, index) => (
+              <Message
+                key={`${message.senderId}-${message.time}-${index}`}
+                sender={message.sender}
+                content={message.content}
+                time={message.time}
+                isRead={message.isRead}
+              />
+            ))}
+          </>
         )}
       </div>
       <div className="message-input-container">
@@ -190,8 +145,8 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
           }}
           rows={1}
         />
-        <button 
-          onClick={handleSendMessage} 
+        <button
+          onClick={handleSendMessage}
           className="send-button"
           disabled={isLoading || !newMessage.trim()}
         >
