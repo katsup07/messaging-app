@@ -1,5 +1,7 @@
 import { User } from "../atoms/userAtom";
+import { TokenResult } from "../types/token";
 
+// TODO: Refactor this class into HTTPClient, AuthService, and MessageService classes
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default class ApiService {
   private readonly _baseFriendsUrl = 'http://localhost:5000/api/friends';
@@ -9,12 +11,22 @@ export default class ApiService {
   private user: User;
   private selectedFriend: User | null = null;
   private accessToken: string | null = null;
+  private refreshToken: string | null = null;
+  private isRefreshing = false;
+  private refreshPromise: Promise<{ newAccessToken: string; newRefreshToken: string } | null> | null = null;
+
+  // Queue of callbacks to call after token refresh
+  private refreshSubscribers: Array<(token: string) => void> = [];
 
   private static instance: ApiService | null = null;
 
   private constructor(user?: User) {
     const anonymousUser = { _id: 0, username: 'anon-user', email: 'anon-user@email.com' };
     this.user = user || anonymousUser;
+    
+    // Initialize tokens from localStorage
+    this.accessToken = localStorage.getItem('accessToken');
+    this.refreshToken = localStorage.getItem('refreshToken');
   }
 
   static getInstance(user?: User): ApiService {
@@ -46,15 +58,78 @@ export default class ApiService {
 
   setAccessToken(token: string | null) {
     this.accessToken = token;
+    if (token) {
+      localStorage.setItem('accessToken', token);
+    } else {
+      localStorage.removeItem('accessToken');
+    }
+  }
+
+  setRefreshToken(token: string | null) {
+    this.refreshToken = token;
+    if (token) {
+      localStorage.setItem('refreshToken', token);
+    } else {
+      localStorage.removeItem('refreshToken');
+    }
   }
 
   setUser(user: User) {
     this.user = user;
   }
 
+  // Subscribe to token refresh
+  private onRefreshed(callback: (token: string) => void) {
+    this.refreshSubscribers.push(callback);
+  }
+
+  // Notify all subscribers about new token
+  private notifySubscribers(token: string) {
+    this.refreshSubscribers.forEach(callback => callback(token));
+    this.refreshSubscribers = [];
+  }
+
   private async authorizedRequest(url: string, options: RequestInit = {}): Promise<Response> {
-    if (!this.accessToken)
+    if (!this.accessToken) {
       throw new Error('No access token available');
+    }
+
+    try {
+      // Attempt the request with current token
+      const response = await this.performRequest(url, options);
+      
+      // If successful, return the response
+      if (response.ok) {
+        return response;
+      }
+      
+      // Check if it's an auth error that needs token refresh
+      if (response.status === 401) {
+        const errorData = await response.json();
+        
+        // Handle expired token
+        if (errorData.error === 'TokenExpired') {
+          // Get a new token and retry the request
+          const newToken = await this.handleTokenRefresh();
+          if (newToken) {
+            // Retry with the new token
+            return this.performRequest(url, options);
+          }
+        }
+      }
+      
+      // If we get here, either the token refresh failed or it was another error
+      return response;
+    } catch (error) {
+      console.error('Request error:', error);
+      throw error;
+    }
+  }
+
+  private async performRequest(url: string, options: RequestInit = {}): Promise<Response> {
+    if (!this.accessToken) {
+      throw new Error('No access token available');
+    }
 
     const headers = {
       'Content-Type': 'application/json',
@@ -63,6 +138,71 @@ export default class ApiService {
     };
 
     return fetch(url, { ...options, headers });
+  }
+
+  private async handleTokenRefresh(): Promise<string | null> {
+    // If already refreshing, wait for that to complete
+    if (this.isRefreshing) {
+      return new Promise<string | null>((resolve) => {
+        this.onRefreshed(token => {
+          resolve(token);
+        });
+      });
+    }
+
+    this.isRefreshing = true;
+    try {
+      // Start the refresh process
+      this.refreshPromise = this.onRefreshToken();
+      const tokens = await this.refreshPromise;
+      
+      if (tokens) {
+        // Update tokens
+        this.setAccessToken(tokens.newAccessToken);
+        this.setRefreshToken(tokens.newRefreshToken);
+        
+        // Notify waiting requests
+        this.notifySubscribers(tokens.newAccessToken);
+        return tokens.newAccessToken;
+      }
+      
+      // If refresh failed, clear tokens and return null
+      this.setAccessToken(null);
+      this.setRefreshToken(null);
+      return null;
+    } finally {
+      this.isRefreshing = false;
+      this.refreshPromise = null;
+    }
+  }
+
+  async onRefreshToken(): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
+    console.log('Refreshing token in ApiService...');
+    try {
+      if (!this.refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      // Use fetch directly since we don't want to trigger another refresh
+      const response = await fetch(`${this._baseAuthUrl}/refresh-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ refreshToken: this.refreshToken })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh token');
+      }
+
+      const result = await response.json();
+      console.log('Token refresh result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      return null;
+    }
   }
 
   async getMessages(): Promise<any> {
@@ -122,7 +262,7 @@ export default class ApiService {
     }
   }
 
-  async verifyToken(accessToken: string): Promise<boolean> {
+  async verifyToken(accessToken: string): Promise<TokenResult> {
     try {
       // No authorized request because verifyToken is called before token is set
       const response = await fetch(`${this._baseAuthUrl}/verify-token`, {
@@ -133,14 +273,18 @@ export default class ApiService {
         }
       });
 
-      if (!response.ok)
-        throw new Error('Failed to verify token');
+      if (!response.ok){
+        const data = await response.json();
+        console.log('response data in verifyToken:', data);
+        return { isValid: false, error: new Error(data.error || 'Token verification failed') };
+      }
 
-      const data = await response.json();
-      return data.isValid;
-    } catch (error) {
+      const result = await response.json();
+        
+      return result;
+    } catch (error: any) {
       console.error('Error verifying token:', error);
-      return false;
+      return { isValid: false, error: { message: error.message} };
     }
   }
 

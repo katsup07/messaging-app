@@ -4,6 +4,16 @@ class FriendService {
     this.authRepository = authRepository;
   }
 
+  async getFriendRequestById(requestId) {
+    try {
+      const request = await this.friendRepository.findFriendRequestById(requestId);
+      if (!request) throw new Error('Friend request not found');
+      return request;
+    } catch (error) {
+      throw new Error(`Failed to get friend request: ${error.message}`);
+    }
+  }
+
   async getFriendsList(userId) {
     try {
       const friends = await this.friendRepository.getFriends();

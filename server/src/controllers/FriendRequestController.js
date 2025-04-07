@@ -34,7 +34,7 @@ async function respondToRequest(req, res) {
   const { requestId } = req.params;
   const { accept } = req.body;
 
-  try {
+  try {   
     const updatedRequest = await friendService.respondToFriendRequest(requestId, accept);
     const io = socketIoController.getIO();
  

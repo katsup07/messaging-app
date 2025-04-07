@@ -4,7 +4,6 @@ const { socketIoController } = require('../socketio');
 async function getMessages(req, res) {
   const { userId } = req.params;
   const { friendId } = req.query;
-
   try {
     const conversationMessages = await messageService.getConversation(userId, friendId);
     res.json(conversationMessages);
@@ -14,7 +13,6 @@ async function getMessages(req, res) {
 }
 
 async function saveMessage(req, res) {
-
   try {
     const newMessage = await messageService.saveMessage(req.body);
     const { senderId, sender, receiverId, content, 
@@ -38,6 +36,12 @@ async function saveMessage(req, res) {
 
 async function deleteMessagesBetweenUsers(req, res) {
   const { user1Id, user2Id } = req.params;
+  
+  // Authorization check - ensure user can only delete their own messages
+  if (req.user.userId.toString() !== user1Id.toString() && 
+      req.user.userId.toString() !== user2Id.toString()) {
+    return res.status(403).json({ error: 'Unauthorized attempt to delete messages' });
+  }
   
   try {
     await messageService.deleteMessagesBetweenUsers(user1Id, user2Id);

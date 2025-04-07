@@ -9,6 +9,7 @@ function setAuthRoutes(app) {
   router.post('/login', AuthController.login);
   router.post('/signup', AuthController.signup);
   router.post('/verify-token', AuthController.verifyToken);
+  router.post('/refresh-token', AuthController.refreshToken); // Should not require authentication
 
   // Protected routes
   router.get('/users', authenticate, AuthController.getUsers);

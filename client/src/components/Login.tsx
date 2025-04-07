@@ -44,8 +44,9 @@ const Login: React.FC = () => {
       return;
     }
 
-    // Store token in ApiService
+    // Store tokens in ApiService
     apiService.setAccessToken(response.accessToken);
+    apiService.setRefreshToken(response.refreshToken);
     
     localStorage.setItem('accessToken', response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);

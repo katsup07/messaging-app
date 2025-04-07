@@ -52,6 +52,12 @@ async function findUserById(req, res) {
 
 async function logout(req, res) {
   const { userId } = req.params;
+  
+  // Authorization check - ensure user can only logout themselves
+  if (req.user.userId.toString() !== userId.toString()) {
+    return res.status(403).json({ error: 'Unauthorized attempt to logout another user' });
+  }
+  
   try {
     await authService.logout(userId);
     res.json({ success: true });
@@ -67,13 +73,34 @@ async function verifyToken(req, res) {
   try {
     const token = extractTokenFromHeaders(req.headers);
     const result = await authService.verifyToken(token);
+    console.log('result in verifyToken controller: ', result);
+    if (!result.isValid) return res.status(401).json(result);
 
-    if (!result) return res.status(401).json({ isValid: false });
-
-    res.json({ isValid: true, userId: result.userId });
+    res.json(result);
   } catch (err) {
     res.status(401).json({ valid: false });
   }
 }
 
-module.exports = { getUsers, login, signup, logout, verifyToken, findUserById };
+async function refreshToken(req, res) {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+    
+    const newTokens = await authService.refreshToken(refreshToken);
+    
+    if (!newTokens) {
+      return res.status(401).json({ error: 'Invalid or expired refresh token' });
+    }
+    
+    res.json(newTokens);
+  } catch (err) {
+    console.error('Error in refresh token endpoint:', err);
+    res.status(500).json({ error: 'Failed to refresh token' });
+  }
+}
+
+module.exports = { getUsers, login, signup, logout, verifyToken, findUserById, refreshToken };

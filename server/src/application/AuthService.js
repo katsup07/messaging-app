@@ -1,29 +1,53 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET
-const JWT_EXPIRATION = process.env.JWT_EXPIRES_IN || '1h';
 
-// TODO: Check for auth token upon every request. Add middleware to check for token in headers and validate it.
+const JWT_SECRET = process.env.JWT_SECRET
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
+const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION;
+const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION;
+
 class AuthService {
   constructor(authRepository) {
     this.authRepository = authRepository;
     this.saltRounds = 10; // Rounds for password hashing
   }
 
+  async refreshToken(refreshToken) {
+    try{
+      const decodedRefreshToken = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET); // throws error if token is expired or invalid
+      const user = await this.authRepository.findById(decodedRefreshToken.id);
+      if (!user) return null;
+
+      // Check to ensure token has not been invalidated via token version
+      const isTokenValid = decodedRefreshToken.tokenVersion === user.tokenVersion;
+      if (!isTokenValid) return null;
+
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = this._generateTokens(user._id, user.tokenVersion);
+      console.log('newAccessToken in authService', newAccessToken);
+      console.log('newRefreshToken in authService', newRefreshToken);
+      return { newAccessToken, newRefreshToken };
+    }catch(error){
+      console.error('Token refresh error:', error);
+      return null;
+    }
+  }
+
   async verifyToken(accessToken) {
     try {
-      const decoded = jwt.verify(accessToken, JWT_SECRET);
-      const user = await this.authRepository.findById(decoded.id);
+      const decodedAccessToken = jwt.verify(accessToken, JWT_SECRET); // throws error if token is expired or invalid
+      const user = await this.authRepository.findById(decodedAccessToken.id);
       
       if (!user) return null;
 
       // Check to ensure token has not been invalidated via token version
-      const isTokenValid = decoded.tokenVersion === user.tokenVersion;
+      const isTokenValid = decodedAccessToken.tokenVersion === user.tokenVersion;
+      console.log('isTokenValid in authService verifyToken', isTokenValid);
       if (!isTokenValid) return null;
-
-      return { userId: user._id };
+     
+      return { isValid: true, userId: user._id, error: null };
     } catch (error) {
-      return null;
+      console.error('Token verification error:', 'message!!!!!!!!: ', error.message);
+      return { isValid: false, error: error.message };
     }
   }
 
@@ -75,10 +99,6 @@ class AuthService {
   }
 
   _generateTokens(userId, tokenVersion){
-    const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
-    const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION;
-    const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION;
-
     const accessToken = jwt.sign(
       { id: userId, tokenVersion }, 
       JWT_SECRET, 
@@ -87,7 +107,7 @@ class AuthService {
     
     const refreshToken = jwt.sign(
       { id: userId, tokenVersion },
-      REFRESH_SECRET,
+      REFRESH_TOKEN_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRATION }
     );
 

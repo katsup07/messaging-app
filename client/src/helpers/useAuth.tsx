@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSetAtom } from 'jotai';
 import { User, userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
+import { TokenResult } from '../types/token';
 
-const verifyTokenOnServer = async (token: string): Promise<boolean> => {
+const verifyTokenOnServer = async (token: string): Promise<TokenResult> => {
   const apiService = ApiService.getInstance();
   return await apiService.verifyToken(token);
 }
@@ -21,8 +22,9 @@ export default function useAuth() {
     ApiService.resetInstance();
 
     // client-side logout
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    // Clear tokens and user data from localStorage
+    apiService.setAccessToken(null);
+    apiService.setRefreshToken(null);
     localStorage.removeItem('user');
     setUser(undefined);
     setIsAuthenticated(false);
@@ -31,6 +33,7 @@ export default function useAuth() {
   const checkAuth = useCallback(async () => {
     try {
       const accessToken = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
       
       if (!accessToken) {
         setIsLoading(false);
@@ -40,29 +43,45 @@ export default function useAuth() {
       
       // Get user data
       const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser) as User;
-        setUser(userData);
-        
-        // Set the token in the ApiService for future authenticated requests
-        const apiService = ApiService.getInstance(userData);
-        apiService.setAccessToken(accessToken);
-        
-        setIsAuthenticated(true);
+    
+      if (!storedUser) {
+        logout();
+        return;
       }
       
-      const isValid = await verifyTokenOnServer(accessToken);
+      const userData = JSON.parse(storedUser) as User;
+      setUser(userData);
+        
+      // Set the tokens in the ApiService for future authenticated requests
+      const apiService = ApiService.getInstance(userData);
+      apiService.setAccessToken(accessToken);
+      apiService.setRefreshToken(refreshToken);
+        
+      setIsAuthenticated(true);
+
+      const { isValid, error } = await verifyTokenOnServer(accessToken);
+
+      if(!isValid && error?.message === 'jwt expired'){
+        const result = await apiService.onRefreshToken();
+
+        if(!result?.newAccessToken || !result?.newRefreshToken) {
+          logout();
+          return;
+        }
+       
+        // Update both tokens
+        apiService.setAccessToken(result.newAccessToken);
+        apiService.setRefreshToken(result.newRefreshToken);
+
+        setIsAuthenticated(true);
+        return;
+      }
       
       if (!isValid) 
         logout();
-
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      setUser(undefined);
-      setIsAuthenticated(false);
+      logout();
     } finally {
       setIsLoading(false);
     }
@@ -75,3 +94,4 @@ export default function useAuth() {
 
   return { isLoading, isAuthenticated, logout };
 }
+

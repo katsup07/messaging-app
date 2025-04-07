@@ -7,16 +7,22 @@ async function authenticate(req, res, next) {
   try {
     const token = extractTokenFromHeaders(req.headers);
     if (!token)
-       return res.status(401).json({ isValid: false, error: 'Invalid authorization format' });
+      return res.status(401).json({ isValid: false, error: 'TokenMissing' });
 
     const result = await authService.verifyToken(token);
-    if (!result)
-      return res.status(401).json({ isValid: false, error: 'Invalid or expired token' });
-    
+    if (!result || !result.isValid) {
+      sendErrorOnInvalidToken(result, res);
+      return;
+    }
+
     req.user = { userId: result.userId };
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Authentication failed' });
+    console.error('Auth middleware error:', err);
+    if (err.message && err.message.includes('expired'))
+      return res.status(401).json({ isValid: false, error: 'TokenExpired' });
+    
+    return res.status(401).json({ error: 'AuthenticationFailed' });
   }
 }
 
@@ -30,6 +36,13 @@ function extractTokenFromHeaders(headers) {
   
   const token = bearerAndToken[1];
   return token;
+}
+
+function sendErrorOnInvalidToken(result, res){
+  if (result && result.error === 'jwt expired') 
+    return res.status(401).json({ isValid: false, error: 'TokenExpired' });
+    
+  return res.status(401).json({ isValid: false, error: 'InvalidToken' });
 }
 
 module.exports = { authenticate, extractTokenFromHeaders };

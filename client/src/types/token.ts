@@ -1,0 +1,1 @@
+export type TokenResult =  { isValid: boolean, userId?: string, error?: { message: string} }
