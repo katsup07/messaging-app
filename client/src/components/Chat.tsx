@@ -1,6 +1,6 @@
 import { socket } from '../helpers/socket-io-client';
 
-import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
@@ -29,7 +29,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const user = useAtomValue(userAtom);
 
-  const apiService = useMemo(() => new ApiService(user), [user]);
+  const apiService = ApiService.getInstance(user);
 
   useEffect(() => {
     if (user) socket.emit('register-user', user._id);

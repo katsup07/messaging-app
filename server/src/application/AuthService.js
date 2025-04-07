@@ -96,16 +96,13 @@ class AuthService {
 
   async logout(userId) {
     try {
-      console.log('Logging out user on backend...:', userId);
       const user = await this.authRepository.findById(userId);
-      console.log('User found:', user);
       
       if (!user)
         throw new Error('User not found');
-      console.log('About to increment token version...');
       // Increment token version to invalidate all previous tokens
       const newTokenVersion = (user.tokenVersion || 0) + 1;
-      console.log('New token version:', newTokenVersion);
+
       await this.authRepository.updateUser(
         { userId, 
           updateFields: { tokenVersion: newTokenVersion } 

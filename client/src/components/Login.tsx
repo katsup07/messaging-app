@@ -36,15 +36,17 @@ const Login: React.FC = () => {
     if(!isValid)
       return;
 
-    const apiService = new ApiService();
+    const apiService = ApiService.getInstance();
     const response = await apiService.auth({ email, password, isSignup });
-    console.log('Login response:', response);
 
     if (!response || !response.accessToken) {
       alert('Invalid email or password');
       return;
     }
 
+    // Store token in ApiService
+    apiService.setAccessToken(response.accessToken);
+    
     localStorage.setItem('accessToken', response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);
 

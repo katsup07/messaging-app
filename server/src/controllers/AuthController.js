@@ -1,4 +1,5 @@
 const { authService } = require('../diContainer');
+const { extractTokenFromHeaders } = require('../middleware/auth');
 
 async function signup(req, res) {
 
@@ -50,10 +51,9 @@ async function findUserById(req, res) {
 }
 
 async function logout(req, res) {
-  const { userId, accessToken, refreshToken } = req.params;
-  console.log('Logout called with:', userId, accessToken, refreshToken);
+  const { userId } = req.params;
   try {
-    await authService.logout(userId, accessToken, refreshToken);
+    await authService.logout(userId);
     res.json({ success: true });
   } catch (err) {
     if (err.message.includes('not found')) 
@@ -67,26 +67,13 @@ async function verifyToken(req, res) {
   try {
     const token = extractTokenFromHeaders(req.headers);
     const result = await authService.verifyToken(token);
+
     if (!result) return res.status(401).json({ isValid: false });
 
     res.json({ isValid: true, userId: result.userId });
   } catch (err) {
     res.status(401).json({ valid: false });
   }
-}
-
- function extractTokenFromHeaders(headers) {
-  const { authorization } = headers;
-  if (!authorization)
-    return res.status(401).json({ isValid: false, error: 'Missing authorization header' });
-
-  const bearerAndToken = authorization.split(' ');
-
-  if (bearerAndToken.length !== 2 || bearerAndToken[0] !== 'Bearer') 
-    return res.status(401).json({ isValid: false, error: 'Invalid authorization format' });
-  
-  const token = bearerAndToken[1];
-  return token;
 }
 
 module.exports = { getUsers, login, signup, logout, verifyToken, findUserById };

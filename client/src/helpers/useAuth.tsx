@@ -4,21 +4,21 @@ import { User, userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
 
 const verifyTokenOnServer = async (token: string): Promise<boolean> => {
-  const apiService = new ApiService();
+  const apiService = ApiService.getInstance();
   return await apiService.verifyToken(token);
 }
 
-export default function useAuth(user?: User) {
+export default function useAuth() {
   const setUser = useSetAtom(userAtom);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const logout = useCallback(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
+  const logout = useCallback(() => {    
     // server-side logout
-    const apiService = new ApiService(user);
-    apiService.logout(accessToken, refreshToken);
+    const apiService = ApiService.getInstance();
+    apiService.logout();
+    // Reset the singleton after logout
+    ApiService.resetInstance();
 
     // client-side logout
     localStorage.removeItem('accessToken');
@@ -26,14 +26,13 @@ export default function useAuth(user?: User) {
     localStorage.removeItem('user');
     setUser(undefined);
     setIsAuthenticated(false);
-  },[setUser]);
+  }, [setUser]);
 
-  const checkAuth = useCallback( async () => {
+  const checkAuth = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
+      const accessToken = localStorage.getItem('accessToken');
       
-      if (!token) {
-        // Not logged in
+      if (!accessToken) {
         setIsLoading(false);
         setIsAuthenticated(false);
         return;
@@ -44,10 +43,15 @@ export default function useAuth(user?: User) {
       if (storedUser) {
         const userData = JSON.parse(storedUser) as User;
         setUser(userData);
+        
+        // Set the token in the ApiService for future authenticated requests
+        const apiService = ApiService.getInstance(userData);
+        apiService.setAccessToken(accessToken);
+        
         setIsAuthenticated(true);
       }
       
-      const isValid = await verifyTokenOnServer(token);
+      const isValid = await verifyTokenOnServer(accessToken);
       
       if (!isValid) 
         logout();
@@ -55,14 +59,15 @@ export default function useAuth(user?: User) {
     } catch (error) {
       console.error('Auth check failed:', error);
       localStorage.removeItem('accessToken');
-      localStorage
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       setUser(undefined);
       setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }
-  }, [setUser, logout]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setUser]);
 
   useEffect(() => {
     checkAuth();

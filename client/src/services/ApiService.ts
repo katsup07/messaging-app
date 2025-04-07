@@ -8,11 +8,28 @@ export default class ApiService {
   private readonly _baseFriendRequestUrl = 'http://localhost:5000/api/friend-requests';
   private user: User;
   private selectedFriend: User | null = null;
+  private accessToken: string | null = null;
 
-  constructor(user?: User) {
+  private static instance: ApiService | null = null;
+
+  private constructor(user?: User) {
     const anonymousUser = { _id: 0, username: 'anon-user', email: 'anon-user@email.com' };
-
     this.user = user || anonymousUser;
+  }
+
+  static getInstance(user?: User): ApiService {
+    if (!ApiService.instance) { // Create a new instance if it doesn't exist
+      ApiService.instance = new ApiService(user);
+    } else if (user) {
+      // Update the user in the existing instance if provided
+      ApiService.instance.user = user;
+    }
+    // Otherwise, return the existing instance
+    return ApiService.instance;
+  }
+
+  static resetInstance(): void {
+    ApiService.instance = null;
   }
 
   get baseMessageUrl(): string {
@@ -27,12 +44,33 @@ export default class ApiService {
     this.selectedFriend = friend;
   }
 
+  setAccessToken(token: string | null) {
+    this.accessToken = token;
+  }
+
+  setUser(user: User) {
+    this.user = user;
+  }
+
+  private async authorizedRequest(url: string, options: RequestInit = {}): Promise<Response> {
+    if (!this.accessToken)
+      throw new Error('No access token available');
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.accessToken}`,
+      ...options.headers
+    };
+
+    return fetch(url, { ...options, headers });
+  }
+
   async getMessages(): Promise<any> {
     if (!this.selectedFriend) {
       return [];
     }
     try {
-      const response = await fetch(`${this.baseMessageUrl}/${this.user._id}?friendId=${this.selectedFriend._id}`);
+      const response = await this.authorizedRequest(`${this.baseMessageUrl}/${this.user._id}?friendId=${this.selectedFriend._id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch messages');
       }
@@ -45,16 +83,13 @@ export default class ApiService {
 
   async sendMessage(message: { sender: string; content: string }): Promise<any> {
     try {
-      const response = await fetch(this.baseMessageUrl, {
+      const response = await this.authorizedRequest(this.baseMessageUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(message),
       });
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error('Failed to send message');
-      }
+      
       return response.json();
     } catch (error) {
       console.error('Error sending message:', error);
@@ -89,17 +124,18 @@ export default class ApiService {
 
   async verifyToken(accessToken: string): Promise<boolean> {
     try {
+      // No authorized request because verifyToken is called before token is set
       const response = await fetch(`${this._baseAuthUrl}/verify-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
+          'Authorization': `Bearer ${accessToken}`
+        }
       });
-  
+
       if (!response.ok)
         throw new Error('Failed to verify token');
-      
+
       const data = await response.json();
       return data.isValid;
     } catch (error) {
@@ -110,7 +146,7 @@ export default class ApiService {
 
   async getFriends(): Promise<any> {
     try {
-      const response = await fetch(`${this._baseFriendsUrl}/${this.user._id}`);
+      const response = await this.authorizedRequest(`${this._baseFriendsUrl}/${this.user._id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch friends');
       }
@@ -123,10 +159,10 @@ export default class ApiService {
 
   async getUsers(): Promise<any> {
     try {
-      const response = await fetch(`${this._baseAuthUrl}/users`);
+      const response = await this.authorizedRequest(`${this._baseAuthUrl}/users`);
       if (!response.ok)
         throw new Error('Failed to fetch users');
-      
+
       const users = await response.json();
 
       return users;
@@ -138,7 +174,7 @@ export default class ApiService {
 
   async getUserById(userId: number | string): Promise<any> {
     try {
-      const response = await fetch(`${this._baseAuthUrl}/users/${userId}`);
+      const response = await this.authorizedRequest(`${this._baseAuthUrl}/users/${userId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch user');
       }
@@ -149,30 +185,18 @@ export default class ApiService {
     }
   }
 
-  async logout(accessToken?: string | null, refreshToken?: string | null): Promise<void> {
+  async logout(): Promise<void> {
     try {
-      if (!accessToken || !refreshToken) 
-        throw new Error('Access token or refresh token is missing');
-
-      console.log('Logging out user in APIService:', this.user._id, this.user.username);
-      console.log('Access token:', accessToken);  
-      console.log('Refresh token:', refreshToken);
-      
-      const response = await fetch(`${this._baseAuthUrl}/logout/${this.user._id}`, {
+      const response = await this.authorizedRequest(`${this._baseAuthUrl}/logout/${this.user._id}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           userId: this.user._id,
-          accessToken,
-          refreshToken,
         }),
       });
 
       if (!response.ok)
         throw new Error('Failed to logout');
-      
+
     } catch (error) {
       console.error('Error during logout:', error);
       throw error;
@@ -181,7 +205,7 @@ export default class ApiService {
 
   async getPendingFriendRequests(): Promise<any> {
     try {
-      const response = await fetch(`${this._baseFriendRequestUrl}/pending/${this.user._id}`);
+      const response = await this.authorizedRequest(`${this._baseFriendRequestUrl}/pending/${this.user._id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch pending friend requests');
       }
@@ -194,11 +218,8 @@ export default class ApiService {
 
   async sendFriendRequest(toUserId: number | string): Promise<any> {
     try {
-      const response = await fetch(`${this._baseFriendRequestUrl}`, {
+      const response = await this.authorizedRequest(`${this._baseFriendRequestUrl}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           fromUserId: this.user._id,
           toUserId
@@ -217,11 +238,8 @@ export default class ApiService {
 
   async respondToFriendRequest(requestId: string | number, accept: boolean): Promise<any> {
     try {
-      const response = await fetch(`${this._baseFriendRequestUrl}/${requestId}/respond`, {
+      const response = await this.authorizedRequest(`${this._baseFriendRequestUrl}/${requestId}/respond`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ accept }),
       });
       if (!response.ok) {
