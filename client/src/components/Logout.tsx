@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { useSetAtom, useAtomValue } from 'jotai';
-import { userAtom } from '../atoms/userAtom';
+import { useSetAtom } from 'jotai';
+import { User, userAtom } from '../atoms/userAtom';
 import { MdLogout } from 'react-icons/md';
 import useAuth from '../helpers/useAuth';
 
-const Logout: React.FC = () => {
-  const { logout }  = useAuth();
+interface Props{
+  user?: User;
+}
+
+const Logout: React.FC<Props> = ({ user }: Props) => {
+  const { logout }  = useAuth(user);
   const setUser = useSetAtom(userAtom);
-  const user = useAtomValue(userAtom);
   const [showModal, setShowModal] = useState(false);
 
   const handleLogout = async () => {
@@ -18,10 +21,12 @@ const Logout: React.FC = () => {
         console.error('Error during logout:', error);
       }
     }
-    localStorage.removeItem('user');
     setUser(undefined);
     setShowModal(false);
   };
+
+  if(!user) 
+    return null;
 
   return (
     <>

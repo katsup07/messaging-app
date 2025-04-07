@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import Logout from './Logout';
+import { User } from '../atoms/userAtom';
 
 interface Props {
   isLoggedIn: boolean;
+  user?: User;
 }
 
-const Header: React.FC<Props> = ({ isLoggedIn }: Props) => {
+const Header: React.FC<Props> = ({ isLoggedIn, user }: Props) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
@@ -33,7 +35,7 @@ const Header: React.FC<Props> = ({ isLoggedIn }: Props) => {
         <circle cx={isDarkMode ? "16" : "8"} cy="12" r="4" fill="currentColor" />
       </svg>
     </button>
-    {isLoggedIn ? <Logout /> : null}
+    {isLoggedIn ? <Logout user={user} /> : null}
   </div> 
   </div>)
   

@@ -10,12 +10,17 @@ class AuthService {
     this.saltRounds = 10; // Rounds for password hashing
   }
 
-  async verifyToken(token) {
+  async verifyToken(accessToken) {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET);
+      const decoded = jwt.verify(accessToken, JWT_SECRET);
       const user = await this.authRepository.findById(decoded.id);
+      
       if (!user) return null;
-  
+
+      // Check to ensure token has not been invalidated via token version
+      const isTokenValid = decoded.tokenVersion === user.tokenVersion;
+      if (!isTokenValid) return null;
+
       return { userId: user._id };
     } catch (error) {
       return null;
@@ -37,7 +42,8 @@ class AuthService {
       const newUser = {
         username: email.split('@')[0],
         email,
-        passwordHash
+        passwordHash,
+        tokenVersion: 0, // initialize token
       };
 
       await this.authRepository.saveUser(newUser);
@@ -59,21 +65,51 @@ class AuthService {
       if (!isPasswordValid)
         throw new Error('Invalid credentials');
   
-      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
+      const { accessToken, refreshToken } = this._generateTokens(user._id, user.tokenVersion);
 
       const { passwordHash, ...userWithoutPasswordHash } = user;
-      return { user: userWithoutPasswordHash, token };
+      return { user: userWithoutPasswordHash, accessToken, refreshToken };
     } catch (error) {
       throw new Error(`Login failed: ${error.message}`);
     }
   }
 
+  _generateTokens(userId, tokenVersion){
+    const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
+    const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION;
+    const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION;
+
+    const accessToken = jwt.sign(
+      { id: userId, tokenVersion }, 
+      JWT_SECRET, 
+      { expiresIn: ACCESS_TOKEN_EXPIRATION 
+      });
+    
+    const refreshToken = jwt.sign(
+      { id: userId, tokenVersion },
+      REFRESH_SECRET,
+      { expiresIn: REFRESH_TOKEN_EXPIRATION }
+    );
+
+    return { accessToken, refreshToken };
+  }
+
   async logout(userId) {
     try {
+      console.log('Logging out user on backend...:', userId);
       const user = await this.authRepository.findById(userId);
+      console.log('User found:', user);
       
       if (!user)
         throw new Error('User not found');
+      console.log('About to increment token version...');
+      // Increment token version to invalidate all previous tokens
+      const newTokenVersion = (user.tokenVersion || 0) + 1;
+      console.log('New token version:', newTokenVersion);
+      await this.authRepository.updateUser(
+        { userId, 
+          updateFields: { tokenVersion: newTokenVersion } 
+        });
 
       return true;
     } catch (error) {

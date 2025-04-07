@@ -8,13 +8,21 @@ const verifyTokenOnServer = async (token: string): Promise<boolean> => {
   return await apiService.verifyToken(token);
 }
 
-export default function useAuth() {
+export default function useAuth(user?: User) {
   const setUser = useSetAtom(userAtom);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('token');
+    const accessToken = localStorage.getItem('accessToken');
+    const refreshToken = localStorage.getItem('refreshToken');
+    // server-side logout
+    const apiService = new ApiService(user);
+    apiService.logout(accessToken, refreshToken);
+
+    // client-side logout
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setUser(undefined);
     setIsAuthenticated(false);
@@ -46,7 +54,8 @@ export default function useAuth() {
 
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
+      localStorage
       localStorage.removeItem('user');
       setUser(undefined);
       setIsAuthenticated(false);

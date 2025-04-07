@@ -50,9 +50,10 @@ async function findUserById(req, res) {
 }
 
 async function logout(req, res) {
-  const { userId } = req.params;
+  const { userId, accessToken, refreshToken } = req.params;
+  console.log('Logout called with:', userId, accessToken, refreshToken);
   try {
-    await authService.logout(userId);
+    await authService.logout(userId, accessToken, refreshToken);
     res.json({ success: true });
   } catch (err) {
     if (err.message.includes('not found')) 

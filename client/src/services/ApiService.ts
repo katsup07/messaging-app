@@ -87,13 +87,13 @@ export default class ApiService {
     }
   }
 
-  async verifyToken(token: string): Promise<boolean> {
+  async verifyToken(accessToken: string): Promise<boolean> {
     try {
       const response = await fetch(`${this._baseAuthUrl}/verify-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
   
@@ -149,14 +149,30 @@ export default class ApiService {
     }
   }
 
-  async logout(): Promise<void> {
+  async logout(accessToken?: string | null, refreshToken?: string | null): Promise<void> {
     try {
+      if (!accessToken || !refreshToken) 
+        throw new Error('Access token or refresh token is missing');
+
+      console.log('Logging out user in APIService:', this.user._id, this.user.username);
+      console.log('Access token:', accessToken);  
+      console.log('Refresh token:', refreshToken);
+      
       const response = await fetch(`${this._baseAuthUrl}/logout/${this.user._id}`, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: this.user._id,
+          accessToken,
+          refreshToken,
+        }),
       });
-      if (!response.ok) {
+
+      if (!response.ok)
         throw new Error('Failed to logout');
-      }
+      
     } catch (error) {
       console.error('Error during logout:', error);
       throw error;

@@ -38,13 +38,15 @@ const Login: React.FC = () => {
 
     const apiService = new ApiService();
     const response = await apiService.auth({ email, password, isSignup });
+    console.log('Login response:', response);
 
-    if (!response || !response.token) {
+    if (!response || !response.accessToken) {
       alert('Invalid email or password');
       return;
     }
 
-    localStorage.setItem('token', response.token);
+    localStorage.setItem('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
 
     const userData = { 
       _id: response.user._id,

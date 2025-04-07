@@ -30,7 +30,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <Header isLoggedIn={isLoggedIn}/>
+      <Header isLoggedIn={isLoggedIn} user={user}/>
       <div className="main-content">
         <div className="friends-container">
           <FriendsList 
