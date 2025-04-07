@@ -23,8 +23,7 @@ class AuthService {
       if (!isTokenValid) return null;
 
       const { accessToken: newAccessToken, refreshToken: newRefreshToken } = this._generateTokens(user._id, user.tokenVersion);
-      console.log('newAccessToken in authService', newAccessToken);
-      console.log('newRefreshToken in authService', newRefreshToken);
+
       return { newAccessToken, newRefreshToken };
     }catch(error){
       console.error('Token refresh error:', error);
@@ -41,7 +40,6 @@ class AuthService {
 
       // Check to ensure token has not been invalidated via token version
       const isTokenValid = decodedAccessToken.tokenVersion === user.tokenVersion;
-      console.log('isTokenValid in authService verifyToken', isTokenValid);
       if (!isTokenValid) return null;
      
       return { isValid: true, userId: user._id, error: null };

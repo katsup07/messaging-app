@@ -177,7 +177,6 @@ export default class ApiService {
   }
 
   async onRefreshToken(): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
-    console.log('Refreshing token in ApiService...');
     try {
       if (!this.refreshToken) {
         throw new Error('No refresh token available');
@@ -197,7 +196,6 @@ export default class ApiService {
       }
 
       const result = await response.json();
-      console.log('Token refresh result:', result);
       return result;
     } catch (error) {
       console.error('Error refreshing token:', error);
@@ -275,7 +273,6 @@ export default class ApiService {
 
       if (!response.ok){
         const data = await response.json();
-        console.log('response data in verifyToken:', data);
         return { isValid: false, error: new Error(data.error || 'Token verification failed') };
       }
 

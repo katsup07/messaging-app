@@ -73,7 +73,6 @@ async function verifyToken(req, res) {
   try {
     const token = extractTokenFromHeaders(req.headers);
     const result = await authService.verifyToken(token);
-    console.log('result in verifyToken controller: ', result);
     if (!result.isValid) return res.status(401).json(result);
 
     res.json(result);
