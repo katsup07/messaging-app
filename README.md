@@ -10,7 +10,7 @@
 ### Notes
 - A mongoDB database needs to be connected to use this project as is. An .env file in the server folder with the following keys is required:
 MONGODB_URI, JWT_SECRET, and JWT_EXPIRATION
-- Coming Soon: Middleware for authentication requests, refresh token verification, and logging.
+- Coming Soon: logging.
 - [Demo Video](https://youtu.be/mEsYUYDX8vM)
   
 ### Friends List and Chat
