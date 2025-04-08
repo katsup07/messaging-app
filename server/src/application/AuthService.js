@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { logError, logInfo } = require('../middleware/logger');
+const { logError } = require('../middleware/logger');
 
 const JWT_SECRET = process.env.JWT_SECRET
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
@@ -11,12 +11,6 @@ class AuthService {
   constructor(authRepository) {
     this.authRepository = authRepository;
     this.saltRounds = 10; // Rounds for password hashing
-    
-    // Log environment variables for debugging (excluding the actual secrets)
-    logInfo(`JWT_SECRET set: ${!!JWT_SECRET}`);
-    logInfo(`REFRESH_TOKEN_SECRET set: ${!!REFRESH_TOKEN_SECRET}`);
-    logInfo(`ACCESS_TOKEN_EXPIRATION: ${ACCESS_TOKEN_EXPIRATION}`);
-    logInfo(`REFRESH_TOKEN_EXPIRATION: ${REFRESH_TOKEN_EXPIRATION}`);
   }
 
   async refreshToken(refreshToken) {
@@ -60,7 +54,7 @@ class AuthService {
     try {
       const validation = this._validatePasswordStrength(password);
       if(!validation.isValid)
-        throw new Error(validation.message);
+         throw new Error(validation.message);
 
       const existingUser = await this.authRepository.findByEmail(email);
       if (existingUser)
@@ -85,34 +79,25 @@ class AuthService {
 
   async login(email, password) {
     try {
-      logInfo(`AuthService.login: Finding user with email: ${email}`);
       const user = await this.authRepository.findByEmail(email);
 
-      if (!user || user.email !== email) {
-        logInfo('AuthService.login: User not found or email mismatch');
+      if (!user || user.email !== email)
         throw new Error('Invalid credentials');
-      }
 
-      logInfo('AuthService.login: User found, comparing password');
       const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-      if (!isPasswordValid) {
-        logInfo('AuthService.login: Password invalid');
+      if (!isPasswordValid)
         throw new Error('Invalid credentials');
-      }
   
-      logInfo('AuthService.login: Password valid, generating tokens');
       const { accessToken, refreshToken } = await this._generateTokens(user);
 
       const { passwordHash, ...userWithoutPasswordHash } = user;
-      logInfo('AuthService.login: Login successful');
       return { user: userWithoutPasswordHash, accessToken, refreshToken };
     } catch (error) {
-      logError(`AuthService.login error: ${error.message}`);
       throw new Error(`Login failed: ${error.message}`);
     }
   }
 
-  async _generateTokens(user) {
+ async _generateTokens(user){
     const accessToken = jwt.sign(
       { id: user._id, tokenVersion: user.tokenVersion }, 
       JWT_SECRET, 

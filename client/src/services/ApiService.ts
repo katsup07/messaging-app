@@ -5,11 +5,11 @@ import { handleApiError } from "./ErrorService";
 // TODO: Refactor this class into HTTPClient, AuthService, and MessageService classes
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default class ApiService {
-  private readonly _apiBaseUrl: string;
-  private readonly _baseFriendsUrl: string;
-  private readonly _baseMessageUrl: string;
-  private readonly _baseAuthUrl: string;
-  private readonly _baseFriendRequestUrl: string;
+  private readonly _apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  private readonly _baseFriendsUrl = `${this._apiBaseUrl}/friends`;
+  private readonly _baseMessageUrl = `${this._apiBaseUrl}/messages`;
+  private readonly _baseAuthUrl = `${this._apiBaseUrl}/auth`;
+  private readonly _baseFriendRequestUrl = `${this._apiBaseUrl}/friend-requests`;
   private user: User;
   private selectedFriend: User | null = null;
   private accessToken: string | null = null;
@@ -25,18 +25,6 @@ export default class ApiService {
   private constructor(user?: User) {
     const anonymousUser = { _id: 0, username: 'anon-user', email: 'anon-user@email.com' };
     this.user = user || anonymousUser;
-    
-    const envApiUrl = typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_API_BASE_URL : undefined;
-    this._apiBaseUrl = envApiUrl || 'http://localhost:5000/api';
-    
-    // Force logging the URL to debug in production
-    console.log('API Base URL:', this._apiBaseUrl);
-    
-    // Initialize API endpoints
-    this._baseFriendsUrl = `${this._apiBaseUrl}/friends`;
-    this._baseMessageUrl = `${this._apiBaseUrl}/messages`;
-    this._baseAuthUrl = `${this._apiBaseUrl}/auth`;
-    this._baseFriendRequestUrl = `${this._apiBaseUrl}/friend-requests`;
     
     // Initialize tokens from localStorage
     this.accessToken = localStorage.getItem('accessToken');
@@ -223,106 +211,23 @@ export default class ApiService {
   }
 
   async auth(credentials: { email: string; password: string, isSignup: boolean }): Promise<any> {
-    try {
-      const authUrl = this._baseAuthUrl + (credentials.isSignup ? '/signup' : '/login');
-      
-      // Log request information for debugging
-      console.log(`Making auth request to: ${authUrl}`);
-      console.log(`Browser navigator.onLine: ${navigator.onLine}`);
-      
-      // Create a clean credentials object without isSignup flag
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { isSignup, ...cleanCredentials } = credentials;
-      
-      // Implement timeout for fetch request
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-      
-      try {
-        // Use a no-CORS approach as a last resort
-        const response = await fetch(`${authUrl}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify(cleanCredentials),
-          // Set mode to 'no-cors' if we continue to have CORS issues
-          // Note: This will make the response opaque but might help with connection issues
-          mode: 'cors',
-          credentials: 'omit', // Try without credentials first
-          signal: controller.signal,
-          cache: 'no-cache',
-        });
-        
-        // Clear the timeout since we got a response
-        clearTimeout(timeoutId);
-        
-        // Log response status and headers
-        console.log(`Auth response status: ${response.status}`);
-        
-        if (!response.ok) {
-          // Try to get error information from response
-          try {
-            const errorData = await response.json();
-            console.error('Auth error response:', errorData);
-          } catch (e) {
-            console.error('Auth error but could not parse response:', response.statusText);
-          }
-          return null;
-        }
+    const authUrl = this._baseAuthUrl + (credentials.isSignup ? '/signup' : '/login');
+    
+    const response = await fetch(`${authUrl}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
 
-        const data = await response.json();
-        if (data.error) {
-          console.error('Auth error in response data:', data.error);
-          return null;
-        }
+    if (!response.ok) return null;
 
-        return data;
-      } catch (fetchError:any) {
-        clearTimeout(timeoutId);
-        
-        // More detailed logging for fetch errors
-        if (fetchError.name === 'AbortError') {
-          console.error('Auth request timed out after 15 seconds');
-        } else {
-          console.error('Fetch error details:', {
-            message: fetchError.message,
-            name: fetchError.name,
-            stack: fetchError.stack,
-            url: authUrl
-          });
-        }
-        
-        // Try a different fetch approach if the first one failed
-        console.log('Attempting with different fetch options...');
-        try {
-          const altResponse = await fetch(`${authUrl}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(cleanCredentials),
-            mode: 'no-cors', // Last resort
-            cache: 'no-cache',
-          });
-          
-          console.log('Alternative fetch succeeded with status:', altResponse.status);
-          // Note: With 'no-cors', we can't access response data normally
-          return { success: true, message: "Login request sent. Check server logs." };
-        } catch (altError) {
-          console.error('Alternative fetch also failed:', altError);
-          throw fetchError; // Throw the original error
-        }
-      }
-    } catch (error) {
-      // Log any fetch errors (network issues, etc.)
-      console.error('Auth request failed with error:', error);
-      return null;
-    }
+    const data = await response.json();
+    if (data.error) return null;
+
+    return data;
   }
-  
-  
 
   async verifyToken(accessToken: string): Promise<TokenResult> {
     // No authorized request because verifyToken is called before token is set

@@ -7,9 +7,7 @@ const serverUrl = import.meta.env.VITE_API_BASE_URL
 
 export const socket = io(serverUrl, {
   path: '/socket.io',
-  transports: ['polling'], 
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000
+  transports: ['websocket', 'polling']
 });
 
 // Logging
