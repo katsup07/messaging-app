@@ -16,6 +16,7 @@ const socketIoController = {
           methods: ['GET', 'POST'],
           credentials: true
         },
+        transports: ['polling'], // Force polling only
       });
     }
     
