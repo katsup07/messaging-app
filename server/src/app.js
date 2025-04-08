@@ -17,11 +17,9 @@ const io = socketIoController.init(server)
 
 // Configure CORS for different environments
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.CLIENT_URL] 
-    : 'http://localhost:5173', // Vite's default dev port
+  origin: '*', // Vite's default dev port
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: '*',
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 
