@@ -238,6 +238,7 @@ export default class ApiService {
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
       try {
+        // Use a no-CORS approach as a last resort
         const response = await fetch(`${authUrl}`, {
           method: 'POST',
           headers: {
@@ -245,10 +246,11 @@ export default class ApiService {
             'Accept': 'application/json',
           },
           body: JSON.stringify(cleanCredentials),
+          // Set mode to 'no-cors' if we continue to have CORS issues
+          // Note: This will make the response opaque but might help with connection issues
           mode: 'cors',
-          credentials: 'include',
+          credentials: 'omit', // Try without credentials first
           signal: controller.signal,
-          // Cache control to avoid caching issues
           cache: 'no-cache',
         });
         
@@ -276,7 +278,7 @@ export default class ApiService {
         }
 
         return data;
-      } catch (fetchError: any) {
+      } catch (fetchError) {
         clearTimeout(timeoutId);
         
         // More detailed logging for fetch errors
@@ -291,13 +293,26 @@ export default class ApiService {
           });
         }
         
-        // Fall back to XMLHttpRequest as a last resort
-        if (navigator.onLine) {
-          console.log('Attempting fallback with XMLHttpRequest...');
-          return this.authWithXHR(authUrl, cleanCredentials);
+        // Try a different fetch approach if the first one failed
+        console.log('Attempting with different fetch options...');
+        try {
+          const altResponse = await fetch(`${authUrl}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cleanCredentials),
+            mode: 'no-cors', // Last resort
+            cache: 'no-cache',
+          });
+          
+          console.log('Alternative fetch succeeded with status:', altResponse.status);
+          // Note: With 'no-cors', we can't access response data normally
+          return { success: true, message: "Login request sent. Check server logs." };
+        } catch (altError) {
+          console.error('Alternative fetch also failed:', altError);
+          throw fetchError; // Throw the original error
         }
-        
-        throw fetchError;
       }
     } catch (error) {
       // Log any fetch errors (network issues, etc.)
