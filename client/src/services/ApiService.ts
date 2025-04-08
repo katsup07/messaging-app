@@ -276,7 +276,7 @@ export default class ApiService {
         }
 
         return data;
-      } catch (fetchError) {
+      } catch (fetchError: any) {
         clearTimeout(timeoutId);
         
         // More detailed logging for fetch errors
