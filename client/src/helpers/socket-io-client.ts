@@ -2,11 +2,13 @@ import { io } from 'socket.io-client';
 
 // Get server URL from environment variables, fallback to localhost
 const serverUrl = import.meta.env.VITE_API_BASE_URL 
-  ? import.meta.env.VITE_API_BASE_URL.replace('/api', '') 
+  ? new URL(import.meta.env.VITE_API_BASE_URL).origin
   : 'http://localhost:5000';
 
-// Create a single socket instance
-export const socket = io(serverUrl);
+export const socket = io(serverUrl, {
+  path: '/socket.io',
+  transports: ['websocket', 'polling']
+});
 
 // Logging
 socket.on('connect', () => {
