@@ -231,6 +231,7 @@ export default class ApiService {
       console.log(`Browser navigator.onLine: ${navigator.onLine}`);
       
       // Create a clean credentials object without isSignup flag
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { isSignup, ...cleanCredentials } = credentials;
       
       // Implement timeout for fetch request
@@ -278,7 +279,7 @@ export default class ApiService {
         }
 
         return data;
-      } catch (fetchError) {
+      } catch (fetchError:any) {
         clearTimeout(timeoutId);
         
         // More detailed logging for fetch errors
