@@ -15,9 +15,19 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIoController.init(server)
 
+// Configure CORS for different environments
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? [process.env.CLIENT_URL] 
+    : 'http://localhost:5173', // Vite's default dev port
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 // Middleware
 app.use(logger); 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Set up routes
