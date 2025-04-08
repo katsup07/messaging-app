@@ -1,3 +1,5 @@
+const { throwError } = require('../utils/throwError');
+
 class FriendService {
   constructor(friendRepository, authRepository) {
     this.friendRepository = friendRepository;
@@ -5,13 +7,9 @@ class FriendService {
   }
 
   async getFriendRequestById(requestId) {
-    try {
-      const request = await this.friendRepository.findFriendRequestById(requestId);
-      if (!request) throw new Error('Friend request not found');
-      return request;
-    } catch (error) {
-      throw new Error(`Failed to get friend request: ${error.message}`);
-    }
+    const request = await this.friendRepository.findFriendRequestById(requestId);
+    if (!request) throwError('Friend request not found', 404);
+    return request;
   }
 
   async getFriendsList(userId) {
@@ -20,43 +18,39 @@ class FriendService {
       const userFriends = friends.find(f => f.user._id.toString() === userId.toString());
       return userFriends ? userFriends.friends : [];
     } catch (error) {
-      throw new Error(`Failed to get friends list: ${error.message}`);
+      throwError(`Failed to get friends list: ${error.message}`, 500);
     }
   }
 
   async sendFriendRequest(fromUserId, toUserId) {
-    try {
-      // Validate users exist
-      const fromUser = await this.authRepository.findById(fromUserId);
-      const toUser = await this.authRepository.findById(toUserId);
-      
-      if (!fromUser || !toUser)
-        throw new Error('One or both users not found');
+    // Validate users exist
+    const fromUser = await this.authRepository.findById(fromUserId);
+    const toUser = await this.authRepository.findById(toUserId);
+    
+    if (!fromUser || !toUser)
+      throwError('One or both users not found', 404);
 
-      // Check if a pending request already exists
-      const existingRequest = await this.friendRepository.findPendingRequest(fromUserId, toUserId);
+    // Check if a pending request already exists
+    const existingRequest = await this.friendRepository.findPendingRequest(fromUserId, toUserId);
 
-      if (existingRequest)
-        throw new Error('Friend request already sent');
+    if (existingRequest)
+      throwError('Friend request already sent', 400);
 
-      // Simplified friendship check using the new areFriends method
-      const areFriends = await this.friendRepository.areFriends(fromUserId, toUserId);
-      if (areFriends)
-        throw new Error('Users are already friends or one party declined the request');
+    // Simplified friendship check using the new areFriends method
+    const areFriends = await this.friendRepository.areFriends(fromUserId, toUserId);
+    if (areFriends)
+      throwError('Users are already friends or one party declined the request', 400);
 
-      // Create and insert new request
-      const newRequest = {
-        fromUserId,
-        toUserId,
-        status: 'pending',
-        createdAt: new Date().toISOString()
-      };
-      await this.friendRepository.insertFriendRequest(newRequest);
-      await this.addPendingFriendship(fromUser, toUser); // pending friendship until accepted
-      return newRequest;
-    } catch (error) {
-      throw new Error(`Failed to send friend request: ${error.message}`);
-    }
+    // Create and insert new request
+    const newRequest = {
+      fromUserId,
+      toUserId,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    await this.friendRepository.insertFriendRequest(newRequest);
+    await this.addPendingFriendship(fromUser, toUser); // pending friendship until accepted
+    return newRequest;
   }
 
   async addPendingFriendship(user1, user2) {
@@ -76,64 +70,59 @@ class FriendService {
         r => r.toUserId.toString() === userId.toString() && r.status === 'pending'
       );
     } catch (error) {
-      throw new Error(`Failed to get pending requests: ${error.message}`);
+      throwError(`Failed to get pending requests: ${error.message}`, 500);
     }
   }
 
   async respondToFriendRequest(requestId, accept) {
-    try {
-      // Find the specific request
-      const request = await this.friendRepository.findFriendRequestById(requestId);
-      if (!request)
-        throw new Error('Friend request not found');
-      
-      // If accepted, add friendship between users
-      if (accept) {
-        const fromUser = await this.authRepository.findById(request.fromUserId);
-        const toUser = await this.authRepository.findById(request.toUserId);
-        if (!fromUser || !toUser)
-          throw new Error('One or both users not found');
-        
-        await this.addFriendship(fromUser, toUser);
-      } else {
-        // If rejected, remove the pending friendship
-        const fromUser = await this.authRepository.findById(request.fromUserId);
-        const toUser = await this.authRepository.findById(request.toUserId);
-        if(!fromUser || !toUser) 
-          throw new Error('One or both users not found');
+    // Find the specific request
+    const request = await this.friendRepository.findFriendRequestById(requestId);
+    if (!request)
+      throwError('Friend request not found', 404);
     
-        const user1FriendData = {
-          _id: toUser._id,
-          username: toUser.username,
-          email: toUser.email,
-          isPending: false,
-          isRejected: true
-        };
-        const user2FriendData = {
-          _id: fromUser._id, 
-          username: fromUser.username,
-          email: fromUser.email,
-          isPending: false,
-          isRejected: true
-        };
-        // Update the pending friendships with rejection status
-        await this.friendRepository.updateOrCreateFriendship(fromUser._id, fromUser.username, user1FriendData);
-        await this.friendRepository.updateOrCreateFriendship(toUser._id, toUser.username, user2FriendData);
-      }
-
-      // Update the friend request status
-      const updatedRequest = await this.friendRepository.updateFriendRequest(requestId, {
-        status: accept ? 'accepted' : 'rejected',
-        respondedAt: new Date().toISOString()
-      });
-      return updatedRequest;
-    } catch (error) {
-      throw new Error(`Failed to respond to friend request: ${error.message}`);
+    // If accepted, add friendship between users
+    if (accept) {
+      const fromUser = await this.authRepository.findById(request.fromUserId);
+      const toUser = await this.authRepository.findById(request.toUserId);
+      if (!fromUser || !toUser)
+        throwError('One or both users not found', 404);
+      
+      await this.addFriendship(fromUser, toUser);
+    } else {
+      // If rejected, remove the pending friendship
+      const fromUser = await this.authRepository.findById(request.fromUserId);
+      const toUser = await this.authRepository.findById(request.toUserId);
+      if(!fromUser || !toUser) 
+        throwError('One or both users not found', 404);
+  
+      const user1FriendData = {
+        _id: toUser._id,
+        username: toUser.username,
+        email: toUser.email,
+        isPending: false,
+        isRejected: true
+      };
+      const user2FriendData = {
+        _id: fromUser._id, 
+        username: fromUser.username,
+        email: fromUser.email,
+        isPending: false,
+        isRejected: true
+      };
+      // Update the pending friendships with rejection status
+      await this.friendRepository.updateOrCreateFriendship(fromUser._id, fromUser.username, user1FriendData);
+      await this.friendRepository.updateOrCreateFriendship(toUser._id, toUser.username, user2FriendData);
     }
+
+    // Update the friend request status
+    const updatedRequest = await this.friendRepository.updateFriendRequest(requestId, {
+      status: accept ? 'accepted' : 'rejected',
+      respondedAt: new Date().toISOString()
+    });
+    return updatedRequest;
   }
 
   async addFriendship(user1, user2) {
-    
     try {
       // Add user2 to user1's friends
       const user1FriendData = {
@@ -157,7 +146,7 @@ class FriendService {
       
       return true;
     } catch (error) {
-      throw new Error(`Failed to add friendship: ${error.message}`);
+      throwError(`Failed to add friendship: ${error.message}`, 500);
     }
   }
 }

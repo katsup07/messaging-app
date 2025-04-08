@@ -7,19 +7,27 @@ const { setMessageRoutes } = require('./routes/messageRoutes');
 const { setAuthRoutes } = require('./routes/authRoutes');
 const { setFriendsRoutes } = require('./routes/friendsRoutes');
 const { setFriendRequestRoutes } = require('./routes/friendRequestRoutes');
+const { logger } = require('./middleware/logger');
+const { errorHandler } = require('./middleware/errorHandler');
 
 const port = process.env.PORT || 5000;
 const app = express();
 const server = http.createServer(app);
 const io = socketIoController.init(server)
 
+// Apply middleware
+app.use(logger); // Add logger middleware early
 app.use(cors());
 app.use(express.json());
 
+// Set up routes
 setMessageRoutes(app);
 setAuthRoutes(app);
 setFriendsRoutes(app);
 setFriendRequestRoutes(app);
+
+// Error handling middleware must be after routes
+app.use(errorHandler);
 
 io.on('connection', (socket) => {
   console.log('New client connected: ', socket.id);

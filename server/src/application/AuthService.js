@@ -22,7 +22,7 @@ class AuthService {
       const isTokenValid = decodedRefreshToken.tokenVersion === user.tokenVersion;
       if (!isTokenValid) return null;
 
-      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = this._generateTokens(user._id, user.tokenVersion);
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await this._generateTokens(user);
 
       return { newAccessToken, newRefreshToken };
     }catch(error){
@@ -44,7 +44,7 @@ class AuthService {
      
       return { isValid: true, userId: user._id, error: null };
     } catch (error) {
-      console.error('Token verification error:', 'message!!!!!!!!: ', error.message);
+      console.error('Token verification error: ', error.message);
       return { isValid: false, error: error.message };
     }
   }
@@ -87,7 +87,7 @@ class AuthService {
       if (!isPasswordValid)
         throw new Error('Invalid credentials');
   
-      const { accessToken, refreshToken } = this._generateTokens(user._id, user.tokenVersion);
+      const { accessToken, refreshToken } = await this._generateTokens(user);
 
       const { passwordHash, ...userWithoutPasswordHash } = user;
       return { user: userWithoutPasswordHash, accessToken, refreshToken };
@@ -96,15 +96,15 @@ class AuthService {
     }
   }
 
-  _generateTokens(userId, tokenVersion){
+ async _generateTokens(user){
     const accessToken = jwt.sign(
-      { id: userId, tokenVersion }, 
+      { id: user._id, tokenVersion: user.tokenVersion }, 
       JWT_SECRET, 
       { expiresIn: ACCESS_TOKEN_EXPIRATION 
       });
     
     const refreshToken = jwt.sign(
-      { id: userId, tokenVersion },
+      { id: user._id, tokenVersion: user.tokenVersion },
       REFRESH_TOKEN_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRATION }
     );
@@ -118,18 +118,21 @@ class AuthService {
       
       if (!user)
         throw new Error('User not found');
-      // Increment token version to invalidate all previous tokens
-      const newTokenVersion = (user.tokenVersion || 0) + 1;
-
-      await this.authRepository.updateUser(
-        { userId, 
-          updateFields: { tokenVersion: newTokenVersion } 
-        });
+     
+      this._invalidateToken(user);
 
       return true;
     } catch (error) {
       throw new Error(`Logout failed: ${error.message}`);
     }
+  }
+
+  _invalidateToken = async (user) => {
+    const newTokenVersion = (user.tokenVersion || 0) + 1;
+    await this.authRepository.updateUser(
+      { userId: user._id, 
+        updateFields: { tokenVersion: newTokenVersion } 
+      });
   }
 
   async getAllUsers() {
