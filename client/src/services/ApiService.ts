@@ -322,40 +322,7 @@ export default class ApiService {
     }
   }
   
-  // Fallback method using XMLHttpRequest instead of fetch
-  private authWithXHR(url: string, credentials: { email: string; password: string }): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', url, true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.setRequestHeader('Accept', 'application/json');
-      xhr.timeout = 30000; // 30 second timeout
-      xhr.withCredentials = true; // For CORS
-      
-      xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            resolve(data);
-          } catch (e) {
-            reject(new Error('Invalid JSON response'));
-          }
-        } else {
-          reject(new Error(`XHR error: ${xhr.status} ${xhr.statusText}`));
-        }
-      };
-      
-      xhr.onerror = function() {
-        reject(new Error('Network error occurred'));
-      };
-      
-      xhr.ontimeout = function() {
-        reject(new Error('Request timed out'));
-      };
-      
-      xhr.send(JSON.stringify(credentials));
-    });
-  }
+  
 
   async verifyToken(accessToken: string): Promise<TokenResult> {
     // No authorized request because verifyToken is called before token is set
