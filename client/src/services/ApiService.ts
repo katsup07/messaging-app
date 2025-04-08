@@ -5,11 +5,11 @@ import { handleApiError } from "./ErrorService";
 // TODO: Refactor this class into HTTPClient, AuthService, and MessageService classes
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default class ApiService {
-  private readonly _apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-  private readonly _baseFriendsUrl = `${this._apiBaseUrl}/friends`;
-  private readonly _baseMessageUrl = `${this._apiBaseUrl}/messages`;
-  private readonly _baseAuthUrl = `${this._apiBaseUrl}/auth`;
-  private readonly _baseFriendRequestUrl = `${this._apiBaseUrl}/friend-requests`;
+  private readonly _apiBaseUrl: string;
+  private readonly _baseFriendsUrl: string;
+  private readonly _baseMessageUrl: string;
+  private readonly _baseAuthUrl: string;
+  private readonly _baseFriendRequestUrl: string;
   private user: User;
   private selectedFriend: User | null = null;
   private accessToken: string | null = null;
@@ -25,6 +25,18 @@ export default class ApiService {
   private constructor(user?: User) {
     const anonymousUser = { _id: 0, username: 'anon-user', email: 'anon-user@email.com' };
     this.user = user || anonymousUser;
+    
+    const envApiUrl = typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_API_BASE_URL : undefined;
+    this._apiBaseUrl = envApiUrl || 'http://localhost:5000/api';
+    
+    // Force logging the URL to debug in production
+    console.log('API Base URL:', this._apiBaseUrl);
+    
+    // Initialize API endpoints
+    this._baseFriendsUrl = `${this._apiBaseUrl}/friends`;
+    this._baseMessageUrl = `${this._apiBaseUrl}/messages`;
+    this._baseAuthUrl = `${this._apiBaseUrl}/auth`;
+    this._baseFriendRequestUrl = `${this._apiBaseUrl}/friend-requests`;
     
     // Initialize tokens from localStorage
     this.accessToken = localStorage.getItem('accessToken');
