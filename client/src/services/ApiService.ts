@@ -228,47 +228,117 @@ export default class ApiService {
       
       // Log request information for debugging
       console.log(`Making auth request to: ${authUrl}`);
+      console.log(`Browser navigator.onLine: ${navigator.onLine}`);
       
       // Create a clean credentials object without isSignup flag
       const { isSignup, ...cleanCredentials } = credentials;
       
-      const response = await fetch(`${authUrl}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(cleanCredentials),
-        // Add these options to help with CORS
-        mode: 'cors',
-        credentials: 'include',
-      });
+      // Implement timeout for fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
-      // Log response status and headers
-      console.log(`Auth response status: ${response.status}`);
-      
-      if (!response.ok) {
-        // Try to get error information from response
-        try {
-          const errorData = await response.json();
-          console.error('Auth error response:', errorData);
-        } catch (e) {
-          console.error('Auth error but could not parse response:', response.statusText);
+      try {
+        const response = await fetch(`${authUrl}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify(cleanCredentials),
+          mode: 'cors',
+          credentials: 'include',
+          signal: controller.signal,
+          // Cache control to avoid caching issues
+          cache: 'no-cache',
+        });
+        
+        // Clear the timeout since we got a response
+        clearTimeout(timeoutId);
+        
+        // Log response status and headers
+        console.log(`Auth response status: ${response.status}`);
+        
+        if (!response.ok) {
+          // Try to get error information from response
+          try {
+            const errorData = await response.json();
+            console.error('Auth error response:', errorData);
+          } catch (e) {
+            console.error('Auth error but could not parse response:', response.statusText);
+          }
+          return null;
         }
-        return null;
-      }
 
-      const data = await response.json();
-      if (data.error) {
-        console.error('Auth error in response data:', data.error);
-        return null;
-      }
+        const data = await response.json();
+        if (data.error) {
+          console.error('Auth error in response data:', data.error);
+          return null;
+        }
 
-      return data;
+        return data;
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        
+        // More detailed logging for fetch errors
+        if (fetchError.name === 'AbortError') {
+          console.error('Auth request timed out after 15 seconds');
+        } else {
+          console.error('Fetch error details:', {
+            message: fetchError.message,
+            name: fetchError.name,
+            stack: fetchError.stack,
+            url: authUrl
+          });
+        }
+        
+        // Fall back to XMLHttpRequest as a last resort
+        if (navigator.onLine) {
+          console.log('Attempting fallback with XMLHttpRequest...');
+          return this.authWithXHR(authUrl, cleanCredentials);
+        }
+        
+        throw fetchError;
+      }
     } catch (error) {
       // Log any fetch errors (network issues, etc.)
       console.error('Auth request failed with error:', error);
       return null;
     }
+  }
+  
+  // Fallback method using XMLHttpRequest instead of fetch
+  private authWithXHR(url: string, credentials: { email: string; password: string }): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('Accept', 'application/json');
+      xhr.timeout = 30000; // 30 second timeout
+      xhr.withCredentials = true; // For CORS
+      
+      xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            resolve(data);
+          } catch (e) {
+            reject(new Error('Invalid JSON response'));
+          }
+        } else {
+          reject(new Error(`XHR error: ${xhr.status} ${xhr.statusText}`));
+        }
+      };
+      
+      xhr.onerror = function() {
+        reject(new Error('Network error occurred'));
+      };
+      
+      xhr.ontimeout = function() {
+        reject(new Error('Request timed out'));
+      };
+      
+      xhr.send(JSON.stringify(credentials));
+    });
   }
 
   async verifyToken(accessToken: string): Promise<TokenResult> {
