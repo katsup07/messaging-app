@@ -1,5 +1,6 @@
 import { User } from "../atoms/userAtom";
 import { TokenResult } from "../types/token";
+import { handleApiError } from "./ErrorService";
 
 // TODO: Refactor this class into HTTPClient, AuthService, and MessageService classes
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -58,20 +59,20 @@ export default class ApiService {
 
   setAccessToken(token: string | null) {
     this.accessToken = token;
-    if (token) {
+    if (token) 
       localStorage.setItem('accessToken', token);
-    } else {
+    else
       localStorage.removeItem('accessToken');
-    }
+    
   }
 
   setRefreshToken(token: string | null) {
     this.refreshToken = token;
-    if (token) {
+    if (token)
       localStorage.setItem('refreshToken', token);
-    } else {
+    else
       localStorage.removeItem('refreshToken');
-    }
+    
   }
 
   setUser(user: User) {
@@ -90,46 +91,40 @@ export default class ApiService {
   }
 
   private async authorizedRequest(url: string, options: RequestInit = {}): Promise<Response> {
-    if (!this.accessToken) {
+    if (!this.accessToken)
       throw new Error('No access token available');
-    }
+    
 
-    try {
-      // Attempt the request with current token
-      const response = await this.performRequest(url, options);
+    // Attempt the request with current token
+    const response = await this.performRequest(url, options);
+    
+    // If successful, return the response
+    if (response.ok) return response;
+    
+    
+    // Check if it's an auth error that needs token refresh
+    if (response.status === 401) {
+      const errorData = await response.json();
       
-      // If successful, return the response
-      if (response.ok) {
-        return response;
-      }
-      
-      // Check if it's an auth error that needs token refresh
-      if (response.status === 401) {
-        const errorData = await response.json();
-        
-        // Handle expired token
-        if (errorData.error === 'TokenExpired') {
-          // Get a new token and retry the request
-          const newToken = await this.handleTokenRefresh();
-          if (newToken) {
-            // Retry with the new token
-            return this.performRequest(url, options);
-          }
+      // Handle expired token
+      if (errorData.error === 'TokenExpired') {
+        // Get a new token and retry the request
+        const newToken = await this.handleTokenRefresh();
+        if (newToken) {
+          // Retry with the new token
+          return this.performRequest(url, options);
         }
       }
-      
-      // If we get here, either the token refresh failed or it was another error
-      return response;
-    } catch (error) {
-      console.error('Request error:', error);
-      throw error;
     }
+    
+    // If we get here, either the token refresh failed or it was another error
+    return handleApiError(response);
   }
 
   private async performRequest(url: string, options: RequestInit = {}): Promise<Response> {
-    if (!this.accessToken) {
+    if (!this.accessToken)
       throw new Error('No access token available');
-    }
+    
 
     const headers = {
       'Content-Type': 'application/json',
@@ -142,13 +137,13 @@ export default class ApiService {
 
   private async handleTokenRefresh(): Promise<string | null> {
     // If already refreshing, wait for that to complete
-    if (this.isRefreshing) {
+    if (this.isRefreshing) 
       return new Promise<string | null>((resolve) => {
         this.onRefreshed(token => {
           resolve(token);
         });
       });
-    }
+    
 
     this.isRefreshing = true;
     try {
@@ -177,219 +172,136 @@ export default class ApiService {
   }
 
   async onRefreshToken(): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
-    try {
-      if (!this.refreshToken) {
-        throw new Error('No refresh token available');
-      }
+    if (!this.refreshToken)
+      throw new Error('No refresh token available');
 
-      // Use fetch directly since we don't want to trigger another refresh
-      const response = await fetch(`${this._baseAuthUrl}/refresh-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ refreshToken: this.refreshToken })
-      });
+    // Use fetch directly since we don't want to trigger another refresh
+    const response = await fetch(`${this._baseAuthUrl}/refresh-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ refreshToken: this.refreshToken })
+    });
 
-      if (!response.ok) {
-        throw new Error('Failed to refresh token');
-      }
-
-      const result = await response.json();
-      return result;
-    } catch (error) {
-      console.error('Error refreshing token:', error);
+    if (!response.ok)
       return null;
-    }
+
+    return response.json();
   }
 
   async getMessages(): Promise<any> {
-    if (!this.selectedFriend) {
+    if (!this.selectedFriend)
       return [];
-    }
-    try {
-      const response = await this.authorizedRequest(`${this.baseMessageUrl}/${this.user._id}?friendId=${this.selectedFriend._id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch messages');
-      }
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-      throw error;
-    }
+    
+    
+    const response = await this.authorizedRequest(`${this.baseMessageUrl}/${this.user._id}?friendId=${this.selectedFriend._id}`);
+    await handleApiError(response);
+    return response.json();
   }
 
   async sendMessage(message: { sender: string; content: string }): Promise<any> {
-    try {
-      const response = await this.authorizedRequest(this.baseMessageUrl, {
-        method: 'POST',
-        body: JSON.stringify(message),
-      });
-      if (!response.ok)
-        throw new Error('Failed to send message');
-      
-      return response.json();
-    } catch (error) {
-      console.error('Error sending message:', error);
-      throw error;
-    }
+    const response = await this.authorizedRequest(this.baseMessageUrl, {
+      method: 'POST',
+      body: JSON.stringify(message),
+    });
+    await handleApiError(response);
+    return response.json();
   }
 
-  async auth(credentials: { email: string; password: string, isSignup: boolean }) {
+  async auth(credentials: { email: string; password: string, isSignup: boolean }): Promise<any> {
     const authUrl = this._baseAuthUrl + (credentials.isSignup ? '/signup' : '/login');
-    try {
-      const response = await fetch(`${authUrl}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
+    
+    const response = await fetch(`${authUrl}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
 
-      if (!response.ok)
-        return null;
+    if (!response.ok) return null;
 
-      const data = await response.json();
-      if (data.error)
-        return null;
+    const data = await response.json();
+    if (data.error) return null;
 
-      return data;
-    } catch (error) {
-      console.error('Error during login:', error);
-      return null;
-    }
+    return data;
   }
 
   async verifyToken(accessToken: string): Promise<TokenResult> {
-    try {
-      // No authorized request because verifyToken is called before token is set
-      const response = await fetch(`${this._baseAuthUrl}/verify-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-
-      if (!response.ok){
-        const data = await response.json();
-        return { isValid: false, error: new Error(data.error || 'Token verification failed') };
+    // No authorized request because verifyToken is called before token is set
+    const response = await fetch(`${this._baseAuthUrl}/verify-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
       }
+    });
 
-      const result = await response.json();
-        
-      return result;
-    } catch (error: any) {
-      console.error('Error verifying token:', error);
-      return { isValid: false, error: { message: error.message} };
+    if (!response.ok) {
+      const data = await response.json();
+      return { isValid: false, error: new Error(data.error || 'Token verification failed') };
     }
+
+    const result = await response.json();
+    return result;
   }
 
   async getFriends(): Promise<any> {
-    try {
-      const response = await this.authorizedRequest(`${this._baseFriendsUrl}/${this.user._id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch friends');
-      }
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching friends:', error);
-      throw error;
-    }
+    const response = await this.authorizedRequest(`${this._baseFriendsUrl}/${this.user._id}`);
+    await handleApiError(response);
+    return response.json();
   }
 
   async getUsers(): Promise<any> {
-    try {
-      const response = await this.authorizedRequest(`${this._baseAuthUrl}/users`);
-      if (!response.ok)
-        throw new Error('Failed to fetch users');
-
-      const users = await response.json();
-
-      return users;
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      throw error;
-    }
+    const response = await this.authorizedRequest(`${this._baseAuthUrl}/users`);
+    await handleApiError(response);
+    return response.json();
   }
 
   async getUserById(userId: number | string): Promise<any> {
-    try {
-      const response = await this.authorizedRequest(`${this._baseAuthUrl}/users/${userId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch user');
-      }
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching user:', error);
-      throw error;
-    }
+    const response = await this.authorizedRequest(`${this._baseAuthUrl}/users/${userId}`);
+    await handleApiError(response);
+    return response.json();
   }
 
   async logout(): Promise<void> {
-    try {
-      const response = await this.authorizedRequest(`${this._baseAuthUrl}/logout/${this.user._id}`, {
-        method: 'POST',
-        body: JSON.stringify({
-          userId: this.user._id,
-        }),
-      });
-
-      if (!response.ok)
-        throw new Error('Failed to logout');
-
-    } catch (error) {
-      console.error('Error during logout:', error);
-      throw error;
-    }
+    const response = await this.authorizedRequest(`${this._baseAuthUrl}/logout/${this.user._id}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        userId: this.user._id,
+      }),
+    });
+    
+    await handleApiError(response);
   }
 
   async getPendingFriendRequests(): Promise<any> {
-    try {
-      const response = await this.authorizedRequest(`${this._baseFriendRequestUrl}/pending/${this.user._id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch pending friend requests');
-      }
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching pending friend requests:', error);
-      throw error;
-    }
+    const response = await this.authorizedRequest(`${this._baseFriendRequestUrl}/pending/${this.user._id}`);
+    await handleApiError(response);
+    return response.json();
   }
 
   async sendFriendRequest(toUserId: number | string): Promise<any> {
-    try {
-      const response = await this.authorizedRequest(`${this._baseFriendRequestUrl}`, {
-        method: 'POST',
-        body: JSON.stringify({
-          fromUserId: this.user._id,
-          toUserId
-        }),
-      });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to send friend request');
-      }
-      return response.json();
-    } catch (error) {
-      console.error('Error sending friend request:', error);
-      throw error;
-    }
+    const response = await this.authorizedRequest(`${this._baseFriendRequestUrl}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        fromUserId: this.user._id,
+        toUserId
+      }),
+    });
+    
+    await handleApiError(response);
+    return response.json();
   }
 
   async respondToFriendRequest(requestId: string | number, accept: boolean): Promise<any> {
-    try {
-      const response = await this.authorizedRequest(`${this._baseFriendRequestUrl}/${requestId}/respond`, {
-        method: 'POST',
-        body: JSON.stringify({ accept }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to respond to friend request');
-      }
-      return response.json();
-    } catch (error) {
-      console.error('Error responding to friend request:', error);
-      throw error;
-    }
+    const response = await this.authorizedRequest(`${this._baseFriendRequestUrl}/${requestId}/respond`, {
+      method: 'POST',
+      body: JSON.stringify({ accept }),
+    });
+    
+    await handleApiError(response);
+    return response.json();
   }
 }

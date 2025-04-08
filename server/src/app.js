@@ -7,7 +7,7 @@ const { setMessageRoutes } = require('./routes/messageRoutes');
 const { setAuthRoutes } = require('./routes/authRoutes');
 const { setFriendsRoutes } = require('./routes/friendsRoutes');
 const { setFriendRequestRoutes } = require('./routes/friendRequestRoutes');
-const { logger } = require('./middleware/logger');
+const { logger, logInfo } = require('./middleware/logger');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const port = process.env.PORT || 5000;
@@ -30,17 +30,17 @@ setFriendRequestRoutes(app);
 app.use(errorHandler);
 
 io.on('connection', (socket) => {
-  console.log('New client connected: ', socket.id);
+  logInfo(`New client connected: ${socket.id}`);
   socket.on('disconnect', () => {
-    console.log('Client disconnected', socket.id);
+    logInfo(`Client disconnected: ${socket.id}`);
   });
 
   socket.on('register-user', (userId) => {
     socket.join(`user_${userId}`);
-    console.log(`user_${userId} registered for notifications`);
+    logInfo(`user_${userId} registered for notifications`);
   });
 });
 
 server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port} in ${process.env.NODE_ENV} mode`);
+  logInfo(`Server is running on http://localhost:${port} in ${process.env.NODE_ENV} mode`);
 });

@@ -1,6 +1,8 @@
+const { logError } = require('./logger');
+
 function errorHandler(err, req, res, next) {
   // Log the error with useful information for debugging
-  console.error(`[Error] ${err.status || err.statusCode || 500} - ${err.message || 'Unknown error'}`, {
+  logError(`${err.status || err.statusCode || 500} - ${err.message || 'Unknown error'}`, {
     stack: err.stack,
     path: req.path,
     method: req.method

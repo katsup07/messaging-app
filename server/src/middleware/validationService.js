@@ -1,9 +1,9 @@
 const { z } = require('zod');
+const { logInfo } = require('./logger');
 
 class ValidationService {
   constructor() {
     // Auth Schemas
-   
     this.loginAndSignupSchema = z.object({
       email: z.string().email('Invalid email format'),
       password: z.string()
@@ -51,7 +51,6 @@ class ValidationService {
   validate(data, schema) {
     try {
       const validatedData = schema.parse(data);
-      console.log('Validated data:', validatedData);
       return { success: true, data: validatedData };
     } catch (error) {
       const formattedErrors = error.errors.map(err => ({
@@ -81,8 +80,7 @@ class ValidationService {
           details: result.errors 
         });
       }
-      console.log('Request body:', req.body);
-      console.log('Validation result:', result);
+      logInfo(`Request body validation passed for ${req.path}`);
       // Add validated data to request
       req.validatedBody = result.data;
       next();
@@ -130,7 +128,6 @@ class ValidationService {
         });
       }
       
-      // Add validated data to request
       req.validatedQuery = result.data;
       next();
     };
@@ -151,8 +148,7 @@ class ValidationService {
           details: result.errors 
         });
       }
-      
-      // Add validated data to request
+
       req.validatedParams = result.data;
       next();
     };

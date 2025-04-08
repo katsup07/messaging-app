@@ -1,4 +1,5 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const { logInfo, logError } = require('./src/middleware/logger');
 
 const uri = process.env.MONGODB_URI;
 if (!uri) 
@@ -16,9 +17,9 @@ const client = new MongoClient(uri, {
 async function connect() {
   try {
     await client.connect();
-    console.log("Connected to MongoDB");
+    logInfo("Connected to MongoDB");
   } catch (error) {
-    console.error("MongoDB connection error:", error);
+    logError("MongoDB connection error:", error);
     throw error;
   }
 }

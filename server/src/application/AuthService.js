@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { logError } = require('../middleware/logger');
 
 const JWT_SECRET = process.env.JWT_SECRET
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
@@ -26,7 +27,7 @@ class AuthService {
 
       return { newAccessToken, newRefreshToken };
     }catch(error){
-      console.error('Token refresh error:', error);
+      logError('Token refresh error:', error);
       return null;
     }
   }
@@ -44,7 +45,7 @@ class AuthService {
      
       return { isValid: true, userId: user._id, error: null };
     } catch (error) {
-      console.error('Token verification error: ', error.message);
+      logError('Token verification error: ', error.message);
       return { isValid: false, error: error.message };
     }
   }

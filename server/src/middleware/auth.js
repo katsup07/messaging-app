@@ -1,4 +1,5 @@
 const { authService } = require('../diContainer');
+const { logError } = require('./logger');
 
 /**
  * Middleware to check if the user is authenticated
@@ -18,7 +19,7 @@ async function authenticate(req, res, next) {
     req.user = { userId: result.userId };
     next();
   } catch (err) {
-    console.error('Auth middleware error:', err);
+    logError('Auth middleware error:', err);
     if (err.message && err.message.includes('expired'))
       return res.status(401).json({ isValid: false, error: 'TokenExpired' });
     

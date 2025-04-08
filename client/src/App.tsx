@@ -8,6 +8,9 @@ import FriendsList, { Friend } from './components/FriendsList';
 import { useState } from 'react';
 import Header from './components/Header';
 import useAuth from './helpers/useAuth';
+import ErrorBoundary from './components/ErrorBoundary';
+import { ErrorProvider } from './services/ErrorService';
+import ErrorToast from './components/ErrorToast';
 
 // TODO: Update isLoggedIn to use the jwt token
 function App() {
@@ -21,27 +24,37 @@ function App() {
 
   if (!user)
     return (
-      <div className="app-container">
-        <Header isLoggedIn={isLoggedIn}/>
-        <Login />;
-      </div>
+      <ErrorBoundary>
+        <ErrorProvider>
+          <div className="app-container">
+            <Header isLoggedIn={isLoggedIn}/>
+            <Login />
+            <ErrorToast />
+          </div>
+        </ErrorProvider>
+      </ErrorBoundary>
     )
     
 
   return (
-    <div className="app-container">
-      <Header isLoggedIn={isLoggedIn} user={user}/>
-      <div className="main-content">
-        <div className="friends-container">
-          <FriendsList 
-            onSelectFriend={setSelectedFriend}
-            selectedFriend={selectedFriend}
-            user={user}
-          />
+    <ErrorBoundary>
+      <ErrorProvider>
+        <div className="app-container">
+          <Header isLoggedIn={isLoggedIn} user={user}/>
+          <div className="main-content">
+            <div className="friends-container">
+              <FriendsList 
+                onSelectFriend={setSelectedFriend}
+                selectedFriend={selectedFriend}
+                user={user}
+              />
+            </div>
+            <Chat selectedFriend={selectedFriend}/>
+          </div>
+          <ErrorToast />
         </div>
-        <Chat selectedFriend={selectedFriend}/>
-      </div>
-    </div>
+      </ErrorProvider>
+    </ErrorBoundary>
   )
 }
 

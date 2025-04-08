@@ -1235,3 +1235,62 @@ body {
   border-radius: 4px;
   font-size: 0.9rem;
 }
+
+/* Error Toast styles */
+.error-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 350px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid #ff4d4f;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+}
+
+.error-toast-content {
+  padding: 16px;
+  position: relative;
+}
+
+.error-toast h3 {
+  margin: 0 0 8px;
+  color: #ff4d4f;
+  font-size: 16px;
+}
+
+.error-toast p {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.error-toast .close-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+}
+
+.error-toast .close-button:hover {
+  color: #666;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
