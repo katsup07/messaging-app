@@ -223,22 +223,52 @@ export default class ApiService {
   }
 
   async auth(credentials: { email: string; password: string, isSignup: boolean }): Promise<any> {
-    const authUrl = this._baseAuthUrl + (credentials.isSignup ? '/signup' : '/login');
-    
-    const response = await fetch(`${authUrl}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
+    try {
+      const authUrl = this._baseAuthUrl + (credentials.isSignup ? '/signup' : '/login');
+      
+      // Log request information for debugging
+      console.log(`Making auth request to: ${authUrl}`);
+      
+      // Create a clean credentials object without isSignup flag
+      const { isSignup, ...cleanCredentials } = credentials;
+      
+      const response = await fetch(`${authUrl}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cleanCredentials),
+        // Add these options to help with CORS
+        mode: 'cors',
+        credentials: 'include',
+      });
+      
+      // Log response status and headers
+      console.log(`Auth response status: ${response.status}`);
+      
+      if (!response.ok) {
+        // Try to get error information from response
+        try {
+          const errorData = await response.json();
+          console.error('Auth error response:', errorData);
+        } catch (e) {
+          console.error('Auth error but could not parse response:', response.statusText);
+        }
+        return null;
+      }
 
-    if (!response.ok) return null;
+      const data = await response.json();
+      if (data.error) {
+        console.error('Auth error in response data:', data.error);
+        return null;
+      }
 
-    const data = await response.json();
-    if (data.error) return null;
-
-    return data;
+      return data;
+    } catch (error) {
+      // Log any fetch errors (network issues, etc.)
+      console.error('Auth request failed with error:', error);
+      return null;
+    }
   }
 
   async verifyToken(accessToken: string): Promise<TokenResult> {
