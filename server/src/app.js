@@ -13,28 +13,18 @@ const { errorHandler } = require('./middleware/errorHandler');
 const port = process.env.PORT || 5000;
 const app = express();
 const server = http.createServer(app);
-const io = socketIoController.init(server)
+const io = socketIoController.init(server);
 
-// Configure CORS for different environments
-const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.CLIENT_URL] 
-    : 'http://localhost:5173', // Vite's default dev port
-  credentials: true,
+// Simply allow all origins - simplest approach for fixing CORS
+app.use(cors({
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
-
-// app.use(cors({
-//   origin: ['https://messaging-app-client-ebon.vercel.app', 'http://localhost:5173'],
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   credentials: true
-// }));
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
 // Middleware
 app.use(logger); 
-app.use(cors(corsOptions));
 app.use(express.json());
 
 // Set up routes
