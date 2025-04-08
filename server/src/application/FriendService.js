@@ -23,25 +23,21 @@ class FriendService {
   }
 
   async sendFriendRequest(fromUserId, toUserId) {
-    // Validate users exist
     const fromUser = await this.authRepository.findById(fromUserId);
     const toUser = await this.authRepository.findById(toUserId);
     
     if (!fromUser || !toUser)
       throwError('One or both users not found', 404);
 
-    // Check if a pending request already exists
     const existingRequest = await this.friendRepository.findPendingRequest(fromUserId, toUserId);
 
     if (existingRequest)
       throwError('Friend request already sent', 400);
 
-    // Simplified friendship check using the new areFriends method
     const areFriends = await this.friendRepository.areFriends(fromUserId, toUserId);
     if (areFriends)
       throwError('Users are already friends or one party declined the request', 400);
 
-    // Create and insert new request
     const newRequest = {
       fromUserId,
       toUserId,
@@ -58,7 +54,7 @@ class FriendService {
       _id: user2._id,
       username: user2.username,
       email: user2.email,
-      isPending: true // Mark as pending
+      isPending: true 
     };
     await this.friendRepository.updateOrCreateFriendship(user1._id, user1.username, user1FriendData);
   }
@@ -75,7 +71,6 @@ class FriendService {
   }
 
   async respondToFriendRequest(requestId, accept) {
-    // Find the specific request
     const request = await this.friendRepository.findFriendRequestById(requestId);
     if (!request)
       throwError('Friend request not found', 404);
@@ -109,7 +104,7 @@ class FriendService {
         isPending: false,
         isRejected: true
       };
-      // Update the pending friendships with rejection status
+    
       await this.friendRepository.updateOrCreateFriendship(fromUser._id, fromUser.username, user1FriendData);
       await this.friendRepository.updateOrCreateFriendship(toUser._id, toUser.username, user2FriendData);
     }

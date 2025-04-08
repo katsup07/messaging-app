@@ -1,6 +1,5 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
-// Ensure the environment variable is set
 const uri = process.env.MONGODB_URI;
 if (!uri) 
   throw new Error("MONGODB_URI is not defined. Please set the environment variable.");

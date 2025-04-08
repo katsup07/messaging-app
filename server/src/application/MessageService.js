@@ -20,7 +20,7 @@ class MessageService {
     try {
       if (!this.isValidMessage(message))
         throw new Error('Invalid message format');
-      // Add timestamp if not present
+ 
       if (!message.time)
         message.time = new Date().toISOString();
 

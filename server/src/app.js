@@ -15,8 +15,8 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIoController.init(server)
 
-// Apply middleware
-app.use(logger); // Add logger middleware early
+// Middleware
+app.use(logger); 
 app.use(cors());
 app.use(express.json());
 
@@ -26,7 +26,7 @@ setAuthRoutes(app);
 setFriendsRoutes(app);
 setFriendRequestRoutes(app);
 
-// Error handling middleware must be after routes
+// Global error handler
 app.use(errorHandler);
 
 io.on('connection', (socket) => {

@@ -1,9 +1,11 @@
 function errorHandler(err, req, res, next) {
-  // Log the full error stack for debugging
-  console.error('Error occurred:', err);
+  // Log the error with useful information for debugging
+  console.error(`[Error] ${err.status || err.statusCode || 500} - ${err.message || 'Unknown error'}`, {
+    stack: err.stack,
+    path: req.path,
+    method: req.method
+  });
 
-  // Default to 500 (Internal Server Error) if no status is provided
-  // 400 is for Bad Request, which might not be appropriate for all errors
   const statusCode = err.status || err.statusCode || 500;
   const message = err.message || 'Something went wrong';
 
@@ -12,8 +14,6 @@ function errorHandler(err, req, res, next) {
     error: message,
     ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
   };
-
-  console.error(`Error: ${statusCode} - ${message}`);
   
   res.status(statusCode).json(response);
 };

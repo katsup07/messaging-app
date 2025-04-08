@@ -18,7 +18,7 @@ class FriendRepository {
 
   async getFriendRequests() {
     const friendRequestResults = await this.friendRequestsCollection.find({}).toArray();
-    return friendRequestResults ? friendRequestResults : []; // Return empty array if no results found
+    return friendRequestResults ? friendRequestResults : [];
   }
 
   async saveFriendRequests(friendRequests) {
@@ -39,7 +39,7 @@ class FriendRepository {
 
   async getFriends() {
     const friendResults = await this.friendsCollection.find({}).toArray();
-    return friendResults ? friendResults : []; // Return empty array if no results found
+    return friendResults ? friendResults : [];
   }
 
   async clearFriendsCollection() {
@@ -49,7 +49,7 @@ class FriendRepository {
 
   async _areAlreadyFriends(userId, friendId) {
     const retrievedFriend = await this.friendsCollection.findOne({ "user._id": new ObjectId(userId) });
-    if (!retrievedFriend) return false; // No friends found for the user
+    if (!retrievedFriend) return false;
   
     return retrievedFriend.friends.some(friend => friend._id.toString() === friendId.toString());
   }
@@ -82,11 +82,10 @@ class FriendRepository {
   async findFriendRequestById(requestId) {
     const result = await this.friendRequestsCollection.findOne({ _id: new ObjectId(requestId) });
 
-    return result ? result : null; // Return null if no results found
+    return result ? result : null; 
   }
 
   async updateOrCreateFriendship(userId, username, friendData) {
-    // First, check if the user document exists
     const userDoc = await this.friendsCollection.findOne({ "user._id": userId });
     if (!userDoc){
     // If user doesn't exist, create new document with initial friend
