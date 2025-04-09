@@ -16,7 +16,10 @@ const client = new MongoClient(uri, {
   maxPoolSize: 10,
   minPoolSize: 1,
   socketTimeoutMS: 30000,
-  connectTimeoutMS: 30000
+  connectTimeoutMS: 30000,
+   // Add TLS settings to fix SSL error in production
+   tls: true,
+   tlsInsecure: false,
 });
 
 let isConnected = false;
@@ -35,7 +38,7 @@ async function connect() {
   }
 }
 
-// Add a function to check and reconnect if needed
+///Check connection and reconnect if needed
 async function getDb() {
   if (!isConnected) {
     try {
