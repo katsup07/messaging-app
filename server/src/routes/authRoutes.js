@@ -15,7 +15,8 @@ function setAuthRoutes(app) {
 
   // Protected routes
   router.get('/users', authenticate, asyncHandler(AuthController.getUsers));
-  router.get('/user/:userId', authenticate, asyncHandler(AuthController.findUserById));
+  router.get('/users/:userId', authenticate, asyncHandler(AuthController.findUserById));
+  router.put('/users/:userId', authenticate, validationService.validateUserDetailsUpdate(), asyncHandler(AuthController.updateUserDetails));
   router.post('/logout/:userId', authenticate, asyncHandler(AuthController.logout));
 
   app.use('/api/auth', router);

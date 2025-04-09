@@ -65,4 +65,25 @@ async function refreshToken(req, res) {
   res.json(newTokens);
 }
 
-module.exports = { getUsers, login, signup, logout, verifyToken, findUserById, refreshToken };
+async function updateUserDetails(req, res) {
+  const { userId } = req.params;
+  const updateData = req.validatedBody || req.body;
+  
+  // Authorization check - ensure user can only update their own profile
+  if (req.user.userId.toString() !== userId.toString()) 
+    throwError('Unauthorized attempt to update another user', 403);
+  
+  const updatedUser = await authService.updateUserDetails(userId, updateData);
+  res.json(updatedUser);
+}
+
+module.exports = { 
+  getUsers, 
+  login, 
+  signup, 
+  logout, 
+  verifyToken, 
+  findUserById, 
+  refreshToken,
+  updateUserDetails
+};

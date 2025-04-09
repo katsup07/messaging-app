@@ -51,11 +51,7 @@ class AuthService {
   }
 
   async signup(email, password){
-    try {
-      const validation = this._validatePasswordStrength(password);
-      if(!validation.isValid)
-         throw new Error(validation.message);
-
+    try {    
       const existingUser = await this.authRepository.findByEmail(email);
       if (existingUser)
         throw new Error('Email already in use');
@@ -157,29 +153,38 @@ class AuthService {
     }
   }
 
-  // private helper
-  _validatePasswordStrength(password) {
-    // Minimum 8 characters
-    if (password.length < 8)
-      return { isValid: false, message: 'Password must be at least 8 characters' };
+  async updateUserDetails(userId, updateData) {
+    try {
+      // Check if user exists
+      const existingUser = await this.authRepository.findById(userId);
+      if (!existingUser) {
+        throw new Error('User not found');
+      }
 
-    // Require uppercase letters
-    if (!/[A-Z]/.test(password))
-      return { isValid: false, message: 'Password must contain at least one uppercase letter' };
+      // Check if email is taken by another user
+      if (updateData.email !== existingUser.email) {
+        const emailTaken = await this.authRepository.findByEmail(updateData.email);
+        if (emailTaken && emailTaken._id.toString() !== userId.toString()) {
+          throw new Error('Email is already in use by another account');
+        }
+      }
 
-    // Require lowercase letters
-    if (!/[a-z]/.test(password))
-      return { isValid: false, message: 'Password must contain at least one lowercase letter' };
+      // Prepare update fields (always update username and email)
+      const updateFields = {
+        username: updateData.username,
+        email: updateData.email
+      };
+      // Handle password update if provided
+      if (updateData.password) 
+        updateFields.passwordHash = await bcrypt.hash(updateData.password, this.saltRounds);
 
-    // Require numbers
-    if (!/[0-9]/.test(password))
-      return { isValid: false, message: 'Password must contain at least one number' };
-
-    // Require special characters
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password))
-      return { isValid: false, message: 'Password must contain at least one special character' };
-
-    return { isValid: true };
+      const updatedUser = await this.authRepository.updateUser({ userId, updateFields });
+      
+      const { passwordHash, ...userWithoutPasswordHash } = updatedUser;
+      return userWithoutPasswordHash;
+    } catch (error) {
+      throw new Error(`Update failed: ${error.message}`);
+    }
   }
 }
 

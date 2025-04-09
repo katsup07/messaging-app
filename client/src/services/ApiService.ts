@@ -260,10 +260,13 @@ export default class ApiService {
     return response.json();
   }
 
-  async getUserById(userId: number | string): Promise<any> {
-    const response = await this.authorizedRequest(`${this._baseAuthUrl}/users/${userId}`);
+  async updateUserDetails(userId: string, userData: { username: string, email: string }): Promise<User> {
+    const response = await this.authorizedRequest(`${this._baseAuthUrl}/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+    });
     await handleApiError(response);
-    return response.json();
+    return await response.json();
   }
 
   async logout(): Promise<void> {
