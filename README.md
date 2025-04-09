@@ -19,11 +19,11 @@ PORT,
 NODE_ENV.
 
 ## 🧰 Tech Stack
-- **Frontend**: React.js, TypeScript, Jotai (state management) 
+**Frontend**: React.js, TypeScript, Jotai (state management) 
   _(deployed on Vercel)_
-- **Backend**: Node.js, Express.js, Socket.IO, JavaScript, Zod (validation)  
+**Backend**: Node.js, Express.js, Socket.IO, JavaScript, Zod (validation)  
   _(deployed on Railway)_
-- **Database**: MongoDB
+**Database**: MongoDB
 
 ## 🎥 Video
 [Demo Video](https://youtu.be/mEsYUYDX8vM)
