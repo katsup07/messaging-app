@@ -7,16 +7,21 @@
 ### 🔧 Server
 `npm install`
 <br/>`npm start`
+## 🔐 Environment Variables(.env)
+### server
+- MONGODB_URI
+- JWT_SECRET
+- ACCESS_TOKEN_EXPIRATION
+- REFRESH_TOKEN_SECRET
+- REFRESH_TOKEN_EXPIRATION
+- PORT
+- NODE_ENV
+- CLIENT_URL
+### client
+- VITE_API_BASE_URL
 
-## 📝 Notes
-🛢️ A mongoDB database needs to be connected to use this project as is. An .env file in the server folder with the following keys is required:
-MONGODB_URI,
-JWT_SECRET,
-ACCESS_TOKEN_EXPIRATION,
-REFRESH_TOKEN_SECRET,
-REFRESH_TOKEN_EXPIRATION,
-PORT,
-NODE_ENV.
+## 📝 Note
+🛢️ A mongoDB database needs to be connected to use this project as is.
 
 ## 🧰 Tech Stack
 - **Frontend**: React.js, TypeScript, Jotai (state management) 
