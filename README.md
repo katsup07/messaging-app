@@ -9,7 +9,7 @@
 <br/>`npm start`
 
 ## 📝 Notes
-- 🛢️ A mongoDB database needs to be connected to use this project as is. An .env file in the server folder with the following keys is required:
+🛢️ A mongoDB database needs to be connected to use this project as is. An .env file in the server folder with the following keys is required:
 MONGODB_URI,
 JWT_SECRET,
 ACCESS_TOKEN_EXPIRATION,
