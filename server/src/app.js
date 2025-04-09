@@ -3,11 +3,12 @@ const { socketIoController } = require('./socketio');
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
+const { connect } = require('../mongoDBclient');
 const { setMessageRoutes } = require('./routes/messageRoutes');
 const { setAuthRoutes } = require('./routes/authRoutes');
 const { setFriendsRoutes } = require('./routes/friendsRoutes');
 const { setFriendRequestRoutes } = require('./routes/friendRequestRoutes');
-const { logger, logInfo } = require('./middleware/logger');
+const { logger, logInfo, logError } = require('./middleware/logger');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const port = process.env.PORT || 5000;
@@ -29,6 +30,16 @@ const corsOptions = {
 //   allowedHeaders: ['Content-Type', 'Authorization'],
 //   credentials: true
 // }));
+
+// Initialize MongoDB connection
+async function initMongoDB() {
+  try {
+    await connect();
+    logInfo('MongoDB connected successfully');
+  } catch (err) {
+    logError('MongoDB connection error:', err);
+  }
+}
 
 // Middleware
 app.use(logger); 
@@ -56,6 +67,11 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(port, () => {
-  logInfo(`Server is running on http://localhost:${port} in ${process.env.NODE_ENV} mode`);
+// Initialize MongoDB before starting server
+initMongoDB().then(() => {
+  server.listen(port, () => {
+    logInfo(`Server is running on http://localhost:${port} in ${process.env.NODE_ENV} mode`);
+  });
+}).catch(err => {
+  logError('Failed to initialize server:', err);
 });

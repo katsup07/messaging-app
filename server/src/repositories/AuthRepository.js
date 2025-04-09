@@ -1,34 +1,45 @@
-const { client } = require('../../mongoDBclient');
+const { getDb } = require('../../mongoDBclient');
 const { ObjectId } = require('mongodb');
 
 class AuthRepository {
   constructor() {
-    this.userCollection = client.db("messenger-app").collection("users");
+    this.dbName = "messenger-app";
+    this.collectionName = "users";
+  }
+
+  async getUsersCollection() {
+    const client = await getDb();
+    return client.db(this.dbName).collection(this.collectionName);
   }
 
   async getUsers() {
-    const userResults = await this.userCollection.find({}).toArray();
+    const usersCollection = await this.getUsersCollection();
+    const userResults = await usersCollection.find({}).toArray();
     return userResults ? userResults : [];
   }
 
   async saveUser(user) {
-    const result = await this.userCollection.insertOne(user);
+    const usersCollection = await this.getUsersCollection();
+    const result = await usersCollection.insertOne(user);
     return result.insertedId ? this.findById(result.insertedId) : null;
   }
 
   async updateUser({userId, updateFields}) {
+    const usersCollection = await this.getUsersCollection();
     const objectUserId = new ObjectId(userId);
-    await this.userCollection.updateOne({ _id: objectUserId }, { $set: updateFields });
-    return await this.userCollection.findOne({ _id: objectUserId });
+    await usersCollection.updateOne({ _id: objectUserId }, { $set: updateFields });
+    return await usersCollection.findOne({ _id: objectUserId });
   }
 
   async findById(id) {
-    const user = await this.userCollection.findOne({ _id: new ObjectId(id) });
+    const usersCollection = await this.getUsersCollection();
+    const user = await usersCollection.findOne({ _id: new ObjectId(id) });
     return user;
   }
 
   async findByEmail(email) {
-    return await this.userCollection.findOne({ email });
+    const usersCollection = await this.getUsersCollection();
+    return await usersCollection.findOne({ email });
   }
 }
 

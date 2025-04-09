@@ -1,4 +1,4 @@
-const { client } = require('../../mongoDBclient');
+const { getDb } = require('../../mongoDBclient');
 
 const messageFields = {
   senderId: 1, 
@@ -14,22 +14,31 @@ const messageFields = {
   };
 class MessageRepository {
   constructor() {
-    this.collection = client.db("messenger-app").collection("messages");
+    this.dbName = "messenger-app";
+    this.collectionName = "messages";
+  }
+
+  async getMessageCollection() {
+    const client = await getDb();
+    return client.db(this.dbName).collection(this.collectionName);
   }
 
   async getMessages() {
-    return await this.collection.find({}).toArray();
+    const messagesCollection = await this.getMessageCollection();
+    return await messagesCollection.find({}).toArray();
   }
 
   async saveMessage(message) {
-    const result = await this.collection.insertOne(message);
+    const messagesCollection = await this.getMessageCollection();
+    const result = await messagesCollection.insertOne(message);
     // saved message
     return this.findById(result.insertedId);
     
   }
 
   async findById(id) {
-    return await this.collection.findOne({ _id: id }, { projection: messageFields });
+    const messagesCollection = await this.getMessageCollection();
+    return await messagesCollection.findOne({ _id: id }, { projection: messageFields });
   }
 }
 
