@@ -1,14 +1,15 @@
-### Installation and Development
-// Client
-<br/>`npm install`
+## 🚀 Installation and Development
+
+### 🖥️ Client
+`npm install`
 <br/>`npm run dev`
 
-// Server
-<br/>`npm install`
+### 🔧 Server
+`npm install`
 <br/>`npm start`
 
-### Notes
-- A mongoDB database needs to be connected to use this project as is. An .env file in the server folder with the following keys is required:
+## 📝 Notes
+- 🛢️ A mongoDB database needs to be connected to use this project as is. An .env file in the server folder with the following keys is required:
 MONGODB_URI,
 JWT_SECRET,
 ACCESS_TOKEN_EXPIRATION,
@@ -16,7 +17,6 @@ REFRESH_TOKEN_SECRET,
 REFRESH_TOKEN_EXPIRATION,
 PORT,
 NODE_ENV.
-- [Demo Video](https://youtu.be/mEsYUYDX8vM)
 
 ## 🧰 Tech Stack
 - **Frontend**: React.js, TypeScript, Jotai (state management) 
@@ -24,7 +24,11 @@ NODE_ENV.
 - **Backend**: Node.js, Express.js, Socket.IO, JavaScript, Zod (validation)  
   _(deployed on Railway)_
 - **Database**: MongoDB
-  
+
+## 🎥 Video
+[Demo Video](https://youtu.be/mEsYUYDX8vM)
+
+## 🖼️ Images  
 ### Friends List and Chat
 ![Vite-React-TS-02-16-2025_07_04_PM](https://github.com/user-attachments/assets/cf701d83-cea5-4475-a957-8f7521141339)
 ### Invite Friends
@@ -34,7 +38,7 @@ NODE_ENV.
 ### Light Theme
 ![light-theme](https://github.com/user-attachments/assets/bf5602fb-b747-4452-9ce5-7b8dafeb8fa7)
 
-### Details
+### 📋 Details
 Frontend (React + TypeScript)
 - Built with React, TypeScript, and Vite
 - Uses Jotai for state management (a more modern alternative to Redux)
