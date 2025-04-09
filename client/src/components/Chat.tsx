@@ -7,6 +7,7 @@ import ApiService from '../services/ApiService';
 import Message from './Message';
 import React from 'react';
 import { Friend } from './FriendsList';
+import useScrollToBottom from '../helpers/useScrollToBottom';
 
 interface Message {
   senderId: number;
@@ -30,6 +31,8 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   const user = useAtomValue(userAtom);
 
   const apiService = ApiService.getInstance(user);
+  
+  useScrollToBottom(messagesContainerRef, [messages, selectedFriend]);
 
   useEffect(() => {
     if (user) socket.emit('register-user', user._id);

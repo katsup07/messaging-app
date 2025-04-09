@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { User } from '../atoms/userAtom';
-import { useAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
 import { validatePassword } from '../helpers/validation-utils';
@@ -11,7 +11,7 @@ interface Props {
 }
 
 const UserSettings: React.FC<Props> = ({ user, onClose }) => {
-  const [, setUser] = useAtom(userAtom);
+  const setUser = useSetAtom(userAtom);
   const [formData, setFormData] = useState({
     username: user.username,
     email: user.email,
@@ -71,7 +71,11 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
       };
       
       const updatedUser = await apiService.updateUserDetails(user._id.toString(), updateData);
+      // global state
       setUser(updatedUser);
+      // local storage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
       setUpdateSuccess(true);
       
       // Clear password fields
@@ -102,7 +106,7 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
       onClose();
     }
   };
-
+  console.log('UserSettings component rendered with user:', user);
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
       <div className="modal-content settings-modal">

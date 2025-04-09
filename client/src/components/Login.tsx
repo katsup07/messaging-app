@@ -43,11 +43,10 @@ const Login: React.FC = () => {
       alert('Invalid email or password');
       return;
     }
-
-    // Store tokens in ApiService
+    // api
     apiService.setAccessToken(response.accessToken);
     apiService.setRefreshToken(response.refreshToken);
-    
+    // session
     localStorage.setItem('accessToken', response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);
 

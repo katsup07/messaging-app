@@ -266,7 +266,9 @@ export default class ApiService {
       body: JSON.stringify(userData),
     });
     await handleApiError(response);
-    return await response.json();
+    const updatedUser = await response.json();
+    console.log('Updated user:', updatedUser);
+    return updatedUser;
   }
 
   async logout(): Promise<void> {
