@@ -20,6 +20,10 @@ const client = new MongoClient(uri, {
    // Add TLS settings to fix SSL error in production
    tls: true,
    tlsInsecure: false,
+   // Network Timeout options to reduce vulnerability to slow attacks
+  serverSelectionTimeoutMS: 5000,
+  // Faster timeout on failed connections
+  connectTimeoutMS: 10000
 });
 
 let isConnected = false;
