@@ -19,10 +19,11 @@ NODE_ENV.
 - [Demo Video](https://youtu.be/mEsYUYDX8vM)
 
 ## 🧰 Tech Stack
-- Frontend: React.js
-- Backend: Express.js, Node.js
-- Database: MongoDB
-- Deployment: Vercel (frontend), Railway (backend)
+- **Frontend**: React.js, TypeScript, Jotai (state management) 
+  _(deployed on Vercel)_
+- **Backend**: Node.js, Express.js, Socket.IO, JavaScript, Zod (validation)  
+  _(deployed on Railway)_
+- **Database**: MongoDB
   
 ### Friends List and Chat
 ![Vite-React-TS-02-16-2025_07_04_PM](https://github.com/user-attachments/assets/cf701d83-cea5-4475-a957-8f7521141339)
