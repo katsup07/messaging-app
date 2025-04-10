@@ -38,6 +38,8 @@
 ![Vite-React-TS-02-16-2025_07_04_PM](https://github.com/user-attachments/assets/cf701d83-cea5-4475-a957-8f7521141339)
 ### Invite Friends
 ![Vite-React-TS-02-16-2025_07_09_PM](https://github.com/user-attachments/assets/be4d376b-47c1-4eae-a6f8-a93b388d7971)
+### User Settings
+![settings](https://github.com/user-attachments/assets/9c263353-3fb6-4fe3-9830-c72c9a45e15c)
 ### Login Screen
 ![new-signup-screen](https://github.com/user-attachments/assets/0e0b44ca-c163-4580-bf0e-ef02276a6b65)
 ### Light Theme
