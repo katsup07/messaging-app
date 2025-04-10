@@ -1579,6 +1579,43 @@ body {
 }
 
 /* Mobile Responsiveness for Settings Modal */
+@media (max-width: 768px) {
+  .settings-modal {
+    width: 95%;
+  }
+  
+  .modal-header {
+    padding: 12px 16px;
+  }
+  
+  .settings-modal form {
+    padding: 16px;
+  }
+  
+  .button {
+    padding: 8px 12px;
+  }
+  
+  .mobile-settings {
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  
+  .mobile-settings form {
+    padding-bottom: 24px; /* Add extra padding at the bottom for better scrolling experience */
+  }
+}
+
+/* Small screen adjustments */
+@media (max-width: 480px) {
+  .mobile-settings {
+    max-height: 80vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+  }
+}
+
+/* Mobile Responsiveness for Settings Modal */
 @media (max-width: 480px) {
   .settings-modal {
     width: 95%;

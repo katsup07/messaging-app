@@ -4,6 +4,7 @@ import { useSetAtom } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
 import { validatePassword } from '../helpers/validation-utils';
+import { useIsMobile } from '../helpers/useIsMobile';
 
 interface Props {
   user: User;
@@ -12,6 +13,7 @@ interface Props {
 
 const UserSettings: React.FC<Props> = ({ user, onClose }) => {
   const setUser = useSetAtom(userAtom);
+  const { isMobile } = useIsMobile();
   const [formData, setFormData] = useState({
     username: user.username,
     email: user.email,
@@ -106,10 +108,10 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
       onClose();
     }
   };
-  console.log('UserSettings component rendered with user:', user);
+
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div className="modal-content settings-modal">
+      <div className={`modal-content settings-modal ${isMobile ? 'mobile-settings' : ''}`}>
         <div className="modal-header">
           <h2>User Settings</h2>
           <button className="close-button" onClick={onClose}>×</button>
