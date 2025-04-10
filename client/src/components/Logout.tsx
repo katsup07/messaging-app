@@ -25,6 +25,12 @@ const Logout: React.FC<Props> = ({ user }: Props) => {
     setShowModal(false);
   };
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setShowModal(false);
+    }
+  };
+
   if(!user) 
     return null;
 
@@ -36,7 +42,7 @@ const Logout: React.FC<Props> = ({ user }: Props) => {
       </button>
 
       {showModal && (
-        <div className="modal-overlay">
+        <div className="modal-overlay" onClick={(e) => handleBackdropClick(e)}>
           <div className="modal-content">
             <h3>Confirm Logout</h3>
             <p>Are you sure you want to logout?</p>
