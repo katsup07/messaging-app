@@ -429,7 +429,7 @@
 }
 @media (max-width: 400px) {
   .modal-content{
-    overflow: scroll;
+    overflow: auto;
   }
 }
 
@@ -439,7 +439,7 @@
     flex-direction: column;
     padding: 0;
     gap: 0;
-    overflow: scroll;
+    overflow: scroll; /* Changed from scroll to hidden */
   }
 
   .friends-container {
@@ -452,13 +452,22 @@
   }
 
   .chat-container {
-    height: 65%;
+    flex: 1;
+    min-height: 65%; /* Use min-height instead of fixed height */
     border-radius: 0;
     border-left: none;
     border-right: none;
-    border-bottom: none;    
+    border-bottom: none;
+    display: flex;
+    flex-direction: column;
   }
-
+  
+  .messages-container {
+    flex: 1;
+    overflow-y: auto; /* Ensure messages are scrollable */
+    max-height: 100%;
+  }
+  
   .app-title span {
     display: none;
   }

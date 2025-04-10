@@ -18,8 +18,7 @@ const Header: React.FC<Props> = ({ isLoggedIn, isMobile, user }: Props) => {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
-  
-  console.log('isMobile in header: ', isMobile);
+
   return (  
     <div className="app-header">
       <h1 className="app-title">
