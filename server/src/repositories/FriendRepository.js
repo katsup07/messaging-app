@@ -110,9 +110,9 @@ class FriendRepository {
   async updateOrCreateFriendship(userId, username, friendData) {
     const friendsCollection = await this.getFriendsCollection();
     const userDoc = await friendsCollection.findOne({ "user._id": userId });
+        // If user doesn't exist, create new document with initial friend
     if (!userDoc){
-    // If user doesn't exist, create new document with initial friend
-    await collection.insertOne({
+    await friendsCollection.insertOne({
       user: { _id: userId, username },
       friends: [friendData]
     });
