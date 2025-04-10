@@ -426,6 +426,11 @@
 .send-button:active {
   transform: scale(0.98);
 }
+@media (max-width: 400px) {
+  .modal-content{
+    overflow: scroll;
+  }
+}
 
 /* Mobile Styles */
 @media (max-width: 768px) {
@@ -449,7 +454,7 @@
     border-radius: 0;
     border-left: none;
     border-right: none;
-    border-bottom: none;
+    border-bottom: none;    
   }
 
   .app-title span {
@@ -523,8 +528,14 @@
     height: 40%;
   }
 
+  
   .chat-container {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
     height: 60%;
+    width: 90% !important;
+    border: 1px none none none;
   }
 
   .app-header {
@@ -555,6 +566,7 @@
   .messages-container {
     padding: 0.75rem;
     gap: 0.5rem;
+    
   }
 
   .message {
@@ -675,6 +687,7 @@
 /* Add smooth scrolling for messages container */
 .messages-container {
   scroll-behavior: smooth;
+  /* width: 80%; */
 }
 
 /* Improve message layout */

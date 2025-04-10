@@ -39,9 +39,9 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [targetUser, setTargetUser] = useState<Friend | null>(null);
   const [users, setUsers] = useState<{[key: number | string]: Friend}>({});
+  const apiService = ApiService.getInstance(user);
 
   const fetchFriends = useCallback(async () => {
-    const apiService = ApiService.getInstance(user);
     const friendsData = await apiService.getFriends();
     const usersData = await apiService.getUsers();
     
@@ -68,7 +68,6 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const fetchPendingRequests = useCallback(async () => {
     if (!user) return;
     try {
-      const apiService = ApiService.getInstance(user);
       const results= await apiService.getPendingFriendRequests();
       setPendingRequests(results);
     } catch (error) {
@@ -100,14 +99,13 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     fetchPendingRequests();
   }, [fetchFriends, fetchPendingRequests]); 
   
-  const handleClick = (friend: Friend) => {
+  const handleFriendSelect = async(friend: Friend) => {
     onSelectFriend(friend);
   };
 
   const validateAndConfirmRequest = async () => {
     try {
       setError(null);
-      
       // Check if trying to add self
       if (newFriendId === user._id) {
         setError("You cannot send a friend request to yourself");
@@ -115,7 +113,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       }
 
       // TODO: simplify this logic in API Service and backend
-      const apiService = ApiService.getInstance(user);
+      
       const users = await apiService.getUsers();
       const targetUser = users.find((u: Friend) => u._id === newFriendId);
       if (!targetUser) {
@@ -133,7 +131,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const handleSendFriendRequest = async () => {
     try {
       setError(null);
-      const apiService = ApiService.getInstance(user);
+      
       await apiService.sendFriendRequest(newFriendId);
       setNewFriendId('');
       setShowAddFriend(false);
@@ -151,7 +149,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const handleRespondToRequest = async (requestId: string | number, accept: boolean) => {
     try {
       setError(null);
-      const apiService = ApiService.getInstance(user);
+      
       await apiService.respondToFriendRequest(requestId, accept);
       
       // Refresh data after responding to request
@@ -253,7 +251,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
           <div
             key={friend._id}
             className={`friend-item ${selectedFriend?._id === friend._id && !friend.isPending ? 'active' : ''} ${onlineStatus[friend._id] ? 'online' : ''} ${friend.isPending ? 'pending-requests' : ''}`}
-            onClick={() => handleClick(friend)}
+            onClick={() => handleFriendSelect(friend)}
           >
             {friend.username}<span className="pending-text">{friend.isPending ? '(Pending)' : ''}</span>
           </div>

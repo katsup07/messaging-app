@@ -23,6 +23,7 @@ interface Props {
 }
 
 const Chat: React.FC<Props> = ({ selectedFriend }) => {
+  const [hasFriends, setHasFriends] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +35,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   
   useScrollToBottom(messagesContainerRef, [messages, selectedFriend]);
 
+  // Socket initialization
   useEffect(() => {
     if (user) socket.emit('register-user', user._id);
 
@@ -45,6 +47,11 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
       socket.off('receive-message');
     };
   }, [user]);
+
+  const hasAFriend = useCallback(async() => {
+    const friendsData = await apiService.getFriends();
+    setHasFriends(friendsData.length > 0);
+  }, [apiService])
 
   // Fetch messages function
   const fetchMessages = useCallback(async () => {
@@ -63,18 +70,20 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
     }
   }, [apiService, selectedFriend, user]);
 
-  // Set up when friend is selected
+  // Initialization of state
   useEffect(() => {
     if (selectedFriend && user) {
       apiService.setSelectedFriend(selectedFriend);
+    
+    hasAFriend();
 
-      // Initial fetch
-      fetchMessages();
+    // Initial fetch
+    fetchMessages();
     } else {
       setMessages([]);
       setError(null);
     }
-  }, [apiService, selectedFriend, user, fetchMessages]);
+  }, [apiService, selectedFriend, user, fetchMessages, hasAFriend]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedFriend || !user) return;
@@ -134,7 +143,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
         )}
       </div>
       <div className="message-input-container">
-        <textarea
+         {hasFriends && <textarea
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type your message"
@@ -147,14 +156,14 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
             }
           }}
           rows={1}
-        />
-        <button
+        />}
+        {hasFriends && <button
           onClick={handleSendMessage}
           className="send-button"
           disabled={isLoading || !newMessage.trim()}
         >
           Send
-        </button>
+        </button>}
       </div>
     </div>
   );
