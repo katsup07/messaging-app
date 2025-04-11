@@ -186,14 +186,18 @@
   padding: 0.4rem !important;
 }
 
-.friends-header h3 {
-  margin: 0;
-  font-size: 1.15rem;
-  color: white;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  display: flex;
-  align-items: center;
+/* Mobile styles - make header scrollable instead of sticky */
+@media (max-width: 768px) {
+  .friends-header {
+    position: relative;
+    top: auto;
+    border-radius: 0;
+  }
+  
+  .friends-container {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+  }
 }
 
 .friends-header-controls {
