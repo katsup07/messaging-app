@@ -27,6 +27,10 @@ function App() {
       setShowFriendsModal(prev => !prev);
   };
 
+  const toggleFriendsListModal = () => {
+    setShowFriendsModal(prev => !prev);
+  }
+
   if(isLoading)
     return <div className="loading">Loading...</div>;
 
@@ -56,6 +60,7 @@ if(!mobileData.isMobile)
                 onSelectFriend={setSelectedFriend}
                 selectedFriend={selectedFriend}
                 user={user}
+                isMobile={mobileData.isMobile}
               />
             </div>
             <Chat selectedFriend={selectedFriend}/>
@@ -71,19 +76,13 @@ if(!mobileData.isMobile)
     <ErrorBoundary>
       <ErrorProvider>
         <div className="app-container">
-          <Header isLoggedIn={isLoggedIn} user={user} mobileData={mobileData} setShowFriendsModal={setShowFriendsModal} />
+          <Header isLoggedIn={isLoggedIn} user={user} mobileData={mobileData} setShowFriendsModal={setShowFriendsModal} selectedFriend={selectedFriend}/>
           <div className="main-content">
             <Chat selectedFriend={selectedFriend}/>
             
             {showFriendsModal && (
               <div className="modal-overlay" onClick={(e) => handleBackdropClick(e)}>
                 <div className="modal-content friends-modal">
-                  <button 
-                    className="close-modal-button"
-                    onClick={() => setShowFriendsModal(prev => !prev)}
-                  >
-                    Close
-                  </button>
                   <FriendsList 
                     onSelectFriend={(friend) => {
                       setSelectedFriend(friend);
@@ -91,6 +90,8 @@ if(!mobileData.isMobile)
                     }}
                     selectedFriend={selectedFriend}
                     user={user}
+                    isMobile={mobileData.isMobile}
+                    toggleFriendsListModal={toggleFriendsListModal}
                   />
                 </div>
               </div>

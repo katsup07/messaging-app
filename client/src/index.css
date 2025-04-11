@@ -12,8 +12,8 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --focus-purple: #4a5083a2; /* Updated to match the app's purple theme */
-  --border-purple: #3c4167;
+  --focus-purple: #3e4edf1f; /* Updated to match the app's purple theme */
+  --border-purple: #3e4edf40;
 }
 
 a {

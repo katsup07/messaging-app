@@ -27,9 +27,11 @@ interface FriendsListProps {
   onSelectFriend: (friend: Friend) => void;
   selectedFriend: Friend | null;
   user: User;
+  isMobile: boolean;
+  toggleFriendsListModal?: () => void;
 }
 
-const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFriend, user }) => {
+const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFriend, user, isMobile, toggleFriendsListModal }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [onlineStatus, setOnlineStatus] = useState<{[key: number | string]: boolean}>({});
   const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);
@@ -60,10 +62,10 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     setUsers(usersMap);
     setFriends(friendsData);
 
-    if (friendsData.length > 0 && !selectedFriend) {
+    if (friendsData.length > 0 && !selectedFriend && !isMobile) {
       onSelectFriend(friendsData[0]);
     }
-  },[apiService, onSelectFriend, selectedFriend]);
+  },[apiService, onSelectFriend, selectedFriend, isMobile]);
 
   const fetchPendingRequests = useCallback(async () => {
     if (!user) return;
@@ -113,7 +115,6 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       }
 
       // TODO: simplify this logic in API Service and backend
-      
       const users = await apiService.getUsers();
       const targetUser = users.find((u: Friend) => u._id === newFriendId);
       if (!targetUser) {
@@ -164,14 +165,25 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     <div className="friends-list">
       <div className="friends-header">
         <h3>{user.username}'s Friends</h3>
-        <button 
-          className="icon-button"
-          onClick={() => setShowAddFriend(!showAddFriend)}
-          aria-label="Add friend"
-        >
-          <MdPersonAdd size={24} />
-          <span className="tooltip">Add friend</span>
-        </button>
+        <div className="friends-header-controls">
+          <button 
+            className="icon-button"
+            onClick={() => setShowAddFriend(!showAddFriend)}
+            aria-label="Add friend"
+          >
+            <MdPersonAdd size={24} />
+            <span className="tooltip">Add friend</span>
+          </button>
+          {isMobile && toggleFriendsListModal && (
+            <button 
+              className="close-button"
+              onClick={toggleFriendsListModal}
+              aria-label="Close friends list"
+            >
+              ×
+            </button>
+          )}
+        </div>
       </div>
 
       {showAddFriend && (

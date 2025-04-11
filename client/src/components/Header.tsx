@@ -5,15 +5,17 @@ import UserSettings from './UserSettings';
 import MessengerIcon from './icons/MessengerIcon';
 import LogoutIcon from './icons/LogoutIcon';
 import ThemeToggleSwitchIcon from './icons/ThemeToggleSwitchIcon';
+import { Friend } from './FriendsList';
 
 interface Props {
   isLoggedIn: boolean;
   mobileData: { isMobile: boolean, isPortrait: boolean };
+  selectedFriend?: Friend | null;
   setShowFriendsModal: (show: React.SetStateAction<boolean>) => void;
   user?: User;
 }
 
-const Header: React.FC<Props> = ({ isLoggedIn, mobileData: {isMobile, isPortrait}, user, setShowFriendsModal }: Props) => {
+const Header: React.FC<Props> = ({ isLoggedIn, mobileData: {isMobile, isPortrait}, selectedFriend, user, setShowFriendsModal }: Props) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
@@ -46,7 +48,7 @@ const Header: React.FC<Props> = ({ isLoggedIn, mobileData: {isMobile, isPortrait
               className="friends-toggle-button"
               onClick={toggleFriendsModal}
             >
-              Friends
+              { selectedFriend ? selectedFriend.username : 'Friends'}
             </button>}
         <button 
           className="icon-button theme-switch"

@@ -172,38 +172,62 @@
 
 .friends-header {
   display: flex;
-  justify-content: flex-start;
-  align-items: stretch;
-  margin-bottom: 1.25rem;
-  padding: 0.5rem 0.5rem;
-  background-color: var(--subtle-bg);
-  border-radius: 7px 7px 0 0;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(to right, var(--primary-color), var(--focus-purple));
+  color: white;
+  border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  padding: 0.4rem !important;
 }
 
 .friends-header h3 {
   margin: 0;
-  font-size: 1.25rem;
-  color: var(--text-primary);
+  font-size: 1.15rem;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   display: flex;
   align-items: center;
-  margin-right: 0.5rem;
+}
+
+.friends-header-controls {
+  display: flex;
+  align-items: start;
+  gap: 0.5rem;
 }
 
 .friends-header .icon-button {
-  color: var(--focus-purple);
+  color: white;
+  background-color: rgba(255, 255, 255, 0.15);
   padding: 8px;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
   position: relative;
 }
 
-.friends-header .icon-button:hover {
-  background-color: var(--input-bg);
-  transform: translateY(-1px);
+.friends-header .close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+  padding: 0 0 0 8px;
+  line-height: 1;
+  margin-left: 4px;
+  opacity: 0.9;
+  transition: all 0.2s ease;
 }
 
-.friends-header .icon-button .tooltip {
-  display: none;
+.friends-header .close-button:hover {
+  color: white;
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .friends-list-items {
