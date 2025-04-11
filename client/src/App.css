@@ -331,10 +331,6 @@
   border-radius: 8px 8px 0 0;
 }
 
-.no-messages{
-  max-height: 200px !important; 
-}
-
 .message-input-container {
   display: flex;
   gap: 0.5rem;

@@ -44,7 +44,7 @@ const Header: React.FC<Props> = ({ isLoggedIn, mobileData: {isMobile, isPortrait
          { isMobile && isPortrait ? '' : 'Messenger'}
       </h1>
       <div className="header-controls" style={headerControlsStyle}>
-      { isMobile && <button 
+      { isMobile && isLoggedIn && <button 
               className="friends-toggle-button"
               onClick={toggleFriendsModal}
             >

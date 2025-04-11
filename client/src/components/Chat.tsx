@@ -120,7 +120,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
 
   return (
     <div className="chat-container">
-      <div className={ messages.length !== 0 ? "messages-container": "messages-container no-messages"} ref={messagesContainerRef}>
+      <div className="messages-container" ref={messagesContainerRef}>
         {error && <div className="error-message">{error}</div>}
         {isLoading && messages.length === 0 ? (
           <div className="loading-spinner">Loading messages...</div>
