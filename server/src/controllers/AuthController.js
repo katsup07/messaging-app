@@ -1,6 +1,7 @@
-const { authService } = require('../diContainer');
+const { authService, userFacadeService } = require('../diContainer');
 const { extractTokenFromHeaders } = require('../middleware/auth');
 const { throwError } = require('../utils/throwError');
+const { logInfo } = require('../middleware/logger');
 
 async function signup(req, res) {
   const { email, password } = req.validatedBody || req.body;
@@ -72,8 +73,13 @@ async function updateUserDetails(req, res) {
   // Authorization check - ensure user can only update their own profile
   if (req.user.userId.toString() !== userId.toString()) 
     throwError('Unauthorized attempt to update another user', 403);
+
+  // Run both update operations in parallel using Promise.all
+  const [updatedUser, _] = await Promise.all([
+    authService.updateUserDetails(userId, updateData),
+    userFacadeService.updateUserDetailsInFriendsLists(userId, updateData)
+  ]);
   
-  const updatedUser = await authService.updateUserDetails(userId, updateData);
   res.json(updatedUser);
 }
 
@@ -85,5 +91,5 @@ module.exports = {
   verifyToken, 
   findUserById, 
   refreshToken,
-  updateUserDetails
+  updateUserDetails,
 };

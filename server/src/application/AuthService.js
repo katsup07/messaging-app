@@ -155,7 +155,6 @@ class AuthService {
 
   async updateUserDetails(userId, updateData) {
     try {
-      // Check if user exists
       const existingUser = await this.authRepository.findById(userId);
       if (!existingUser) {
         throw new Error('User not found');
@@ -169,7 +168,7 @@ class AuthService {
         }
       }
 
-      // Prepare update fields (always update username and email)
+      // Prepare update fields
       const updateFields = {
         username: updateData.username,
         email: updateData.email

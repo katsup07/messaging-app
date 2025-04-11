@@ -222,6 +222,17 @@ export default class ApiService {
     return data;
   }
 
+  async updateUsername(userId: string, username: string): Promise<User> {
+    const response = await this.authorizedRequest(`${this._baseAuthUrl}/update-username/${userId}`, { 
+      method: 'PUT',
+      body: JSON.stringify({ username }),
+    });
+    await handleApiError(response);
+    const updatedUser = await response.json();
+    console.log('Updated user:', updatedUser);
+    return updatedUser;
+  }
+
   async verifyToken(accessToken: string): Promise<TokenResult> {
     // No authorized request because verifyToken is called before token is set
     const response = await fetch(`${this._baseAuthUrl}/verify-token`, {

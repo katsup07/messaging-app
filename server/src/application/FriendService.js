@@ -22,6 +22,19 @@ class FriendService {
     }
   }
 
+  async updateUserDataInFriendsLists(userId, updateData) {
+    try {
+      if (!updateData || (!updateData.username && !updateData.email))
+        return { success: true, message: "No data to update" };
+      
+      const { isSuccess } = await this.friendRepository.updateUserDataInAllFriendsLists(userId, updateData);
+      
+      return { isSuccess, message: "User data updated in all relevant friends lists" };
+    } catch (error) {
+      throwError(`Failed to update user data in friends lists: ${error.message}`, 500);
+    }
+  }
+
   async sendFriendRequest(fromUserId, toUserId) {
     const fromUser = await this.authRepository.findById(fromUserId);
     const toUser = await this.authRepository.findById(toUserId);

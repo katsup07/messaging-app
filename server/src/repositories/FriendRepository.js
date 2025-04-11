@@ -52,6 +52,30 @@ class FriendRepository {
     return FriendsIds;
   }
 
+  async updateUserDataInAllFriendsLists(friendId, updateFields){
+    const friendIdObject = new ObjectId(friendId);
+    const friendsCollection = await this.getFriendsCollection();
+
+    const [friendsResult, userResult] = await Promise.all([
+      friendsCollection.updateMany(
+        { "friends._id": friendIdObject },
+        { $set: { 
+          "friends.$.username": updateFields.username, 
+          "friends.$.email": updateFields.email 
+        } 
+      }),
+      friendsCollection.updateOne(
+        {"user._id": friendIdObject},
+        { $set: { 
+          "user.username": updateFields.username, 
+          "user.email": updateFields.email 
+        }
+      })
+    ]);
+    
+    return { isSuccess: friendsResult.acknowledged === true && userResult.acknowledged === true };
+  }
+
   async getFriends() {
     const friendsCollection = await this.getFriendsCollection();
     const friendResults = await friendsCollection.find({}).toArray();
