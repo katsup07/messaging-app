@@ -78,8 +78,10 @@
 
 .header-controls {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.1rem;
+  width: 100%;
 }
 
 .theme-switch {
@@ -1750,8 +1752,9 @@ body {
 
 @media (max-width: 480px) {
   .friends-toggle-button {
-    width: 80%;
-    font-size: 0.9rem;
+    width: 40%;
+    font-size: 1rem !important;
     padding: 8px 12px;
+   
   }
 }

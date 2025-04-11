@@ -5,10 +5,11 @@ import { MdLogout } from 'react-icons/md';
 import useAuth from '../helpers/useAuth';
 
 interface Props{
+  isMobile: boolean;
   user?: User;
 }
 
-const Logout: React.FC<Props> = ({ user }: Props) => {
+const Logout: React.FC<Props> = ({ user, isMobile }: Props) => {
   const { logout }  = useAuth();
   const setUser = useSetAtom(userAtom);
   const [showModal, setShowModal] = useState(false);
@@ -38,7 +39,7 @@ const Logout: React.FC<Props> = ({ user }: Props) => {
     <>
       <button className="icon-button" onClick={() => setShowModal(true)} aria-label="Logout">
         <MdLogout size={24} />
-        <span>Logout</span>
+        {!isMobile && <span>Logout</span>}
       </button>
 
       {showModal && (

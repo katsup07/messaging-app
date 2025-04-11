@@ -63,7 +63,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     if (friendsData.length > 0 && !selectedFriend) {
       onSelectFriend(friendsData[0]);
     }
-  },[user, onSelectFriend, selectedFriend]);
+  },[apiService, onSelectFriend, selectedFriend]);
 
   const fetchPendingRequests = useCallback(async () => {
     if (!user) return;
@@ -73,7 +73,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     } catch (error) {
       console.error('Failed to fetch pending requests:', error);
     }
-  }, [user]);
+  }, [user, apiService]);
 
    useEffect(() => {
       if(user)
