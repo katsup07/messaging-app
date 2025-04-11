@@ -10,8 +10,9 @@ const socketIoController = {
       io = new Server(httpServer, {
         cors: {
           origin: corsOrigin,
-          methods: ['GET', 'POST'],
-          credentials: true
+          methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+          allowedHeaders: ['Content-Type', 'Authorization'],
+          optionsSuccessStatus: 204 // For legacy browser support
         },
       });
     }

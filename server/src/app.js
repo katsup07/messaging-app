@@ -20,8 +20,9 @@ const io = socketIoController.init(server)
 const corsOptions = {
   origin: process.env.CLIENT_URL, 
   credentials: true,
-  methods: '*',
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204 // For legacy browser support
 };
 
 // Initialize MongoDB connection
