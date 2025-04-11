@@ -18,18 +18,11 @@ const io = socketIoController.init(server)
 
 // Configure CORS for different environments
 const corsOptions = {
-  origin: '*', // Vite's default dev port
+  origin: process.env.CLIENT_URL, 
   credentials: true,
   methods: '*',
   allowedHeaders: ['Content-Type', 'Authorization']
 };
-
-// app.use(cors({
-//   origin: ['https://messaging-app-client-ebon.vercel.app', 'http://localhost:5173'],
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   credentials: true
-// }));
 
 // Initialize MongoDB connection
 async function initMongoDB() {

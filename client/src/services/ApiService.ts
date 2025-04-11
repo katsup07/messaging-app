@@ -94,19 +94,13 @@ export default class ApiService {
   private async authorizedRequest(url: string, options: RequestInit = {}): Promise<Response> {
     if (!this.accessToken)
       throw new Error('No access token available');
-    
-
     // Attempt the request with current token
     const response = await this.performRequest(url, options);
-    
     // If successful, return the response
     if (response.ok) return response;
-    
-    
     // Check if it's an auth error that needs token refresh
     if (response.status === 401) {
       const errorData = await response.json();
-      
       // Handle expired token
       if (errorData.error === 'TokenExpired') {
         // Get a new token and retry the request
@@ -126,7 +120,6 @@ export default class ApiService {
     if (!this.accessToken)
       throw new Error('No access token available');
     
-
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${this.accessToken}`,
