@@ -113,9 +113,10 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   };
 
   const isFriendSenderOrReceiver = (message: Message) => {
-    const isFriendSender = message.senderId === selectedFriend?._id;
-    const isFriendReceiver = message.receiverId === selectedFriend?._id;
-    return isFriendSender || isFriendReceiver;
+    const userToFriend = message.senderId === user?._id && message.receiverId === selectedFriend?._id;
+    const friendToUser = message.senderId === selectedFriend?._id && message.receiverId === user?._id;
+    
+    return userToFriend || friendToUser;
   };
 
   return (
@@ -131,6 +132,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
             {messages.filter(isFriendSenderOrReceiver).map((message, index) => (
               <Message
                 key={`${message.senderId}-${message.time}-${index}`}
+                senderId={message.senderId.toString()}
                 sender={message.sender}
                 content={message.content}
                 time={message.time}

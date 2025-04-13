@@ -3,15 +3,16 @@ import { useAtomValue } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
 
 interface MessageProps {
+  senderId: string;
   sender: string;
   content: string;
   time: string;
   isRead?: boolean;
 }
 
-const Message: React.FC<MessageProps> = ({ content, sender, time, isRead = false }) => {
+const Message: React.FC<MessageProps> = ({ content, senderId, sender, time, isRead = false }) => {
   const currentUser = useAtomValue(userAtom);
-  const isCurrentUser = currentUser?.username === sender;
+  const isCurrentUser = currentUser?._id === senderId;
   
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);

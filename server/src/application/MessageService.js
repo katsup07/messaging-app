@@ -5,6 +5,9 @@ class MessageService {
 
   async getConversation(userId, friendId) {
     try {
+      // TODO:
+      // Improve performance by shifting filtering to the database level
+      // and using indexes on senderId and receiverId fields.
       const messages = await this.messageRepository.getMessages();
       const filteredMessages = messages.filter(message => 
         (message.senderId.toString() === userId.toString() && message.receiverId.toString() === friendId.toString()) ||
