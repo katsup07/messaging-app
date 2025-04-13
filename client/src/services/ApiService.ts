@@ -229,7 +229,7 @@ export default class ApiService {
     });
     await handleApiError(response);
     const updatedUser = await response.json();
-    console.log('Updated user:', updatedUser);
+
     return updatedUser;
   }
 
@@ -271,7 +271,7 @@ export default class ApiService {
     });
     await handleApiError(response);
     const updatedUser = await response.json();
-    console.log('Updated user:', updatedUser);
+
     return updatedUser;
   }
 

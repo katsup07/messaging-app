@@ -1,4 +1,5 @@
 const { mongoDbManager } = require('../../providers/mongoDbManager');
+const { logError } = require('../middleware/logger');
 
 const messageFields = {
   senderId: 1, 
@@ -16,6 +17,11 @@ class MessageRepository {
   constructor() {
     this.dbName = "messenger-app";
     this.collectionName = "messages";
+
+    //
+    this._createIndexes().catch(err => {
+      logError("Failed to create indexes:", err);
+    });
   }
 
   async getMessageCollection() {
@@ -26,6 +32,16 @@ class MessageRepository {
   async getMessages() {
     const messagesCollection = await this.getMessageCollection();
     return await messagesCollection.find({}).toArray();
+  }
+
+  async getMessagesBetweenUsers(userId, friendId) {
+    const messagesCollection = await this.getMessageCollection();
+    return await messagesCollection.find({
+      $or: [
+        { senderId: userId, receiverId: friendId },
+        { senderId: friendId, receiverId: userId }
+      ]
+    }).sort({ time: 1 }).toArray();
   }
 
   async saveMessage(message) {
@@ -40,6 +56,14 @@ class MessageRepository {
     const messagesCollection = await this.getMessageCollection();
     return await messagesCollection.findOne({ _id: id }, { projection: messageFields });
   }
+
+  async _createIndexes() {
+    const messagesCollection = await this.getMessageCollection();
+    await messagesCollection.createIndex({ senderId: 1, receiverId: 1 });
+    await messagesCollection.createIndex({ receiverId: 1, senderId: 1 });
+    await messagesCollection.createIndex({ time: 1 });
+  }
+
 }
 
 module.exports = { messageRepository: new MessageRepository() }

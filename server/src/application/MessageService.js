@@ -8,12 +8,13 @@ class MessageService {
       // TODO:
       // Improve performance by shifting filtering to the database level
       // and using indexes on senderId and receiverId fields.
-      const messages = await this.messageRepository.getMessages();
-      const filteredMessages = messages.filter(message => 
-        (message.senderId.toString() === userId.toString() && message.receiverId.toString() === friendId.toString()) ||
-        (message.senderId.toString() === friendId.toString() && message.receiverId.toString() === userId.toString())
-      );
-      return filteredMessages;
+      // const messages = await this.messageRepository.getMessages();
+      // const filteredMessages = messages.filter(message => 
+      //   (message.senderId.toString() === userId.toString() && message.receiverId.toString() === friendId.toString()) ||
+      //   (message.senderId.toString() === friendId.toString() && message.receiverId.toString() === userId.toString())
+      // );
+      // return filteredMessages;
+      return await this.messageRepository.getMessagesBetweenUsers(userId, friendId)
     } catch (error) {
       throw new Error(`Failed to get conversation: ${error.message}`);
     }
