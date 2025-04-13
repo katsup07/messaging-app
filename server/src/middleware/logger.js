@@ -1,3 +1,7 @@
+const { info } = require('console');
+const fs = require('fs');
+const path = require('path');
+
 function logger(req, res, next) {
   const start = Date.now();
   res.on('finish', () => {
@@ -9,11 +13,18 @@ function logger(req, res, next) {
 
 // General application logging functions
 function logInfo(message) {
+  // Console output for development
   console.log(`${colors.brightBlue}[INFO]${colors.reset} ${colors.blue}${_getJSTTimestamp()}${colors.reset} ${message}`);
 }
 
 function logError(message, error) {
-  console.error(`${colors.brightRed}[ERROR]${colors.reset} ${colors.red}${_getJSTTimestamp()}${colors.reset} ${message}`, error ? error : '');
+  const timestamp = _getJSTTimestamp();
+  
+  const errorLog = `[ERROR] ${timestamp} ${message} ${error ? JSON.stringify(error, Object.getOwnPropertyNames(error)) : ''}\n`;
+  errorLogStream.write(errorLog);
+  
+  // Console output for development
+  console.error(`${colors.brightRed}[ERROR]${colors.reset} ${colors.red}${timestamp}${colors.reset} ${message}`, error ? error : '');
 }
 
 function logRequest(method, url, statusCode, duration) {
@@ -83,5 +94,26 @@ const colors = {
   brightCyan: '\x1b[96m'
 };
 
-module.exports = { logger, logInfo, logError };
+// Persistent logging to file
+const logDirectory = path.join(__dirname, '../../logs');
+if (!fs.existsSync(logDirectory)) {
+    fs.mkdirSync(logDirectory, { recursive: true });
+}
+// Single stream instance
+const accessLogStream = fs.createWriteStream(
+    path.join(logDirectory, 'access.log'),
+    { flags: 'a' }
+);
+
+const errorLogStream = fs.createWriteStream(
+    path.join(logDirectory, 'error.log'),
+    { flags: 'a' }
+);
+
+module.exports = { 
+    logger, 
+    logInfo, 
+    logError, 
+    accessLogStream 
+};
 

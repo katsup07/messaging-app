@@ -1,4 +1,4 @@
-const { getDb } = require('../../mongoDBclient');
+const { getDb } = require('../../config/dbConfig');
 const { ObjectId } = require('mongodb');
 
 class AuthRepository {

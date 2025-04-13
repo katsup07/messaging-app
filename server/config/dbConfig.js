@@ -1,5 +1,5 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const { logInfo, logError } = require('./src/middleware/logger');
+const { logInfo, logError } = require('../src/middleware/logger');
 
 const uri = process.env.MONGODB_URI;
 if (!uri) 
@@ -27,8 +27,7 @@ const client = new MongoClient(uri, {
 });
 
 let isConnected = false;
-
-async function connect() {
+async function connectToMongoDB() {
   if (isConnected) return;
   
   try {
@@ -46,7 +45,7 @@ async function connect() {
 async function getDb() {
   if (!isConnected) {
     try {
-      await connect();
+      await connectToMongoDB();
     } catch (error) {
       logError("Failed to reconnect to MongoDB:", error);
       throw error;
@@ -56,7 +55,7 @@ async function getDb() {
 }
 
 module.exports = {
-  connect,
+  connectToMongoDB,
   client,
   getDb
 };
