@@ -1,4 +1,4 @@
-const { getDb } = require('../../config/dbConfig');
+const { mongoDbManager } = require('../../providers/mongoDbManager');
 const { ObjectId } = require('mongodb');
 
 const friendRequestFields = {
@@ -18,12 +18,12 @@ class FriendRepository {
   }
 
   async getFriendRequestsCollection() {
-    const client = await getDb();
+    const client = await mongoDbManager.getDb();
     return client.db(this.dbName).collection(this.friendRequestsCollectionName);
   }
 
   async getFriendsCollection() {
-    const client = await getDb();
+    const client = await mongoDbManager.getDb();
     return client.db(this.dbName).collection(this.friendsCollectionName);
   }
 
@@ -64,16 +64,16 @@ class FriendRepository {
           "friends.$.email": updateFields.email 
         } 
       }),
-      friendsCollection.updateOne(
-        {"user._id": friendIdObject},
-        { $set: { 
-          "user.username": updateFields.username, 
-          "user.email": updateFields.email 
-        }
-      })
+      // friendsCollection.updateOne(
+      //   {"user._id": friendIdObject},
+      //   { $set: { 
+      //     "user.username": updateFields.username, 
+      //     "user.email": updateFields.email 
+      //   }
+      // })
     ]);
     
-    return { isSuccess: friendsResult.acknowledged === true && userResult.acknowledged === true };
+    return { isSuccess: friendsResult.acknowledged === true /* && userResult.acknowledged === true */ };
   }
 
   async getFriends() {

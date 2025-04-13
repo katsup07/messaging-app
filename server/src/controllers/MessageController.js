@@ -1,5 +1,5 @@
 const { messageService } = require('../diContainer');
-const { socketIoController } = require('../socketio');
+const { socketIoController } = require('../../providers/socketioController');
 
 async function getMessages(req, res) {
   const { userId } = req.params;

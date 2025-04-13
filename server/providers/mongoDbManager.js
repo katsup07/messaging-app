@@ -54,8 +54,9 @@ async function getDb() {
   return client;
 }
 
-module.exports = {
+const mongoDbManager = {
   connectToMongoDB,
-  client,
   getDb
 };
+
+module.exports = { mongoDbManager };

@@ -1,4 +1,4 @@
-const { getDb } = require('../../config/dbConfig');
+const { mongoDbManager } = require('../../providers/mongoDbManager');
 
 const messageFields = {
   senderId: 1, 
@@ -19,7 +19,7 @@ class MessageRepository {
   }
 
   async getMessageCollection() {
-    const client = await getDb();
+    const client = await mongoDbManager.getDb();
     return client.db(this.dbName).collection(this.collectionName);
   }
 

@@ -1,4 +1,4 @@
-const { getDb } = require('../../config/dbConfig');
+const { mongoDbManager } = require('../../providers/mongoDbManager');
 const { ObjectId } = require('mongodb');
 
 class AuthRepository {
@@ -8,7 +8,7 @@ class AuthRepository {
   }
 
   async getUsersCollection() {
-    const client = await getDb();
+    const client = await mongoDbManager.getDb();
     return client.db(this.dbName).collection(this.collectionName);
   }
 

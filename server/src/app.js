@@ -1,8 +1,8 @@
 require('dotenv').config();
 const { morgan, morganFormat } = require('../config/morganConfig');
-const { connectToMongoDB } = require('../config/dbConfig');
+const { mongoDbManager } = require('../providers/mongoDbManager');
 const { accessLogStream } = require('./middleware/logger');
-const { socketIoController } = require('./socketio');
+const { socketIoController } = require('../providers/socketioController');
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
@@ -16,7 +16,7 @@ const { errorHandler } = require('./middleware/errorHandler');
 const port = process.env.PORT || 5000;
 const app = express();
 const server = http.createServer(app);
-const io = socketIoController.init(server);
+socketIoController.init(server);
 
 // Configure CORS for different environments
 const corsOptions = {
@@ -42,20 +42,8 @@ setFriendRequestRoutes(app);
 // Global error handler
 app.use(errorHandler);
 
-io.on('connection', (socket) => {
-    logInfo(`New client connected: ${socket.id}`);
-    socket.on('disconnect', () => {
-        logInfo(`Client disconnected: ${socket.id}`);
-    });
-
-    socket.on('register-user', (userId) => {
-        socket.join(`user_${userId}`);
-        logInfo(`user_${userId} registered for notifications`);
-    });
-});
-
 // Initialize server with database connection
-connectToMongoDB()
+mongoDbManager.connectToMongoDB()
     .then(() => {
         server.listen(port, () => {
             logInfo(`Server is running on http://localhost:${port} in ${process.env.NODE_ENV} mode`);

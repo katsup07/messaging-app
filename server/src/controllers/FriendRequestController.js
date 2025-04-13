@@ -1,5 +1,5 @@
 const { friendService } = require('../diContainer');
-const { socketIoController } = require('../socketio');
+const { socketIoController } = require('../../providers/socketioController');
 
 async function sendFriendRequest(req, res) {
   const { fromUserId, toUserId } = req.validatedBody || req.body;
