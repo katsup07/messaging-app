@@ -1,12 +1,24 @@
 ## 🚀 Installation and Development
 
 ### 🖥️ Client
-`npm install`
+cd into client folder
+<br/>`npm install`
 <br/>`npm run dev`
 
 ### 🔧 Server
-`npm install`
+cd into server folder
+<br/>`npm install`
 <br/>`npm start`
+
+
+
+### or
+
+### 🐳 Docker
+Using Docker containers:
+<br/>cd into root folder
+<br/>`docker compose up`
+
 ## 🔐 Environment Variables(.env)
 ### server
 - MONGODB_URI
