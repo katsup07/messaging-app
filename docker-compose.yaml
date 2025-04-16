@@ -8,9 +8,13 @@ services:
     ports:
       - "5000:5000"
     volumes:
+      - ./server:/app
       - logs:/app/logs
+      - /app/node_modules
     env_file:
       - ./server/.env
+    environment:
+      - DOCKER_ENVIRONMENT=true
     restart: unless-stopped
 
   client:
@@ -20,10 +24,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
     stdin_open: true
     tty: true        
     env_file:
       - ./client/.env
+    environment:
+      - DOCKER_ENVIRONMENT=true
     depends_on:
       - server
     restart: unless-stopped
