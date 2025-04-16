@@ -17,7 +17,7 @@ cd into server folder
 ### 🐳 Docker
 Using Docker containers:
 <br/>cd into root folder
-<br/>`docker compose up`
+<br/>`npm run docker:start`
 
 ## 🔐 Environment Variables(.env)
 ### server
