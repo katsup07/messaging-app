@@ -90,6 +90,6 @@ Architecture
 Features
 - User authentication with signup/login workflows
 - Friend request system with accept/reject functionality
-- Real-time messaging with message status indicators(In progress)
+- Real-time messaging with message status indicators(Currently in progress)
 - User online status tracking
 - Responsive UI that works across device sizes
