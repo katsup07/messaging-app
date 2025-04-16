@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  server:
+    container_name: messenger-app-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - logs:/app/logs
+    env_file:
+      - ./server/.env
+    restart: unless-stopped
+
+  client:
+    container_name: messenger-app-client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    stdin_open: true
+    tty: true        
+    env_file:
+      - ./client/.env
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  logs:
