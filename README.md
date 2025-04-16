@@ -12,7 +12,7 @@
 
 ### or
 
-## 🐳 Docker Development Environment
+## 🐳 Docker Development Environment(Optional)
 
 This project supports fully containerized development using Docker, allowing for minimal environment setup.
 From the root folder, you can run both the client and server with a single command: `npm run docker:start`. 
