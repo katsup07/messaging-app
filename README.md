@@ -1,12 +1,26 @@
 ## 🚀 Installation and Development
 
-### 🖥️ Client
+### 🖥️ Client Folder
 `npm install`
 <br/>`npm run dev`
 
-### 🔧 Server
+### 🔧 Server Folder
 `npm install`
 <br/>`npm start`
+
+
+
+### or
+
+## 🐳 Docker Development Environment
+
+This project supports fully containerized development using Docker, allowing for minimal environment setup.
+From the root folder, you can run both the client and server with a single command: `npm run docker:start`. 
+<br/> Note: The local files are mounted into the containers, so any changes made locally will automatically be reflected inside the container, with live reload enabled.
+
+![Desktop Screenshot 2025 04 16 - 14 12 47 62](https://github.com/user-attachments/assets/b95ee49a-3734-4cc5-9f89-11491da2835d)
+
+
 ## 🔐 Environment Variables(.env)
 ### server
 - MONGODB_URI
