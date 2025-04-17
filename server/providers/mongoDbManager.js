@@ -5,19 +5,18 @@ const uri = process.env.MONGODB_URI;
 if (!uri) 
   throw new Error("MONGODB_URI is not defined. Please set the environment variable.");
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
   },
-  // Add connection pool settings for better stability using correct option names
+  // Connection pool settings for better stability using correct option names
   maxPoolSize: 10,
   minPoolSize: 1,
   socketTimeoutMS: 30000,
   connectTimeoutMS: 30000,
-   // Add TLS settings to fix SSL error in production
+   // TLS settings to fix SSL error in production
    tls: true,
    tlsInsecure: false,
    // Network Timeout options to reduce vulnerability to slow attacks
@@ -41,7 +40,7 @@ async function connectToMongoDB() {
   }
 }
 
-///Check connection and reconnect if needed
+// Check connection and reconnect if needed
 async function getDb() {
   if (!isConnected) {
     try {
