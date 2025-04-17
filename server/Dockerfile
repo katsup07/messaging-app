@@ -10,7 +10,4 @@ COPY . .
 
 EXPOSE 5000
 
-ENV MONGODB_USERNAME=root
-ENV MONGODB_PASSWORD=secret
-
 CMD ["npm", "start"]
