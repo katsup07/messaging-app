@@ -57,8 +57,6 @@ const Login: React.FC = () => {
     };
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
-    // socket
-    
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

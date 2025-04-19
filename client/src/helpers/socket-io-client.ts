@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { io } from 'socket.io-client';
 import { Message } from '../components/Chat';
 
@@ -6,7 +7,8 @@ const serverUrl = import.meta.env.VITE_API_BASE_URL
   ? new URL(import.meta.env.VITE_API_BASE_URL).origin
   : 'http://localhost:5000';
 
-export const socket = io(serverUrl, {
+// Singleton socket instance
+const socket = io(serverUrl, {
   path: '/socket.io',
   transports: ['websocket','polling']
 });
@@ -32,5 +34,6 @@ export const messageSentLiveUpdate = (message: Message, receiverId: string) => {
   socket.emit('sent-message', { message, receiverId});
 }
 
+export const socketSetup = (event: string, callback: (...args: any[]) => void) => socket.on(event, callback);
 
-
+export const socketCleanup = (event: string, callback?: (...args: any[]) => void) => socket.off(event, callback);

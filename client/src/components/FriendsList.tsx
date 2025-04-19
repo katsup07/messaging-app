@@ -1,4 +1,4 @@
-import { registerForLiveUpdates, socket } from '../helpers/socket-io-client';
+import { socketCleanup, socketSetup } from '../helpers/socket-io-client';
 
 import React, { useEffect, useState, useCallback } from 'react';
 import ApiService from '../services/ApiService';
@@ -77,21 +77,18 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     }
   }, [user, apiService]);
 
-   useEffect(() => {
-      if(user)
-        registerForLiveUpdates(user._id.toString());
-  
-      socket.on('received-friend-request', (data) => {
+   useEffect(() => { 
+      socketSetup('received-friend-request', (data) => {
         setPendingRequests((prevRequests) => [...prevRequests, data.friendRequest]);
       });
 
-      socket.on('accepted-friend-request', () => {
+      socketSetup('accepted-friend-request', () => {
         fetchFriends();
       });
   
       return () => {
-        socket.off('received-friend-request');
-        socket.off('accepted-friend-request');
+        socketCleanup('received-friend-request');
+        socketCleanup('accepted-friend-request');
       }
     }, [user, fetchFriends]);
 

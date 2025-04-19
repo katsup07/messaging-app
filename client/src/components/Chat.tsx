@@ -1,4 +1,4 @@
-import { messageSentLiveUpdate, registerForLiveUpdates, socket } from '../helpers/socket-io-client';
+import { messageSentLiveUpdate, registerForLiveUpdates, socketCleanup, socketSetup } from '../helpers/socket-io-client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
@@ -39,12 +39,12 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   useEffect(() => {
     if (user) registerForLiveUpdates(user._id.toString());
 
-    socket.on('receive-message', (data) => {
+    socketSetup('receive-message', (data) => {
       setMessages((prevMessages) => [...prevMessages, data.message]);
     });
 
     return () => {
-      socket.off('receive-message');
+      socketCleanup('receive-message');
     };
   }, [user]);
 
