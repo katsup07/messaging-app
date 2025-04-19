@@ -22,6 +22,10 @@ socket.on('disconnect', () => {
   console.log('Socket disconnected');
 });
 
+export const disconnectSocket = () => {
+  socket.disconnect();
+};
+
 export const registerForLiveUpdates = (userId: string) => {
   if (!userId) return
     

@@ -33,7 +33,7 @@ interface FriendsListProps {
 
 const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFriend, user, isMobile, toggleFriendsListModal }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [onlineStatus, setOnlineStatus] = useState<{[key: number | string]: boolean}>({});
+  const [onlineStatus, setOnlineStatus] = useState<{[key: string]: boolean}>({});
   const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [newFriendId, setNewFriendId] = useState('');
@@ -46,19 +46,12 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const fetchFriends = useCallback(async () => {
     const friendsData = await apiService.getFriends();
     const usersData = await apiService.getUsers();
-    
-    // Create a map of user IDs to their login status and user data
-    const statusMap = usersData.reduce((acc: {[key: number | string]: boolean}, user: Friend) => {
-      acc[user._id] = user.isLoggedIn || false;
-      return acc;
-    }, {});
-
+  
     const usersMap = usersData.reduce((acc: {[key: number | string]: Friend}, user: Friend) => {
       acc[user._id] = user;
       return acc;
     }, {});
     
-    setOnlineStatus(statusMap);
     setUsers(usersMap);
     setFriends(friendsData);
 
@@ -85,10 +78,15 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
       socketSetup('accepted-friend-request', () => {
         fetchFriends();
       });
+
+      socketSetup('get-friends-status', (data) => {
+        setOnlineStatus(data);
+      });
   
       return () => {
         socketCleanup('received-friend-request');
         socketCleanup('accepted-friend-request');
+        socketCleanup('get-friends-status');
       }
     }, [user, fetchFriends]);
 

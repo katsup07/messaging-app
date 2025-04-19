@@ -22,7 +22,7 @@ const socketIoController = {
             io.on('connection', (socket) => {
                 logInfo(`New client connected: ${socket.id}`);
                 
-                socket.on('disconnect', () => {
+                socket.on('disconnect', async() => {
                     let disconnectedUserId = null;
                     for (const [userId, socketId] of onlineUsers.entries()) {
                       if (socketId !== socket.id) continue;
@@ -35,22 +35,22 @@ const socketIoController = {
                       // Remove from online users
                       onlineUsers.delete(disconnectedUserId);
                       // Notify friends that user is offline
-                      notifyFriendsOfStatusChange(disconnectedUserId, false);
+                      await _notifyAllFriendsOfStatusChange(disconnectedUserId, false);
                       logInfo(`Client disconnected: ${socket.id}`);
 
                 });
 
-                socket.on('register-user', (userId) => {
+                socket.on('register-user', async(userId) => {
                     socket.join(`user_${userId}`);
                     // Store user as online
                     onlineUsers.set(userId, socket.id);
                     logInfo(`user_${userId} registered for notifications`);
                     // Notify friends that user is online
-                    notifyFriendsOfStatusChange(userId, true);
+                    await _notifyAllFriendsOfStatusChange(userId, true);
                 });
 
                 socket.on('get-friends-status', async (userId) => {
-                  notifyFriendsOfStatusChange(userId);
+                  await fetchFriendsOnlineStatus(userId);
                 });
             });
         }
@@ -62,14 +62,13 @@ const socketIoController = {
 
         return io;
     },
-
     getOnlineUsers: () => {
-      return new Map(onlineUsers);
+        return onlineUsers;
     }
 };
 
 // Helpers
-async function notifyFriendsOfStatusChange(userId, isOnline) {
+async function _notifyAllFriendsOfStatusChange(userId, isOnline) {
   try {
     const friends = await friendService.getFriendsList(userId);
     // Notify each online friend about status change
@@ -86,20 +85,6 @@ async function notifyFriendsOfStatusChange(userId, isOnline) {
   } catch (err) {
     logError('Error notifying friends:', err);
   }
-}
-
-async function notifyFriendsOfStatusChange() {
-  try {
-    const friends = await friendService.getFriendsList(userId);
-    // Compile status of each friend
-    const friendsStatus = {};
-    for (const friend of friends)
-     friendsStatus[friend._id] = onlineUsers.has(friend._id);
-    // Send back to requesting client
-    socket.emit('friends-status', friendsStatus);
-    } catch (err) {
-      console.error('Error getting friends status:', err);
-    }
 }
 
 module.exports = { socketIoController };
