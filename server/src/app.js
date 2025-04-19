@@ -1,8 +1,8 @@
 require('dotenv').config();
-const { morgan, morganFormat } = require('../config/morganConfig');
-const { mongoDbManager } = require('../providers/mongoDbManager');
+const { morgan, morganFormat } = require('./config/morganConfig');
+const { mongoDbManager } = require('./providers/mongoDbManager');
 const { accessLogStream } = require('./middleware/logger');
-const { socketIoController } = require('../providers/socketioController');
+const { socketIoController } = require('./providers/socketioController');
 const express = require('express');
 const cors = require('cors');
 const http = require('http');

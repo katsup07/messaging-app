@@ -1,4 +1,4 @@
-const { mongoDbManager } = require('../../providers/mongoDbManager');
+const { mongoDbManager } = require('../providers/mongoDbManager');
 const { ObjectId } = require('mongodb');
 
 class AuthRepository {

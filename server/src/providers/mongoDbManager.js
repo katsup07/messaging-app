@@ -1,5 +1,5 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const { logInfo, logError } = require('../src/middleware/logger');
+const { logInfo, logError } = require('../middleware/logger');
 
 const uri = process.env.MONGODB_URI;
 if (!uri) 

@@ -6,8 +6,5 @@
   "ignore": [
     "node_modules/",
     "logs/"
-  ],
-  "polling": true,
-  "legacyWatch": true,
-  "delay": 1000
+  ]
 }

@@ -1,4 +1,4 @@
-import { socket } from '../helpers/socket-io-client';
+import { messageSentLiveUpdate, registerForLiveUpdates, socket } from '../helpers/socket-io-client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
@@ -9,11 +9,11 @@ import React from 'react';
 import { Friend } from './FriendsList';
 import useScrollToBottom from '../helpers/useScrollToBottom';
 
-interface Message {
-  senderId: number;
+export interface Message {
+  senderId: number | string;
   sender: string;
   content: string;
-  receiverId: number;
+  receiverId: number | string;
   time: string;
   isRead?: boolean;
 }
@@ -37,7 +37,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
 
   // Socket initialization
   useEffect(() => {
-    if (user) socket.emit('register-user', user._id);
+    if (user) registerForLiveUpdates(user._id.toString());
 
     socket.on('receive-message', (data) => {
       setMessages((prevMessages) => [...prevMessages, data.message]);
@@ -90,7 +90,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
 
     try {
       const messageData = {
-        senderId: user._id,
+        senderId: user._id.toString(),
         time: new Date().toISOString(),
         sender: user.username,
         content: newMessage,
@@ -100,7 +100,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
       };
 
       await apiService.sendMessage(messageData);
-      socket.emit('sent-message', { message: messageData, receiverId: selectedFriend._id });
+      messageSentLiveUpdate(messageData, selectedFriend._id.toString());
       setNewMessage('');
 
       // Fetch messages immediately after sending

@@ -1,4 +1,4 @@
-const { mongoDbManager } = require('../../providers/mongoDbManager');
+const { mongoDbManager } = require('../providers/mongoDbManager');
 const { logError } = require('../middleware/logger');
 
 const messageFields = {
