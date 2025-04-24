@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { io } from 'socket.io-client';
-import { Message } from '../components/Chat';
 
 // Get server URL from environment variables, fallback to localhost
 const serverUrl = import.meta.env.VITE_API_BASE_URL 
@@ -32,11 +31,6 @@ export const registerForLiveUpdates = (userId: string) => {
   socket.emit('register-user', userId.toString());
   console.log(`User ${userId} registered with socket`);
 };
-
-export const messageSentLiveUpdate = (message: Message, receiverId: string) => {
-  console.log('Sending message via socket:', message, receiverId);
-  socket.emit('sent-message', { message, receiverId});
-}
 
 export const socketSetup = (event: string, callback: (...args: any[]) => void) => socket.on(event, callback);
 

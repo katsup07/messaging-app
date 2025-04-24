@@ -1,4 +1,4 @@
-import { messageSentLiveUpdate, registerForLiveUpdates, socketCleanup, socketSetup } from '../helpers/socket-io-client';
+import { registerForLiveUpdates, socketCleanup, socketSetup } from '../helpers/socket-io-client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
@@ -98,13 +98,9 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
         receiverId: selectedFriend._id,
         isRead: false,
       };
-
       await apiService.sendMessage(messageData);
-      messageSentLiveUpdate(messageData, selectedFriend._id.toString());
+      
       setNewMessage('');
-
-      // Fetch messages immediately after sending
-      fetchMessages();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
       setError(errorMessage);

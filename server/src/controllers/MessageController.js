@@ -1,5 +1,4 @@
-const { messageService } = require('../diContainer');
-const { socketIoController } = require('../providers/socketioController');
+const { messageService, notificationService } = require('../diContainer');
 
 async function getMessages(req, res) {
   const { userId } = req.params;
@@ -15,10 +14,8 @@ async function getMessages(req, res) {
 async function saveMessage(req, res) {
   try {
     const newMessage = await messageService.saveMessage(req.body);
-    const { senderId, sender, receiverId, content, 
-      time, isRead
-       } = newMessage;
-    const io = socketIoController.getIO();
+    const { senderId, sender, receiverId, content, time, isRead } = newMessage;
+    
     const message = {
       senderId,
       sender,
@@ -27,7 +24,10 @@ async function saveMessage(req, res) {
       time,
       isRead
     };
-    io.to(`user_${req.body.receiverId}`).emit('receive-message', { message });
+    
+    // Notify the receiver through notification service
+    notificationService.notifyNewMessage(receiverId, message);
+    
     res.json(newMessage);
   } catch (err) {
     res.status(500).json({ error: err.message });

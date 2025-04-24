@@ -96,3 +96,32 @@ Features
 - Real-time messaging with message status indicators(Currently in progress)
 - User online status tracking
 - Responsive UI that works across device sizes
+
+## 🏗️ Clean Architecture Implementation
+This project follows Domain-Driven Design and Clean Architecture principles:
+
+- **Domain Layer**: Core business logic and entities
+- **Application Layer**: Services that coordinate domain actions
+- **Infrastructure Layer**: External concerns like databases and messaging
+- **Interface Layer**: Controllers and routes that handle HTTP requests
+
+The architecture employs the Dependency Inversion Principle, ensuring high-level modules don't depend on low-level implementations. Key architectural features include:
+
+- **NotificationService**: Abstracts all real-time communication, decoupling controllers from Socket.IO
+- **Strong boundary enforcement**: Each layer has a clear responsibility
+- **Dependency injection**: Services receive their dependencies rather than creating them
+- **Loose coupling**: Components depend on abstractions rather than concrete implementations
+
+## 💻 Real-time Communication
+- Socket.IO implementation with clean architectural separation
+- Centralized notification system for consistent real-time events
+- Proper handling of user connection/disconnection events
+- Live status updates for friends
+- Real-time message delivery with typing indicators
+
+## 🔮 Future Enhancements(Coming soon)
+- Enhanced notifications and real-time features
+- End-to-end encryption for messages
+- Media sharing capabilities
+- Group chat functionality
+- Voice and video calling features

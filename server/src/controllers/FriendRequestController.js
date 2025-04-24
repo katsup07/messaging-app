@@ -1,14 +1,12 @@
-const { friendService } = require('../diContainer');
-const { socketIoController } = require('../providers/socketioController');
+const { friendService, notificationService } = require('../diContainer');
 
 async function sendFriendRequest(req, res) {
   const { fromUserId, toUserId } = req.validatedBody || req.body;
   
   const newRequest = await friendService.sendFriendRequest(fromUserId, toUserId);
   
-  // Emit socket event for real-time notification
-  const io = socketIoController.getIO();
-  io.to(`user_${toUserId}`).emit('received-friend-request', { friendRequest: newRequest });
+  // Notify the recipient through notification service
+  notificationService.notifyFriendRequest(toUserId, newRequest);
 
   res.json(newRequest);
 }
@@ -25,11 +23,11 @@ async function respondToRequest(req, res) {
 
   const updatedRequest = await friendService.respondToFriendRequest(requestId, accept);
   
-  // Notify the sender through socket.io
-  const io = socketIoController.getIO();
-  if(updatedRequest.status === 'accepted' || updatedRequest.status === 'rejected') {
-    io.to(`user_${updatedRequest.fromUserId}`).emit('accepted-friend-request');
-  }
+  // Notify the sender through notification service
+  notificationService.notifyFriendRequestResponse(
+    updatedRequest.fromUserId, 
+    updatedRequest.status
+  );
 
   res.json(updatedRequest);
 }

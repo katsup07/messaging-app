@@ -12,11 +12,17 @@ const { setFriendsRoutes } = require('./routes/friendsRoutes');
 const { setFriendRequestRoutes } = require('./routes/friendRequestRoutes');
 const { logger, logInfo, logError } = require('./middleware/logger');
 const { errorHandler } = require('./middleware/errorHandler');
+const { friendService, notificationService } = require('./diContainer');
 
 const port = process.env.PORT || 5000;
 const app = express();
 const server = http.createServer(app);
-socketIoController.init(server);
+
+// Initialize socket.io with the required services
+socketIoController.init(server, { 
+  notificationService, 
+  friendService 
+});
 
 // Configure CORS for different environments
 const corsOptions = {
