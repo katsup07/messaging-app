@@ -31,7 +31,11 @@ class NotificationService {
   // Message notifications
   notifyNewMessage(receiverId, message) {
     const io = this.socketProvider.getIO();
+    // Notify receiver
     io.to(`user_${receiverId}`).emit('receive-message', { message });
+    // Notify sender
+    if (message.senderId)
+      io.to(`user_${message.senderId}`).emit('receive-message', { message });
   }
 
   // Status change notifications
