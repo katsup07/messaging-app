@@ -102,7 +102,7 @@ This project follows Domain-Driven Design and Clean Architecture principles:
 
 - **Domain Layer**: Core business logic and entities
 - **Application Layer**: Services that coordinate domain actions
-- **Infrastructure Layer**: External concerns like databases and messaging
+- **Repository Layer**: External concerns like databases and messaging
 - **Interface Layer**: Controllers and routes that handle HTTP requests
 
 The architecture employs the Dependency Inversion Principle, ensuring high-level modules don't depend on low-level implementations. Key architectural features include:
