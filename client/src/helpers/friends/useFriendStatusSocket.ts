@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { registerForLiveUpdates, socketCleanup, socketSetup } from '../../socket-io-client';
+import { socketCleanup, socketSetup } from '../../socket-io-client';
 
 /**
  * Custom hook for managing socket connections related to friend online status
@@ -13,8 +13,6 @@ export function useFriendStatusSocket(
 ) {
   useEffect(() => {
     if (!userId || !onStatusChange) return;
-
-    registerForLiveUpdates(userId.toString());
     
     socketSetup('get-friends-status', onStatusChange);
     

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { registerForLiveUpdates, socketCleanup, socketSetup } from '../../socket-io-client';
+import { socketCleanup, socketSetup } from '../../socket-io-client';
 
 /**
  * Custom hook for managing socket connections related to friend requests
@@ -15,8 +15,6 @@ export function useFriendRequestSocket(
 ) {
   useEffect(() => {
     if (!userId) return;
-
-    registerForLiveUpdates(userId.toString());
     
     socketSetup('received-friend-request', (data) => {
       console.log('Friend request received:', data);

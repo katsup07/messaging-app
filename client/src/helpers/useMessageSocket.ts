@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { registerForLiveUpdates, socketCleanup, socketSetup } from '../socket-io-client';
+import { socketCleanup, socketSetup } from '../socket-io-client';
 import { Message } from '../types/message';
 
 
@@ -15,9 +15,7 @@ export function useMessageSocket(
 ) {
   useEffect(() => {
     if (!userId || !onMessageReceive) return;
-
-    registerForLiveUpdates(userId.toString());
-    
+        
     socketSetup('receive-message', (data) => {
       onMessageReceive(data.message);
     });

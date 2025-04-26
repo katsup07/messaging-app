@@ -4,6 +4,7 @@ import { MdLogin } from 'react-icons/md';
 import { validateEmail, validatePassword } from '../../helpers/validation-utils';
 import { userAtom } from '../../atoms/userAtom';
 import ApiService from '../../services/ApiService';
+import { registerForLiveUpdates } from '../../socket-io-client';
 
 const validateLogin = (email: string, password: string): boolean => {
   const isValidEmail = validateEmail(email);
@@ -57,6 +58,8 @@ const Login: React.FC = () => {
     };
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
+    
+    registerForLiveUpdates(response.user._id.toString());
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

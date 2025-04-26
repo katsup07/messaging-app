@@ -3,7 +3,7 @@ import { useSetAtom } from 'jotai';
 import { User, userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
 import { TokenResult } from '../types/token';
-import { disconnectSocket } from '../socket-io-client';
+import { disconnectSocket, registerForLiveUpdates } from '../socket-io-client';
 
 const verifyTokenOnServer = async (token: string): Promise<TokenResult> => {
   const apiService = ApiService.getInstance();
@@ -77,11 +77,17 @@ export default function useAuth() {
         apiService.setRefreshToken(result.newRefreshToken);
 
         setIsAuthenticated(true);
+
+        registerForLiveUpdates(userData._id.toString());
         return;
       }
       
-      if (!isValid) 
+      if (!isValid) {
         logout();
+        return;
+      }
+      // isValid
+      registerForLiveUpdates(userData._id.toString());
     } catch (error) {
       console.error('Auth check failed:', error);
       logout();
