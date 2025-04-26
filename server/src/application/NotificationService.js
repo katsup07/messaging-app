@@ -24,7 +24,11 @@ class NotificationService {
   notifyFriendRequestResponse(fromUserId, status) {
     const io = this.socketProvider.getIO();
     if (status === 'accepted' || status === 'rejected') {
-      io.to(`user_${fromUserId}`).emit('accepted-friend-request');
+      io.to(`user_${fromUserId}`).emit('accepted-friend-request', { 
+        status,
+        timestamp: new Date().toISOString(),
+        fromUserId
+      });
     }
   }
 

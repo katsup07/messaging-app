@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import Logout from './Logout';
+
 import { User } from '../atoms/userAtom';
 import UserSettings from './UserSettings';
 import MessengerIcon from './icons/MessengerIcon';
 import LogoutIcon from './icons/LogoutIcon';
 import ThemeToggleSwitchIcon from './icons/ThemeToggleSwitchIcon';
-import { Friend } from './FriendsList';
+import { Friend } from '../types/friend';
+import Logout from './auth/Logout';
 
 interface Props {
   isLoggedIn: boolean;

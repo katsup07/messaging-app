@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useError } from '../services/ErrorService';
+import { useError } from '../../services/ErrorService';
 
 interface ErrorToastProps {
   className?: string;

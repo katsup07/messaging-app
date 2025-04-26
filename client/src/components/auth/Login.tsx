@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSetAtom } from 'jotai';
-import { userAtom } from '../atoms/userAtom';
-import { validateEmail, validatePassword } from '../helpers/validation-utils';
-import ApiService from '../services/ApiService';
 import { MdLogin } from 'react-icons/md';
+import { validateEmail, validatePassword } from '../../helpers/validation-utils';
+import { userAtom } from '../../atoms/userAtom';
+import ApiService from '../../services/ApiService';
 
 const validateLogin = (email: string, password: string): boolean => {
   const isValidEmail = validateEmail(email);

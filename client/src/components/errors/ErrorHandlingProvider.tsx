@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import ErrorBoundary from './ErrorBoundary';
-import { ErrorProvider } from '../services/ErrorService';
+import { ErrorProvider } from '../../services/ErrorService';
 import ErrorToast from './ErrorToast';
+
 
 interface ErrorWrapperProps {
   children: ReactNode;

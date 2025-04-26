@@ -3,7 +3,7 @@ import { useSetAtom } from 'jotai';
 import { User, userAtom } from '../atoms/userAtom';
 import ApiService from '../services/ApiService';
 import { TokenResult } from '../types/token';
-import { disconnectSocket } from './socket-io-client';
+import { disconnectSocket } from '../socket-io-client';
 
 const verifyTokenOnServer = async (token: string): Promise<TokenResult> => {
   const apiService = ApiService.getInstance();

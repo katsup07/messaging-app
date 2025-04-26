@@ -1,22 +1,14 @@
-import { registerForLiveUpdates, socketCleanup, socketSetup } from '../helpers/socket-io-client';
-
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
-import { userAtom } from '../atoms/userAtom';
-import ApiService from '../services/ApiService';
-import Message from './Message';
+import { userAtom } from '../../atoms/userAtom';
+import ApiService from '../../services/ApiService';
 import React from 'react';
-import { Friend } from './FriendsList';
-import useScrollToBottom from '../helpers/useScrollToBottom';
-
-export interface Message {
-  senderId: number | string;
-  sender: string;
-  content: string;
-  receiverId: number | string;
-  time: string;
-  isRead?: boolean;
-}
+import { Friend } from '../../types/friend';
+import useScrollToBottom from '../../helpers/useScrollToBottom';
+import { useMessageSocket } from '../../helpers/useMessageSocket';
+import { Message } from '../../types/message';
+import MessageList from './MessageList';
+import MessageInput from './MessageInput';
 
 interface Props {
   selectedFriend: Friend | null;
@@ -32,28 +24,21 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   const user = useAtomValue(userAtom);
 
   const apiService = ApiService.getInstance(user);
-  
+
   useScrollToBottom(messagesContainerRef, [messages, selectedFriend]);
 
-  // Socket initialization
-  useEffect(() => {
-    if (user) registerForLiveUpdates(user._id.toString());
-
-    socketSetup('receive-message', (data) => {
-      setMessages((prevMessages) => [...prevMessages, data.message]);
-    });
-
-    return () => {
-      socketCleanup('receive-message');
-    };
-  }, [user]);
+  // Handle new messages with custom socket hook
+  const handleNewMessage = useCallback((message: Message) => {
+    setMessages((prevMessages) => [...prevMessages, message]);
+  }, []);
+  
+  useMessageSocket(user?._id, handleNewMessage);
 
   const hasAFriend = useCallback(async() => {
     const friendsData = await apiService.getFriends();
     setHasFriends(friendsData.length > 0);
   }, [apiService])
-
-  // Fetch messages function
+  
   const fetchMessages = useCallback(async () => {
     if (!selectedFriend || !user) return;
 
@@ -70,15 +55,13 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
     }
   }, [apiService, selectedFriend, user]);
 
-  // Initialization of state
   useEffect(() => {
     if (selectedFriend && user) {
       apiService.setSelectedFriend(selectedFriend);
     
-    hasAFriend();
-
-    // Initial fetch
-    fetchMessages();
+      hasAFriend();
+      // Initial fetch
+      fetchMessages();
     } else {
       setMessages([]);
       setError(null);
@@ -117,50 +100,20 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
 
   return (
     <div className="chat-container">
-      <div className="messages-container" ref={messagesContainerRef}>
-        {error && <div className="error-message">{error}</div>}
-        {isLoading && messages.length === 0 ? (
-          <div className="loading-spinner">Loading messages...</div>
-        ) : messages.length === 0 ? (
-            <em>No message history exists.</em>
-        ) : (
-          <>
-            {messages.filter(isFriendSenderOrReceiver).map((message, index) => (
-              <Message
-                key={`${message.senderId}-${message.time}-${index}`}
-                senderId={message.senderId.toString()}
-                sender={message.sender}
-                content={message.content}
-                time={message.time}
-                isRead={message.isRead}
-              />
-            ))}
-          </>
-        )}
-      </div>
-      <div className="message-input-container">
-         {hasFriends && <textarea
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type your message"
-          className="message-input"
-          disabled={isLoading}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSendMessage();
-            }
-          }}
-          rows={1}
-        />}
-        {hasFriends && <button
-          onClick={handleSendMessage}
-          className="send-button"
-          disabled={isLoading || !newMessage.trim()}
-        >
-          Send
-        </button>}
-      </div>
+      <MessageList 
+        messages={messages}
+        isLoading={isLoading}
+        error={error}
+        messagesContainerRef={messagesContainerRef}
+        isFriendSenderOrReceiver={isFriendSenderOrReceiver}
+      />
+      <MessageInput
+        newMessage={newMessage}
+        setNewMessage={setNewMessage}
+        handleSendMessage={handleSendMessage}
+        isLoading={isLoading}
+        hasFriends={hasFriends}
+      />
     </div>
   );
 };

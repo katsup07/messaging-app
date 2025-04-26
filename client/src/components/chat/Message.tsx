@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAtomValue } from 'jotai';
-import { userAtom } from '../atoms/userAtom';
+import { userAtom } from '../../atoms/userAtom';
 
 interface MessageProps {
   senderId: string;

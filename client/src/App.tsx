@@ -1,15 +1,16 @@
 import { useAtomValue } from 'jotai';
 import './App.css'
-import Chat from './components/Chat'
+import Chat from './components/chat/Chat'
 import { userAtom } from './atoms/userAtom';
-import Login from './components/Login';
-import FriendsList, { Friend } from './components/FriendsList';
+import Login from './components/auth/Login';
+import FriendsList from './components/friends/FriendsList';
 import { useState } from 'react';
 import Header from './components/Header';
 import useAuth from './helpers/useAuth';
 import { useIsMobile } from './helpers/useIsMobile';
 import { Loading } from './components/Loading';
-import ErrorHandlingProvider from './components/ErrorHandlingProvider';
+import ErrorHandlingProvider from './components/errors/ErrorHandlingProvider';
+import { Friend } from './types/friend';
 
 function App() {
   const { isLoading } = useAuth();

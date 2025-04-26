@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useSetAtom } from 'jotai';
-import { User, userAtom } from '../atoms/userAtom';
+import { User, userAtom } from '../../atoms/userAtom';
 import { MdLogout } from 'react-icons/md';
-import useAuth from '../helpers/useAuth';
+import useAuth from '../../helpers/useAuth';
 
 interface Props{
   isMobile: boolean;

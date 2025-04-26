@@ -23,7 +23,7 @@ async function respondToRequest(req, res) {
 
   const updatedRequest = await friendService.respondToFriendRequest(requestId, accept);
   
-  // Notify the sender through notification service
+  // Notify the original sender of the friend request
   notificationService.notifyFriendRequestResponse(
     updatedRequest.fromUserId, 
     updatedRequest.status
