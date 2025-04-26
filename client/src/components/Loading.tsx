@@ -5,7 +5,7 @@ export const Loading = () => {
           <div className="spinner-container">
             <div className="spinner"></div>
           </div>
-          <h2 className="loading-title">MessengerApp</h2>
+          <h2 className="loading-title">Messenger</h2>
           <p className="loading-message">Loading your conversations...</p>
         </div>
       </div>
