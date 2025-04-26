@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { socketCleanup, socketSetup } from '../../socket-io-client';
+import { connectSocket, socketCleanup, socketSetup } from '../../socket-io-client';
 
 /**
  * Custom hook for managing socket connections related to friend online status
@@ -13,9 +13,14 @@ export function useFriendStatusSocket(
 ) {
   useEffect(() => {
     if (!userId || !onStatusChange) return;
+    // Ensure socket is connected
+    connectSocket();
     
-    socketSetup('get-friends-status', onStatusChange);
+    socketSetup('get-friends-status', (statuses) => {
+      onStatusChange(statuses);
+    });
     
+    // Clean up on unmount
     return () => {
       socketCleanup('get-friends-status');
     };

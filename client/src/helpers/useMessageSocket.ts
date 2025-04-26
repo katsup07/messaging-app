@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
-import { socketCleanup, socketSetup } from '../socket-io-client';
+import { connectSocket, socketCleanup, socketSetup } from '../socket-io-client';
 import { Message } from '../types/message';
-
 
 /**
  * Custom hook for managing socket connections related to messages
@@ -15,11 +14,13 @@ export function useMessageSocket(
 ) {
   useEffect(() => {
     if (!userId || !onMessageReceive) return;
-        
+    // Ensure socket is connected
+    connectSocket();
+    
     socketSetup('receive-message', (data) => {
       onMessageReceive(data.message);
     });
-    
+    // Clean up on unmount
     return () => {
       socketCleanup('receive-message');
     };
