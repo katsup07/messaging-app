@@ -100,10 +100,9 @@ Features
 ## 🏗️ Clean Architecture Implementation
 This project follows Domain-Driven Design and Clean Architecture principles:
 
-- **Domain Layer**: Core business logic and entities
-- **Application Layer**: Services that coordinate domain actions
-- **Infrastructure Layer**: External concerns like databases and messaging
 - **Interface Layer**: Controllers and routes that handle HTTP requests
+- **Application Layer**: Services that coordinate domain actions
+- **Repository Layer**: External concerns like databases and messaging
 
 The architecture employs the Dependency Inversion Principle, ensuring high-level modules don't depend on low-level implementations. Key architectural features include:
 
@@ -119,9 +118,9 @@ The architecture employs the Dependency Inversion Principle, ensuring high-level
 - Live status updates for friends
 - Real-time message delivery with typing indicators
 
-## 🔮 Future Enhancements(Coming soon)
+## 🔮 Future Enhancements(Coming in the future)
 - Enhanced notifications and real-time features
 - End-to-end encryption for messages
-- Media sharing capabilities
+- Additional profile features
 - Group chat functionality
 - Voice and video calling features
