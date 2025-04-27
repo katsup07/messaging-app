@@ -1,5 +1,9 @@
 ## ⚙️ Overview 
-This is a fullstack messaging app built using a Clean Architecture and Domain-Driven Design (DDD) approach. It features custom dependency injection, secure JWT authentication, real-time messaging via Socket.IO, and a fully containerized Docker environment. The backend includes layered architecture (routes → controllers → services → repositories), with custom logging and middleware for validation, authentication, and error handling. Frontend and backend are deployed separately (Vercel / Railway), and the project supports both local and Docker-based development setups.
+This is a fullstack messaging app built using Clean Architecture and Domain-Driven Design (DDD) principles. It features custom dependency injection, secure JWT authentication, real-time messaging with Socket.IO, and persistent logging for application monitoring in production.
+
+The backend follows a layered structure (routes → controllers → services → repositories) and includes custom logging and middleware for validation, authentication, and error handling.
+
+The frontend and backend are deployed separately (Vercel / Railway), and the project supports both local and Docker-based development environments.
 
 ## 🚀 Installation and Development
 
