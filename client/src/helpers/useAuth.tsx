@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSetAtom } from 'jotai';
 import { User, userAtom } from '../atoms/userAtom';
-import ApiService from '../services/ApiService';
+import ServiceFacade from '../services/ServiceFacade';
 import { TokenResult } from '../types/token';
 import { disconnectSocket, registerForLiveUpdates } from '../socket-io-client';
 
 const verifyTokenOnServer = async (token: string): Promise<TokenResult> => {
-  const apiService = ApiService.getInstance();
-  return await apiService.verifyToken(token);
+  const serviceFacade = ServiceFacade.getInstance();
+  return await serviceFacade.verifyToken(token);
 }
 
 export default function useAuth() {
@@ -17,17 +17,17 @@ export default function useAuth() {
 
   const logout = useCallback(() => {    
     // server-side logout
-    const apiService = ApiService.getInstance();
-    apiService.logout();
+    const serviceFacade = ServiceFacade.getInstance();
+    serviceFacade.logout();
 
     disconnectSocket();
     // Reset the singleton after logout
-    ApiService.resetInstance();
+    ServiceFacade.resetInstance();
 
     // client-side logout
     // Clear tokens and user data from localStorage
-    apiService.setAccessToken(null);
-    apiService.setRefreshToken(null);
+    serviceFacade.setAccessToken(null);
+    serviceFacade.setRefreshToken(null);
     localStorage.removeItem('user');
     setUser(undefined);
     setIsAuthenticated(false);
@@ -55,17 +55,17 @@ export default function useAuth() {
       const userData = JSON.parse(storedUser) as User;
       setUser(userData);
         
-      // Set the tokens in the ApiService for future authenticated requests
-      const apiService = ApiService.getInstance(userData);
-      apiService.setAccessToken(accessToken);
-      apiService.setRefreshToken(refreshToken);
+      // Set the tokens in the ServiceFacade for future authenticated requests
+      const serviceFacade = ServiceFacade.getInstance(userData);
+      serviceFacade.setAccessToken(accessToken);
+      serviceFacade.setRefreshToken(refreshToken);
         
       setIsAuthenticated(true);
 
       const { isValid, error } = await verifyTokenOnServer(accessToken);
 
       if(!isValid && error?.message === 'jwt expired'){
-        const result = await apiService.onRefreshToken();
+        const result = await serviceFacade.onRefreshToken();
 
         if(!result?.newAccessToken || !result?.newRefreshToken) {
           logout();
@@ -73,8 +73,8 @@ export default function useAuth() {
         }
        
         // Update both tokens
-        apiService.setAccessToken(result.newAccessToken);
-        apiService.setRefreshToken(result.newRefreshToken);
+        serviceFacade.setAccessToken(result.newAccessToken);
+        serviceFacade.setRefreshToken(result.newRefreshToken);
 
         setIsAuthenticated(true);
 

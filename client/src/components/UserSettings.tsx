@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { User } from '../atoms/userAtom';
 import { useSetAtom } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
-import ApiService from '../services/ApiService';
+import ServiceFacade from '../services/ServiceFacade';
 import { validatePassword } from '../helpers/validation-utils';
 import { useIsMobile } from '../helpers/useIsMobile';
 
@@ -64,7 +64,7 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
     
     setIsSubmitting(true);
     try {
-      const apiService = ApiService.getInstance();
+      const serviceFacade = ServiceFacade.getInstance();
       // Only include password in update if it was entered
       const updateData = {
         username: formData.username,
@@ -72,7 +72,7 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
         ...(formData.password && { password: formData.password })
       };
       
-      const updatedUser = await apiService.updateUserDetails(user._id.toString(), updateData);
+      const updatedUser = await serviceFacade.updateUserDetails(user._id.toString(), updateData);
       // global state
       setUser(updatedUser);
       // local storage

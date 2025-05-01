@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import ApiService from '../../services/ApiService';
+import ServiceFacade from '../../services/ServiceFacade';
 import { User } from '../../atoms/userAtom';
 import { Friend, FriendRequest } from '../../types/friend';
 
@@ -13,23 +13,23 @@ export const useFriendsData = (
   const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);
   const [users, setUsers] = useState<{ [key: number | string]: Friend }>({});
   const [error, setError] = useState<string | null>(null);
-  const [apiService, setApiService] = useState<ApiService | null>(null);
+  const [serviceFacade, setServiceFacade] = useState<ServiceFacade | null>(null);
 
   useEffect(() => {
     if (!user){
-      setApiService(null);
+      setServiceFacade(null);
       return;
     }
     
-    setApiService(ApiService.getInstance(user));
+    setServiceFacade(ServiceFacade.getInstance(user));
   }, [user]);
 
   const fetchFriends = useCallback(async () => {
-    if (!apiService) return;
+    if (!serviceFacade) return;
     try {
       setError(null);
-      const friendsData = await apiService.getFriends();
-      const usersData = await apiService.getUsers();
+      const friendsData = await serviceFacade.getFriends();
+      const usersData = await serviceFacade.getUsers();
 
       const usersMap = usersData.reduce((acc: { [key: number | string]: Friend }, user: Friend) => {
         acc[user._id] = user;
@@ -47,19 +47,19 @@ export const useFriendsData = (
       console.error('Failed to fetch friends:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch friends');
     }
-  }, [apiService, onSelectFriend, selectedFriend, isMobile]);
+  }, [serviceFacade, onSelectFriend, selectedFriend, isMobile]);
 
   const fetchPendingRequests = useCallback(async () => {
-    if (!apiService) return;
+    if (!serviceFacade) return;
     try {
       setError(null);
-      const results = await apiService.getPendingFriendRequests();
+      const results = await serviceFacade.getPendingFriendRequests();
       setPendingRequests(results);
     } catch (err) {
       console.error('Failed to fetch pending requests:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch pending requests');
     }
-  }, [apiService]);
+  }, [serviceFacade]);
 
   const refreshData = useCallback(() => {
     fetchFriends();
@@ -67,10 +67,10 @@ export const useFriendsData = (
   }, [fetchFriends, fetchPendingRequests]);
 
   useEffect(() => {
-    if (apiService) {
+    if (serviceFacade) {
       refreshData();
     }
-  }, [apiService, refreshData]);
+  }, [serviceFacade, refreshData]);
 
   return {
     friends,
@@ -79,6 +79,6 @@ export const useFriendsData = (
     error,
     setError,
     refreshData,
-    apiService,
+    serviceFacade,
   };
 };

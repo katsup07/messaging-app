@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
 import { userAtom } from '../../atoms/userAtom';
-import ApiService from '../../services/ApiService';
+import ServiceFacade from '../../services/ServiceFacade';
 import React from 'react';
 import { Friend } from '../../types/friend';
 import useScrollToBottom from '../../helpers/useScrollToBottom';
@@ -23,7 +23,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const user = useAtomValue(userAtom);
 
-  const apiService = ApiService.getInstance(user);
+  const serviceFacade = ServiceFacade.getInstance(user);
 
   useScrollToBottom(messagesContainerRef, [messages, selectedFriend]);
 
@@ -35,16 +35,16 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   useMessageSocket(user?._id, handleNewMessage);
 
   const hasAFriend = useCallback(async() => {
-    const friendsData = await apiService.getFriends();
+    const friendsData = await serviceFacade.getFriends();
     setHasFriends(friendsData.length > 0);
-  }, [apiService])
+  }, [serviceFacade])
   
   const fetchMessages = useCallback(async () => {
     if (!selectedFriend || !user) return;
 
     try {
       setIsLoading(true);
-      const fetchedMessages = await apiService.getMessages();
+      const fetchedMessages = await serviceFacade.getMessages();
       setMessages(fetchedMessages);
       setError(null);
     } catch (error) {
@@ -53,11 +53,11 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [apiService, selectedFriend, user]);
+  }, [serviceFacade, selectedFriend, user]);
 
   useEffect(() => {
     if (selectedFriend && user) {
-      apiService.setSelectedFriend(selectedFriend);
+      serviceFacade.setSelectedFriend(selectedFriend);
     
       hasAFriend();
       // Initial fetch
@@ -66,7 +66,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
       setMessages([]);
       setError(null);
     }
-  }, [apiService, selectedFriend, user, fetchMessages, hasAFriend]);
+  }, [serviceFacade, selectedFriend, user, fetchMessages, hasAFriend]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedFriend || !user) return;
@@ -81,7 +81,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
         receiverId: selectedFriend._id,
         isRead: false,
       };
-      await apiService.sendMessage(messageData);
+      await serviceFacade.sendMessage(messageData);
       
       setNewMessage('');
     } catch (error) {

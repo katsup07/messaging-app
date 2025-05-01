@@ -1,16 +1,25 @@
-import { TokenResult } from "../types/token";
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { User } from "../atoms/userAtom";
+import { TokenResult } from "../types/token";
+import { handleApiError } from "./ErrorService";
+import { HttpService } from "./HttpService";
+import { _baseAuthUrl } from "./urls";
+
+// TODO: Split off a user service that handles user-related operations and a token service that handles token-related operations. This will make the code cleaner and more maintainable.
 export default class AuthService {
+  private httpService: HttpService;
+  private user?: User;
   public accessToken: string | null = null;
   public refreshToken: string | null = null;
   public isRefreshing = false;
   public refreshPromise: Promise<{ newAccessToken: string; newRefreshToken: string } | null> | null = null;
   private refreshSubscribers: Array<(token: string) => void> = [];
 
-  constructor() {
+  constructor(user?: User) {
     this.accessToken = localStorage.getItem('accessToken');
     this.refreshToken = localStorage.getItem('refreshToken');
+    this.httpService = new HttpService(this);
+    this.user = user;
   }
 
   setAccessToken(token: string | null) {
@@ -38,6 +47,12 @@ export default class AuthService {
   notifySubscribers(token: string) {
     this.refreshSubscribers.forEach(callback => callback(token));
     this.refreshSubscribers = [];
+  }
+
+  async getUsers(): Promise<any> {
+    const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/users`);
+    await handleApiError(response);
+    return response.json();
   }
 
   async onRefreshToken(baseAuthUrl: string): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
@@ -133,7 +148,50 @@ export default class AuthService {
         }
       }
 
-      // TODO: Add logout?
+      // private isTokenExpired(token: string): boolean {
+        //   try {
+        //     const payload = JSON.parse(atob(token.split('.')[1]));
+        //     return payload.exp < Date.now() / 1000;
+        //   } catch (e) {
+        //     return true; // If can't decode the token, assume expired
+        //   }
+        // }
+      
+        // private async handleTokenRefresh(): Promise<string | null> {
+        //  return await this.authService.handleTokenRefresh(this._baseAuthUrl);
+        // }
+
+      async logout(): Promise<void> {
+          const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/logout/${this.user?._id}`, {
+            method: 'POST',
+            body: JSON.stringify({
+              userId: this.user?._id,
+            }),
+          });
+          
+          await handleApiError(response);
+        }
 
 
+        async updateUsername(userId: string, username: string): Promise<User> {
+          const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/update-username/${userId}`, { 
+            method: 'PUT',
+            body: JSON.stringify({ username }),
+          });
+          await handleApiError(response);
+          const updatedUser = await response.json();
+      
+          return updatedUser;
+        }
+
+        async updateUserDetails(userId: string, userData: { username: string, email: string }): Promise<User> {
+          const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/users/${userId}`, {
+            method: 'PUT',
+            body: JSON.stringify(userData),
+          });
+          await handleApiError(response);
+          const updatedUser = await response.json();
+      
+          return updatedUser;
+        }
   }

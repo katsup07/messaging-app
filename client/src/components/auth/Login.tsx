@@ -3,7 +3,7 @@ import { useSetAtom } from 'jotai';
 import { MdLogin } from 'react-icons/md';
 import { validateEmail, validatePassword } from '../../helpers/validation-utils';
 import { userAtom } from '../../atoms/userAtom';
-import ApiService from '../../services/ApiService';
+import ServiceFacade from '../../services/ServiceFacade';
 import { registerForLiveUpdates } from '../../socket-io-client';
 
 const validateLogin = (email: string, password: string): boolean => {
@@ -37,16 +37,16 @@ const Login: React.FC = () => {
     if(!isValid)
       return;
 
-    const apiService = ApiService.getInstance();
-    const response = await apiService.auth({ email, password, isSignup });
+    const serviceFacade = ServiceFacade.getInstance();
+    const response = await serviceFacade.auth({ email, password, isSignup });
 
     if (!response || !response.accessToken) {
       alert('Invalid email or password');
       return;
     }
     // api
-    apiService.setAccessToken(response.accessToken);
-    apiService.setRefreshToken(response.refreshToken);
+    serviceFacade.setAccessToken(response.accessToken);
+    serviceFacade.setRefreshToken(response.refreshToken);
     // session
     localStorage.setItem('accessToken', response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);

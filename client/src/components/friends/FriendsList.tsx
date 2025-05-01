@@ -25,7 +25,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   const [targetUser, setTargetUser] = useState<Friend | null>(null);
   const [friendIdToValidate, setFriendIdToValidate] = useState<string>('');
 
-  const { friends, pendingRequests, users, error, setError, refreshData, apiService } = useFriendsData(user, onSelectFriend, selectedFriend, isMobile);
+  const { friends, pendingRequests, users, error, setError, refreshData, serviceFacade } = useFriendsData(user, onSelectFriend, selectedFriend, isMobile);
 
   const handleRequestReceived = useCallback(() => {
     refreshData();
@@ -47,7 +47,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   };
 
   const handleValidateAndConfirm = async (friendId: string) => {
-    if (!apiService) return;
+    if (!serviceFacade) return;
     setFriendIdToValidate(friendId);
     try {
       setError(null);
@@ -55,7 +55,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
         setError("You cannot send a friend request to yourself");
         return;
       }
-      const usersList = await apiService.getUsers();
+      const usersList = await serviceFacade.getUsers();
       const targetUserFound = usersList.find((u: Friend) => u._id === friendId);
       if (!targetUserFound) {
         setError("User not found");
@@ -69,10 +69,10 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   };
 
   const handleSendFriendRequest = async () => {
-    if (!apiService || !friendIdToValidate) return;
+    if (!serviceFacade || !friendIdToValidate) return;
     try {
       setError(null);
-      await apiService.sendFriendRequest(friendIdToValidate);
+      await serviceFacade.sendFriendRequest(friendIdToValidate);
       setShowAddFriend(false);
       setShowConfirmation(false);
       setTargetUser(null);
@@ -90,10 +90,10 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   };
 
   const handleRespondToRequest = async (requestId: string | number, accept: boolean) => {
-    if (!apiService) return;
+    if (!serviceFacade) return;
     try {
       setError(null);
-      await apiService.respondToFriendRequest(requestId, accept);
+      await serviceFacade.respondToFriendRequest(requestId, accept);
       refreshData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to respond to friend request');
