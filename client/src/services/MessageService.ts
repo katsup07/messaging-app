@@ -14,11 +14,11 @@ export class MessageService {
     this.selectedFriend = friend;
   }
 
-  async getMessages(): Promise<any> {
+  async getMessages(userId: string | number): Promise<any> {
       if (!this.selectedFriend)
         return [];
       
-      const response = await this.httpService.authorizedRequest(`${_baseMessageUrl}/${this.user._id}?friendId=${this.selectedFriend._id}`);
+      const response = await this.httpService.authorizedRequest(`${_baseMessageUrl}/${userId}?friendId=${this.selectedFriend._id}`);
       await handleApiError(response);
       return response.json();
     }

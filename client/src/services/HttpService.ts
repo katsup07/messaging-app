@@ -38,7 +38,7 @@ export class HttpService {
       if (!this.authService.accessToken)
         throw new Error('No access token available');
   
-    // TODO: Add fingerprint to server
+    // TODO: Add fingerprint to server to combat against XSS attacks
     // Browser fingerprint to help prevent token reuse on different devices
     // const fingerprint = this.getBrowserFingerprint();
       

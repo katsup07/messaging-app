@@ -8,7 +8,6 @@ import { MessageService } from "./MessageService";
 import { _baseAuthUrl, _baseFriendRequestUrl, _baseMessageUrl } from "./urls";
 
 // Singleton facade pattern
-
 export default class ServiceFacade {
   private user: User;
   private authService;
@@ -71,7 +70,7 @@ export default class ServiceFacade {
   }
 
   async getMessages(): Promise<any> {
-    return await this.messageService.getMessages();
+    return await this.messageService.getMessages(this.user._id);
   }
 
   async sendMessage(message: { sender: string; content: string }): Promise<any> {
