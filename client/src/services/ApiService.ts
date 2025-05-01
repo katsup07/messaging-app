@@ -1,5 +1,6 @@
 import { User } from "../atoms/userAtom";
 import { TokenResult } from "../types/token";
+import AuthService from "./AuthService";
 import { handleApiError } from "./ErrorService";
 
 // TODO: Refactor this class into HTTPClient, AuthService, and MessageService classes
@@ -12,23 +13,15 @@ export default class ApiService {
   private readonly _baseFriendRequestUrl = `${this._apiBaseUrl}/friend-requests`;
   private user: User;
   private selectedFriend: User | null = null;
-  private accessToken: string | null = null;
-  private refreshToken: string | null = null;
-  private isRefreshing = false;
-  private refreshPromise: Promise<{ newAccessToken: string; newRefreshToken: string } | null> | null = null;
-
-  // Queue of callbacks to call after token refresh
-  private refreshSubscribers: Array<(token: string) => void> = [];
+  private authService;
 
   private static instance: ApiService | null = null;
 
   private constructor(user?: User) {
     const anonymousUser = { _id: 0, username: 'anon-user', email: 'anon-user@email.com' };
     this.user = user || anonymousUser;
-    
-    // Initialize tokens from localStorage
-    this.accessToken = localStorage.getItem('accessToken');
-    this.refreshToken = localStorage.getItem('refreshToken');
+
+    this.authService = new AuthService();
   }
 
   static getInstance(user?: User): ApiService {
@@ -58,41 +51,20 @@ export default class ApiService {
     this.selectedFriend = friend;
   }
 
-  setAccessToken(token: string | null) {
-    this.accessToken = token;
-    if (token) 
-      localStorage.setItem('accessToken', token);
-    else
-      localStorage.removeItem('accessToken');
-    
-  }
-
-  setRefreshToken(token: string | null) {
-    this.refreshToken = token;
-    if (token)
-      localStorage.setItem('refreshToken', token);
-    else
-      localStorage.removeItem('refreshToken');
-    
-  }
-
   setUser(user: User) {
     this.user = user;
   }
 
-  // Subscribe to token refresh
-  private onRefreshed(callback: (token: string) => void) {
-    this.refreshSubscribers.push(callback);
+  setAccessToken(token: string | null) {
+    this.authService.setAccessToken(token);
   }
 
-  // Notify all subscribers about new token
-  private notifySubscribers(token: string) {
-    this.refreshSubscribers.forEach(callback => callback(token));
-    this.refreshSubscribers = [];
+  setRefreshToken(token: string | null) {
+    this.authService.setRefreshToken(token);
   }
-
+  
   private async authorizedRequest(url: string, options: RequestInit = {}): Promise<Response> {
-    if (!this.accessToken)
+    if (!this.authService.accessToken)
       throw new Error('No access token available');
     // Attempt the request with current token
     const response = await this.performRequest(url, options);
@@ -117,71 +89,51 @@ export default class ApiService {
   }
 
   private async performRequest(url: string, options: RequestInit = {}): Promise<Response> {
-    if (!this.accessToken)
+    if (!this.authService.accessToken)
       throw new Error('No access token available');
+
+  // TODO: Add fingerprint to server
+  // Browser fingerprint to help prevent token reuse on different devices
+  // const fingerprint = this.getBrowserFingerprint();
     
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.accessToken}`,
+      'Authorization': `Bearer ${this.authService.accessToken}`,
+      // 'X-Fingerprint': fingerprint,
+      // 'X-XSS-Protection': '1; mode=block',
+      // 'X-Content-Type-Options': 'nosniff',
       ...options.headers
     };
 
     return fetch(url, { ...options, headers });
   }
 
-  private async handleTokenRefresh(): Promise<string | null> {
-    // If already refreshing, wait for that to complete
-    if (this.isRefreshing) 
-      return new Promise<string | null>((resolve) => {
-        this.onRefreshed(token => {
-          resolve(token);
-        });
-      });
-    
+  private getBrowserFingerprint(): string {
+    // Simple fingerprinting based on navigator and screen properties
+    const fingerprint = {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      screenResolution: `${screen.width}x${screen.height}`,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    };
+    return btoa(JSON.stringify(fingerprint));
+  }
 
-    this.isRefreshing = true;
-    try {
-      // Start the refresh process
-      this.refreshPromise = this.onRefreshToken();
-      const tokens = await this.refreshPromise;
-      
-      if (tokens) {
-        // Update tokens
-        this.setAccessToken(tokens.newAccessToken);
-        this.setRefreshToken(tokens.newRefreshToken);
-        
-        // Notify waiting requests
-        this.notifySubscribers(tokens.newAccessToken);
-        return tokens.newAccessToken;
-      }
-      
-      // If refresh failed, clear tokens and return null
-      this.setAccessToken(null);
-      this.setRefreshToken(null);
-      return null;
-    } finally {
-      this.isRefreshing = false;
-      this.refreshPromise = null;
-    }
+  // private isTokenExpired(token: string): boolean {
+  //   try {
+  //     const payload = JSON.parse(atob(token.split('.')[1]));
+  //     return payload.exp < Date.now() / 1000;
+  //   } catch (e) {
+  //     return true; // If can't decode the token, assume expired
+  //   }
+  // }
+
+  private async handleTokenRefresh(): Promise<string | null> {
+   return await this.authService.handleTokenRefresh(this._baseAuthUrl);
   }
 
   async onRefreshToken(): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
-    if (!this.refreshToken)
-      throw new Error('No refresh token available');
-
-    // Use fetch directly since we don't want to trigger another refresh
-    const response = await fetch(`${this._baseAuthUrl}/refresh-token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ refreshToken: this.refreshToken })
-    });
-
-    if (!response.ok)
-      return null;
-
-    return response.json();
+    return await this.authService.onRefreshToken(this._baseAuthUrl);
   }
 
   async getMessages(): Promise<any> {
@@ -204,22 +156,7 @@ export default class ApiService {
   }
 
   async auth(credentials: { email: string; password: string, isSignup: boolean }): Promise<any> {
-    const authUrl = this._baseAuthUrl + (credentials.isSignup ? '/signup' : '/login');
-    
-    const response = await fetch(`${authUrl}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    if (data.error) return null;
-
-    return data;
+    return await this.authService.auth(credentials, this._baseAuthUrl);
   }
 
   async updateUsername(userId: string, username: string): Promise<User> {
@@ -234,22 +171,7 @@ export default class ApiService {
   }
 
   async verifyToken(accessToken: string): Promise<TokenResult> {
-    // No authorized request because verifyToken is called before token is set
-    const response = await fetch(`${this._baseAuthUrl}/verify-token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      return { isValid: false, error: new Error(data.error || 'Token verification failed') };
-    }
-
-    const result = await response.json();
-    return result;
+    return await this.authService.verifyToken(accessToken, this._baseAuthUrl);
   }
 
   async getFriends(): Promise<any> {
