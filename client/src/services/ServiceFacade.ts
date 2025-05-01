@@ -23,7 +23,7 @@ export default class ServiceFacade {
     this.authService = new AuthService(this.user);
     this.httpService = new HttpService(this.authService);
     this.friendService = new FriendService(this.user, this.httpService);
-    this.messageService = new MessageService(this.user, this.httpService);
+    this.messageService = new MessageService(this.httpService);
   }
 
   static getInstance(user?: User): ServiceFacade {

@@ -7,7 +7,7 @@ import { _baseMessageUrl } from "./urls";
 export class MessageService {
   private selectedFriend: User | null = null;
 
-  constructor(private user: User, private httpService: HttpService) {
+  constructor(private httpService: HttpService) {
   }
 
   setSelectedFriend(friend: User | null) {
