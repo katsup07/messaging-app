@@ -5,12 +5,14 @@ import AuthService from "./AuthService";
 import { FriendService } from "./FriendService";
 import { HttpService } from "./HttpService";
 import { MessageService } from "./MessageService";
-import { _baseAuthUrl, _baseFriendRequestUrl, _baseMessageUrl } from "./urls";
+import { _baseAuthUrl } from "./urls";
+import { UserService } from "./UserService";
 
 // Singleton facade pattern
 export default class ServiceFacade {
   private user: User;
-  private authService;
+  private authService: AuthService;
+  private userService: UserService;
   private httpService: HttpService;
   private friendService: FriendService;
   private messageService: MessageService;
@@ -19,11 +21,13 @@ export default class ServiceFacade {
   private constructor(user?: User) {
     const anonymousUser = { _id: 0, username: 'anon-user', email: 'anon-user@email.com' };
     this.user = user || anonymousUser;
-
     this.authService = new AuthService(this.user);
     this.httpService = new HttpService(this.authService);
+    this.authService.setHttpService(this.httpService);
+    
     this.friendService = new FriendService(this.user, this.httpService);
     this.messageService = new MessageService(this.httpService);
+    this.userService = new UserService(this.httpService);
   }
 
   static getInstance(user?: User): ServiceFacade {
@@ -41,28 +45,9 @@ export default class ServiceFacade {
     ServiceFacade.instance = null;
   }
 
-  get baseMessageUrl(): string {
-    return _baseMessageUrl;
-  }
-
-  get baseFriendRequestUrl(): string {
-    return _baseFriendRequestUrl;
-  }
-
-  setUser(user: User) {
-    this.user = user;
-  }
-
+  // Message methods
   setSelectedFriend(friend: User | null) {
     this.messageService.setSelectedFriend(friend);
-  }
-
-  setAccessToken(token: string | null) {
-    this.authService.setAccessToken(token);
-  }
-
-  setRefreshToken(token: string | null) {
-    this.authService.setRefreshToken(token);
   }
 
   async onRefreshToken(): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
@@ -77,34 +62,49 @@ export default class ServiceFacade {
    return await this.messageService.sendMessage(message);
   }
 
-  async auth(credentials: { email: string; password: string, isSignup: boolean }): Promise<any> {
-    return await this.authService.auth(credentials, _baseAuthUrl);
+  // Auth methods
+  setAccessToken(token: string | null) {
+    this.authService.setAccessToken(token);
   }
 
-  async updateUsername(userId: string, username: string): Promise<User> {
-    return await this.authService.updateUsername(userId, username);
+  setRefreshToken(token: string | null) {
+    this.authService.setRefreshToken(token);
+  }
+
+  async auth(credentials: { email: string; password: string, isSignup: boolean }): Promise<any> {
+    return await this.authService.auth(credentials, _baseAuthUrl);
   }
 
   async verifyToken(accessToken: string): Promise<TokenResult> {
     return await this.authService.verifyToken(accessToken, _baseAuthUrl);
   }
 
-  async getFriends(): Promise<any> {
-    return this.friendService.getFriends(this.user._id);
-  }
-
-  async getUsers(): Promise<any> {
-    return await this.authService.getUsers();
-  }
-
-  async updateUserDetails(userId: string, userData: { username: string, email: string }): Promise<User> {
-    return await this.authService.updateUserDetails(userId, userData);
-  }
-
   async logout(): Promise<void> {
     await this.authService.logout();
   }
 
+  async getFriends(): Promise<any> {
+    return this.friendService.getFriends(this.user._id);
+  }
+
+  // User methods
+  setUser(user: User) {
+    this.user = user;
+  }
+
+  async getUsers(): Promise<any> {
+    return await this.userService.getUsers();
+  }
+
+  async updateUsername(userId: string, username: string): Promise<User> {
+    return await this.userService.updateUsername(userId, username);
+  }
+
+  async updateUserDetails(userId: string, userData: { username: string, email: string }): Promise<User> {
+    return await this.userService.updateUserDetails(userId, userData);
+  }
+
+  // Friend methods
   async getPendingFriendRequests(): Promise<any> {
    return await this.friendService.getPendingFriendRequests();
   }

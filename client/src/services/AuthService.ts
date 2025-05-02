@@ -7,148 +7,153 @@ import { _baseAuthUrl } from "./urls";
 
 // TODO: Split off a user service that handles user-related operations and a token service that handles token-related operations. This will make the code cleaner and more maintainable.
 export default class AuthService {
-  private httpService: HttpService;
-  private user?: User;
   public accessToken: string | null = null;
-  public refreshToken: string | null = null;
-  public isRefreshing = false;
-  public refreshPromise: Promise<{ newAccessToken: string; newRefreshToken: string } | null> | null = null;
+  private refreshToken: string | null = null;
+  private isRefreshing = false;
+  private refreshPromise: Promise<{ newAccessToken: string; newRefreshToken: string } | null> | null = null;
   private refreshSubscribers: Array<(token: string) => void> = [];
+  private httpService: HttpService | null = null;
 
-  constructor(user?: User) {
+  constructor(private user: User) {
     this.accessToken = localStorage.getItem('accessToken');
     this.refreshToken = localStorage.getItem('refreshToken');
-    this.httpService = new HttpService(this);
     this.user = user;
   }
 
+
+  setHttpService(httpService: HttpService) {
+    this.httpService = httpService;
+  }
+
   setAccessToken(token: string | null) {
-      this.accessToken = token;
-      if (token) 
-        localStorage.setItem('accessToken', token);
-      else
-        localStorage.removeItem('accessToken');
-      
-    }
-  
-    setRefreshToken(token: string | null) {
-      this.refreshToken = token;
-      if (token)
-        localStorage.setItem('refreshToken', token);
-      else
-        localStorage.removeItem('refreshToken');
-    }
+    this.accessToken = token;
+    if (token) 
+      localStorage.setItem('accessToken', token);
+    else
+      localStorage.removeItem('accessToken');
+  }
 
-    onRefreshed(callback: (token: string) => void) {
-      this.refreshSubscribers.push(callback);
-    }
+  setRefreshToken(token: string | null) {
+    this.refreshToken = token;
+    if (token)
+      localStorage.setItem('refreshToken', token);
+    else
+      localStorage.removeItem('refreshToken');
+  }
 
-     // Notify all subscribers about new token
+  onRefreshed(callback: (token: string) => void) {
+    this.refreshSubscribers.push(callback);
+  }
+
+  // Notify all subscribers about new token
   notifySubscribers(token: string) {
     this.refreshSubscribers.forEach(callback => callback(token));
     this.refreshSubscribers = [];
   }
 
   async getUsers(): Promise<any> {
+    if (!this.httpService) {
+      throw new Error('HttpService not initialized');
+    }
     const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/users`);
     await handleApiError(response);
     return response.json();
   }
 
   async onRefreshToken(baseAuthUrl: string): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
-      if (!this.refreshToken)
-        throw new Error('No refresh token available');
-  
-      // Use fetch directly since we don't want to trigger another refresh
-      const response = await fetch(`${baseAuthUrl}/refresh-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ refreshToken: this.refreshToken})
-      });
-  
-      if (!response.ok)
-        return null;
-  
-      return response.json();
-    }
+    if (!this.refreshToken)
+      throw new Error('No refresh token available');
 
-    async auth(credentials: { email: string; password: string, isSignup: boolean }, baseAuthUrl: string): Promise<any> {
-      const authUrl = baseAuthUrl + (credentials.isSignup ? '/signup' : '/login');
-      
-      const response = await fetch(`${authUrl}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
-  
-      if (!response.ok) return null;
-  
+    // Use fetch directly since we don't want to trigger another refresh
+    const response = await fetch(`${baseAuthUrl}/refresh-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ refreshToken: this.refreshToken })
+    });
+
+    if (!response.ok)
+      return null;
+
+    return response.json();
+  }
+
+  async auth(credentials: { email: string; password: string, isSignup: boolean }, baseAuthUrl: string): Promise<any> {
+    const authUrl = baseAuthUrl + (credentials.isSignup ? '/signup' : '/login');
+    
+    const response = await fetch(`${authUrl}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    if (data.error) return null;
+
+    return data;
+  }
+
+  async verifyToken(accessToken: string, baseAuthUrl: string): Promise<TokenResult> {
+    // No authorized request because verifyToken is called before token is set
+    const response = await fetch(`${baseAuthUrl}/verify-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok) {
       const data = await response.json();
-      if (data.error) return null;
-  
-      return data;
+      return { isValid: false, error: new Error(data.error || 'Token verification failed') };
     }
 
-     async verifyToken(accessToken: string, baseAuthUrl: string): Promise<TokenResult> {
-        // No authorized request because verifyToken is called before token is set
-        const response = await fetch(`${baseAuthUrl}/verify-token`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          }
+    const result = await response.json();
+    return result;
+  }
+
+  async handleTokenRefresh(baseAuthUrl: string): Promise<string | null> {
+    // If already refreshing, wait for that to complete
+    if (this.isRefreshing) 
+      return new Promise<string | null>((resolve) => {
+        this.onRefreshed(token => {
+          resolve(token);
         });
+      });
     
-        if (!response.ok) {
-          const data = await response.json();
-          return { isValid: false, error: new Error(data.error || 'Token verification failed') };
-        }
-    
-        const result = await response.json();
-        return result;
-      }
 
-     async handleTokenRefresh(baseAuthUrl: string): Promise<string | null> {
-        // If already refreshing, wait for that to complete
-        if (this.isRefreshing) 
-          return new Promise<string | null>((resolve) => {
-            this.onRefreshed(token => {
-              resolve(token);
-            });
-          });
+    this.isRefreshing = true;
+    try {
+      // Start the refresh process
+      this.refreshPromise = this.onRefreshToken(baseAuthUrl);
+      const tokens = await this.refreshPromise;
+      
+      if (tokens) {
+        // Update tokens
+        this.setAccessToken(tokens.newAccessToken);
+        this.setRefreshToken(tokens.newRefreshToken);
         
-    
-        this.isRefreshing = true;
-        try {
-          // Start the refresh process
-          this.refreshPromise = this.onRefreshToken(baseAuthUrl);
-          const tokens = await this.refreshPromise;
-          
-          if (tokens) {
-            // Update tokens
-            this.setAccessToken(tokens.newAccessToken);
-            this.setRefreshToken(tokens.newRefreshToken);
-            
-            // Notify waiting requests
-            this.notifySubscribers(tokens.newAccessToken);
-            return tokens.newAccessToken;
-          }
-          
-          // If refresh failed, clear tokens and return null
-          this.setAccessToken(null);
-          this.setRefreshToken(null);
-          return null;
-        } finally {
-          this.isRefreshing = false;
-          this.refreshPromise = null;
-        }
+        // Notify waiting requests
+        this.notifySubscribers(tokens.newAccessToken);
+        return tokens.newAccessToken;
       }
+      
+      // If refresh failed, clear tokens and return null
+      this.setAccessToken(null);
+      this.setRefreshToken(null);
+      return null;
+    } finally {
+      this.isRefreshing = false;
+      this.refreshPromise = null;
+    }
+  }
 
-      // private isTokenExpired(token: string): boolean {
+// private isTokenExpired(token: string): boolean {
         //   try {
         //     const payload = JSON.parse(atob(token.split('.')[1]));
         //     return payload.exp < Date.now() / 1000;
@@ -161,37 +166,17 @@ export default class AuthService {
         //  return await this.authService.handleTokenRefresh(this._baseAuthUrl);
         // }
 
-      async logout(): Promise<void> {
-          const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/logout/${this.user?._id}`, {
-            method: 'POST',
-            body: JSON.stringify({
-              userId: this.user?._id,
-            }),
-          });
-          
-          await handleApiError(response);
-        }
-
-
-        async updateUsername(userId: string, username: string): Promise<User> {
-          const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/update-username/${userId}`, { 
-            method: 'PUT',
-            body: JSON.stringify({ username }),
-          });
-          await handleApiError(response);
-          const updatedUser = await response.json();
-      
-          return updatedUser;
-        }
-
-        async updateUserDetails(userId: string, userData: { username: string, email: string }): Promise<User> {
-          const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/users/${userId}`, {
-            method: 'PUT',
-            body: JSON.stringify(userData),
-          });
-          await handleApiError(response);
-          const updatedUser = await response.json();
-      
-          return updatedUser;
-        }
+  async logout(): Promise<void> {
+    if (!this.httpService) {
+      throw new Error('HttpService not initialized');
+    }
+    const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/logout/${this.user?._id}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        userId: this.user?._id,
+      }),
+    });
+    
+    await handleApiError(response);
   }
+}

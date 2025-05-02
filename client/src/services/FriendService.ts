@@ -5,15 +5,8 @@ import { HttpService } from "./HttpService";
 import { _baseFriendRequestUrl, _baseFriendsUrl } from "./urls";
 
 export class FriendService {
-  selectedFriend: User | null = null;
-  private user: User;
-  private httpService: HttpService;
   
-
-  constructor(user: User, httpService: HttpService) {
-    this.user = user;
-    this.httpService = httpService;
-  }
+  constructor(private user: User, private httpService: HttpService) {}
 
   async getFriends(userId: string | number): Promise<any> {
       const response = await this.httpService.authorizedRequest(`${_baseFriendsUrl}/${userId}`);
