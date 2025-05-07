@@ -40,22 +40,22 @@ export const connectSocket = () => {
   socket.connect();
 };
 
+const registerUser = (userId: string) => {
+  socket.emit('register-user', userId.toString());
+  console.log(`User ${userId} registered with socket ID: ${socket.id}`);
+};
+
 export const registerForLiveUpdates = (userId: string) => {
-  if (!userId) return
+  if (!userId) return;
   
-  // Make sure socket is connected before registering
   if (!socket.connected) {
     socket.connect();
     
-    // Wait for connection before registering
-    socket.once('connect', () => {
-      socket.emit('register-user', userId.toString());
-      console.log(`User ${userId} registered with socket after reconnection`);
-    });
-  } else {
-    socket.emit('register-user', userId.toString());
-    console.log(`User ${userId} registered with socket`);
-  }
+    socket.once('connect', () => registerUser(userId));
+    return;
+  } 
+  // already connected
+  registerUser(userId);
 };
 
 export const socketSetup = (event: string, callback: (...args: any[]) => void) => socket.on(event, callback);
