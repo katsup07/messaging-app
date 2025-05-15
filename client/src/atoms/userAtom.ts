@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 
 export interface User {
   _id: number | string;
@@ -6,4 +6,4 @@ export interface User {
   email: string;
 }
 
-export const userAtom = atom<User>();
+export const userAtom = atomWithStorage<User | undefined>('user', undefined);

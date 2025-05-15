@@ -71,12 +71,9 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
         email: formData.email,
         ...(formData.password && { password: formData.password })
       };
-      
-      const updatedUser = await serviceFacade.updateUserDetails(user._id.toString(), updateData);
-      // global state
+        const updatedUser = await serviceFacade.updateUserDetails(user._id.toString(), updateData);
+      // update global state (will automatically persist to storage)
       setUser(updatedUser);
-      // local storage
-      localStorage.setItem('user', JSON.stringify(updatedUser));
       
       setUpdateSuccess(true);
       

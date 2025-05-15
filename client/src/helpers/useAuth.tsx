@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { User, userAtom } from '../atoms/userAtom';
 import ServiceFacade from '../services/ServiceFacade';
 import { TokenResult } from '../types/token';
@@ -12,6 +12,7 @@ const verifyTokenOnServer = async (token: string): Promise<TokenResult> => {
 
 export default function useAuth() {
   const setUser = useSetAtom(userAtom);
+  const userData = useAtomValue(userAtom);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -22,38 +23,28 @@ export default function useAuth() {
 
     disconnectSocket();
     // Reset the singleton after logout
-    ServiceFacade.resetInstance();
-
-    // client-side logout
-    // Clear tokens and user data from localStorage
+    ServiceFacade.resetInstance();    // client-side logout
+    // Clear tokens and user data
     serviceFacade.setAccessToken(null);
     serviceFacade.setRefreshToken(null);
-    localStorage.removeItem('user');
     setUser(undefined);
     setIsAuthenticated(false);
   }, [setUser]);
-
   const checkAuth = useCallback(async () => {
     try {
       const accessToken = localStorage.getItem('accessToken');
       const refreshToken = localStorage.getItem('refreshToken');
       
-      if (!accessToken) {
+      if (!accessToken || !userData) {
         setIsLoading(false);
         setIsAuthenticated(false);
         return;
       }
-      
-      // Get user data
-      const storedUser = localStorage.getItem('user');
-    
-      if (!storedUser) {
+        // Get user data
+      if (!userData) {
         logout();
         return;
       }
-      
-      const userData = JSON.parse(storedUser) as User;
-      setUser(userData);
         
       // Set the tokens in the ServiceFacade for future authenticated requests
       const serviceFacade = ServiceFacade.getInstance(userData);
@@ -91,11 +82,10 @@ export default function useAuth() {
     } catch (error) {
       console.error('Auth check failed:', error);
       logout();
-    } finally {
-      setIsLoading(false);
+    } finally {    setIsLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setUser]);
+  }, [logout, userData]);
 
   useEffect(() => {
     checkAuth();

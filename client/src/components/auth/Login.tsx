@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSetAtom } from 'jotai';
 import { MdLogin } from 'react-icons/md';
 import { validateEmail, validatePassword } from '../../helpers/validation-utils';
@@ -22,15 +22,8 @@ const validateLogin = (email: string, password: string): boolean => {
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [isSignup, setIsSignup] = useState<boolean>(false);
+  const [password, setPassword] = useState<string>('');  const [isSignup, setIsSignup] = useState<boolean>(false);
   const setUser = useSetAtom(userAtom);
-
-  useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (user) 
-      setUser(JSON.parse(user));
-  }, [setUser]);
 
   const handleLogin = async() => {
     const isValid = validateLogin(email, password);
@@ -49,14 +42,11 @@ const Login: React.FC = () => {
     serviceFacade.setRefreshToken(response.refreshToken);
     // session
     localStorage.setItem('accessToken', response.accessToken);
-    localStorage.setItem('refreshToken', response.refreshToken);
-
-    const userData = { 
+    localStorage.setItem('refreshToken', response.refreshToken);    const userData = { 
       _id: response.user._id,
       username: response.user.username, 
       email: response.user.email 
     };
-    localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     
     registerForLiveUpdates(response.user._id.toString());
