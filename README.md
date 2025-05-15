@@ -55,6 +55,8 @@ From the root folder, you can run both the client and server with a single comma
 [Demo Video](https://youtu.be/mEsYUYDX8vM)
 
 ## 🖼️ Images  
+### Press Play to Watch GIF ▶️
+![message-app](https://github.com/user-attachments/assets/ef3ad7ee-6e4f-4e0a-ab7f-8f1814b5307c)
 ### Friends List and Chat
 ![Vite-React-TS-02-16-2025_07_04_PM](https://github.com/user-attachments/assets/cf701d83-cea5-4475-a957-8f7521141339)
 ### Invite Friends
