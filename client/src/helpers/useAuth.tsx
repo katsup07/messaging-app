@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { User, userAtom } from '../atoms/userAtom';
+import { userAtom } from '../atoms/userAtom';
 import ServiceFacade from '../services/ServiceFacade';
 import { TokenResult } from '../types/token';
 import { disconnectSocket, registerForLiveUpdates } from '../socket-io-client';
