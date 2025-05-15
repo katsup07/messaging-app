@@ -1,8 +1,10 @@
 const { mongoDbManager } = require('../providers/mongoDbManager');
 const { ObjectId } = require('mongodb');
+const BaseAuthRepository = require('../contracts/BaseAuthRepository');
 
-class AuthRepository {
+class AuthRepository extends BaseAuthRepository{
   constructor() {
+    super();
     this.dbName = "messenger-app";
     this.collectionName = "users";
   }
@@ -43,4 +45,4 @@ class AuthRepository {
   }
 }
 
-module.exports = { authRepository: new AuthRepository() };
+module.exports = { instance: new AuthRepository(), name: "AuthRepository" };

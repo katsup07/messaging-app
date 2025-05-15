@@ -1,5 +1,6 @@
 const { mongoDbManager } = require('../providers/mongoDbManager');
 const { logError } = require('../middleware/logger');
+const BaseMessageRepository = require('../contracts/BaseMessageRepository');
 
 const messageFields = {
   senderId: 1, 
@@ -13,8 +14,9 @@ const messageFields = {
     receiverId: 1, 
     isRead: 1
   };
-class MessageRepository {
+class MessageRepository extends BaseMessageRepository {
   constructor() {
+    super();
     this.dbName = "messenger-app";
     this.collectionName = "messages";
 
@@ -66,4 +68,4 @@ class MessageRepository {
 
 }
 
-module.exports = { messageRepository: new MessageRepository() }
+module.exports = { instance: new MessageRepository(), name: "MessageRepository" };

@@ -1,5 +1,6 @@
 const { mongoDbManager } = require('../providers/mongoDbManager');
 const { ObjectId } = require('mongodb');
+const BaseFriendRepository = require('../contracts/BaseFriendRepository');
 
 const friendRequestFields = {
   _id: 1,
@@ -10,8 +11,9 @@ const friendRequestFields = {
   respondedAt: 1,
 };
 
-class FriendRepository {
+class FriendRepository extends BaseFriendRepository {
   constructor(){
+    super();
     this.dbName = "messenger-app";
     this.friendRequestsCollectionName = "friend-requests";
     this.friendsCollectionName = "friends";
@@ -162,4 +164,4 @@ class FriendRepository {
   }
 }
 
-module.exports = { friendRepository: new FriendRepository() }
+module.exports = { instance: new FriendRepository(), name: "FriendRepository" };
