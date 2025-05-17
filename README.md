@@ -3,7 +3,7 @@ This is a fullstack messaging app built using Clean Architecture principles. It 
 
 The frontend leverages React, TypeScript, Jotai for state management, and Vite for fast development, delivering a modern, responsive UI with light/dark theme support. The backend follows a layered structure (routes → controllers → services → repositories) and includes custom logging and middleware for validation, authentication, and error handling, with MongoDB for data storage
 
-The frontend and backend are deployed separately (Vercel / Railway), and the project supports both local and Docker-based containerized development environments. 
+The frontend and backend are deployed separately (Vercel / Railway), and the project supports both local and Docker-based containerized development environments. The app is live [here](https://messaging-app-client-ebon.vercel.app/)
 
 ## 🚀 Installation and Development
 
