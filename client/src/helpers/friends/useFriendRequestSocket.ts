@@ -1,31 +1,33 @@
 import { useEffect } from 'react';
 import { connectSocket, socketCleanup, socketSetup } from '../../socket-io-client';
+import ServiceFacade from '../../services/ServiceFacade';
 
 /**
- * Custom hook for managing socket connections related to friend requests
+ * Enhanced version of the friend request socket hook that directly triggers
+ * refreshes through the ServiceFacade, which will then notify all observers
  * 
  * @param userId - The current user's ID
- * @param onRequestReceived - Callback function when a new friend request is received
- * @param onRequestAccepted - Callback function when a friend request is accepted
+ * @param serviceFacade - Instance of ServiceFacade
  */
 export function useFriendRequestSocket(
   userId?: string,
-  onRequestReceived?: () => void,
-  onRequestAccepted?: () => void
+  serviceFacade?: ServiceFacade | null
 ) {
   useEffect(() => {
-    if (!userId) return;
-    // Ensure socket is connected
+    if (!userId || !serviceFacade) return;
+    
     connectSocket();
     
-    socketSetup('received-friend-request', (data) => {
+    socketSetup('received-friend-request', async (data) => {
       console.log('Friend request received:', data);
-      if (onRequestReceived) onRequestReceived();
+      // This will fetch and trigger emit to all subscribers including the pendingRequests observable
+      await serviceFacade.getPendingFriendRequests();
     });
     
-    socketSetup('accepted-friend-request', (data) => {
+    socketSetup('accepted-friend-request', async (data) => {
       console.log('Friend request accepted:', data);
-      if (onRequestAccepted) onRequestAccepted();
+      // This will fetch and trigger emit to all subscribers including the friends observable
+      await serviceFacade.refreshFriends();
     });
     
     // Clean up on unmount
@@ -33,5 +35,5 @@ export function useFriendRequestSocket(
       socketCleanup('received-friend-request');
       socketCleanup('accepted-friend-request');
     };
-  }, [userId, onRequestReceived, onRequestAccepted]);
+  }, [userId, serviceFacade]);
 }

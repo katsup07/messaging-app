@@ -5,7 +5,7 @@ import AuthService from "./AuthService";
 import { FriendService } from "./FriendService";
 import { HttpService } from "./HttpService";
 import { MessageService } from "./MessageService";
-import { Observable } from "./Observable";
+import { Observable } from "../lib/Observable";
 import { _baseAuthUrl } from "./urls";
 import { UserService } from "./UserService";
 

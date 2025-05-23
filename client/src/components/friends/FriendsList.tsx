@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { User } from '../../atoms/userAtom';
 import { MdPersonAdd } from 'react-icons/md';
 import { Friend } from '../../types/friend';
@@ -18,29 +18,25 @@ interface FriendsListProps {
   toggleFriendsListModal?: () => void;
 }
 
-const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFriend, user, isMobile, toggleFriendsListModal }) => {
+const FriendsList: React.FC<FriendsListProps> = ({ 
+  onSelectFriend, 
+  selectedFriend, 
+  user, 
+  isMobile, 
+  toggleFriendsListModal 
+}) => {
   const [onlineStatus, setOnlineStatus] = useState<{ [key: string]: boolean }>({});
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [targetUser, setTargetUser] = useState<Friend | null>(null);
   const [friendIdToValidate, setFriendIdToValidate] = useState<string>('');
 
-  const { friends, pendingRequests, users, error, setError, refreshData, serviceFacade } = useFriendsData(user, onSelectFriend, selectedFriend, isMobile);
-
-  const handleRequestReceived = useCallback(() => {
-    refreshData();
-  }, [refreshData]);
-
-  const handleRequestAccepted = useCallback(async() => {
-    refreshData();
-  }, [refreshData]);
+ 
+  const { friends, pendingRequests, users, error, setError, refreshData, serviceFacade } = 
+    useFriendsData(user, onSelectFriend, selectedFriend, isMobile);
 
   useFriendStatusSocket(user?._id, setOnlineStatus);
-  useFriendRequestSocket(
-    user?._id, 
-    handleRequestReceived, 
-    handleRequestAccepted
-  );
+  useFriendRequestSocket(user?._id, serviceFacade);
 
   const handleFriendSelect = (friend: Friend) => {
     onSelectFriend(friend);

@@ -3,7 +3,7 @@ import { User } from "../atoms/userAtom";
 import { Friend, FriendRequest } from "../types/friend";
 import { handleApiError } from "./ErrorService";
 import { HttpService } from "./HttpService";
-import { Observable } from "./Observable";
+import { Observable } from "../lib/Observable";
 import { _baseFriendRequestUrl, _baseFriendsUrl } from "./urls";
 
 export class FriendService {

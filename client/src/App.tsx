@@ -3,7 +3,6 @@ import './App.css'
 import Chat from './components/chat/Chat'
 import { userAtom } from './atoms/userAtom';
 import Login from './components/auth/Login';
-import FriendsList from './components/friends/FriendsList';
 import { useState } from 'react';
 import Header from './components/Header';
 import useAuth from './helpers/useAuth';
@@ -11,7 +10,7 @@ import { useIsMobile } from './helpers/useIsMobile';
 import { Loading } from './components/Loading';
 import ErrorHandlingProvider from './components/errors/ErrorHandlingProvider';
 import { Friend } from './types/friend';
-import ObservableFriendsList from './components/friends/ObservableFriendsList';
+import FriendsList from './components/friends/FriendsList';
 
 function App() {
   const { isLoading } = useAuth();
@@ -48,7 +47,7 @@ function App() {
         <Header isLoggedIn={isLoggedIn} user={user} mobileData={mobileData} setShowFriendsModal={setShowFriendsModal} />
         <div className="main-content">
           <div className="friends-container">
-            <ObservableFriendsList 
+            <FriendsList
               onSelectFriend={setSelectedFriend}
               selectedFriend={selectedFriend}
               user={user}

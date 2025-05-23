@@ -15,6 +15,7 @@ export const useFriendsData = (
   const [error, setError] = useState<string | null>(null);
   const [serviceFacade, setServiceFacade] = useState<ServiceFacade | null>(null);
 
+  // Set user (rarely changes)
   useEffect(() => {
     if (!user){
       setServiceFacade(null);
@@ -24,60 +25,70 @@ export const useFriendsData = (
     setServiceFacade(ServiceFacade.getInstance(user));
   }, [user]);
 
-  const fetchFriends = useCallback(async () => {
+  const fetchUsers = useCallback(async () => {
     if (!serviceFacade) return;
     try {
-      setError(null);
-      const friendsData = await serviceFacade.getFriends();
       const usersData = await serviceFacade.getUsers();
-
       const usersMap = usersData.reduce((acc: { [key: string]: Friend }, user: Friend) => {
         acc[user._id] = user;
         return acc;
       }, {});
-
       setUsers(usersMap);
-      setFriends(friendsData);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch users');
+    }
+  }, [serviceFacade]);
 
+  // Set friends, subscribe to updates, and fetch users for pending requests
+  useEffect(() => {
+    if (!serviceFacade) return;
+    // Initial load
+    serviceFacade.getFriends().then(friendsData => {
+      setFriends(friendsData);
       // Auto-select first friend on desktop if none is selected
       if (friendsData.length > 0 && !selectedFriend && !isMobile) {
         onSelectFriend(friendsData[0]);
       }
-    } catch (err) {
-      console.error('Failed to fetch friends:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch friends');
-    }
-  }, [serviceFacade, onSelectFriend, selectedFriend, isMobile]);
+    });
+    // Subscribe to updates
+    const unsubscribeFriends = serviceFacade.getFriendsObservable().subscribe(setFriends);
+    // Load users once
+    fetchUsers();
+  
+    return () => {
+      unsubscribeFriends();
+    };
+  }, [serviceFacade, selectedFriend, isMobile, onSelectFriend, fetchUsers]);
 
-  const fetchPendingRequests = useCallback(async () => {
+  // Subscribe to pending requests observable
+  useEffect(() => {
     if (!serviceFacade) return;
-    try {
-      setError(null);
-      const results = await serviceFacade.getPendingFriendRequests();
-      setPendingRequests(results);
-    } catch (err) {
-      console.error('Failed to fetch pending requests:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch pending requests');
-    }
+    
+    // Initial load
+    serviceFacade.getPendingFriendRequests().then(setPendingRequests);
+    
+    // Subscribe to updates
+    const unsubscribe = serviceFacade.getPendingRequestsObservable().subscribe(setPendingRequests);
+    
+    return () => {
+      unsubscribe();
+    };
   }, [serviceFacade]);
 
+  // Uses observable pattern internally
   const refreshData = useCallback(async() => {
-    await serviceFacade?.refreshFriends();
-    await fetchFriends();
-    await fetchPendingRequests();
-  }, [serviceFacade, fetchFriends, fetchPendingRequests]);
+    if (!serviceFacade) return;
 
-  useEffect(() => {
-    if (serviceFacade) {
-      refreshData();
-    }
-  }, [serviceFacade, refreshData]);
+    await serviceFacade.refreshFriends();
+    await serviceFacade.getPendingFriendRequests();
+  }, [serviceFacade]);
 
   return {
     friends,
     pendingRequests,
     users,
-    error,
+    error, 
     setError,
     refreshData,
     serviceFacade,
