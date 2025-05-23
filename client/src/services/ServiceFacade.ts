@@ -29,19 +29,26 @@ export default class ServiceFacade {
     this.messageService = new MessageService(this.httpService);
     this.userService = new UserService(this.httpService);
   }
-
   static getInstance(user?: User): ServiceFacade {
     if (!ServiceFacade.instance) { // Create a new instance if it doesn't exist
       ServiceFacade.instance = new ServiceFacade(user);
     } else if (user) {
       // Update the user in the existing instance if provided
       ServiceFacade.instance.user = user;
+      // If user changed, refresh the friends cache
+      if (user._id !== 0)
+        ServiceFacade.instance.invalidateFriendsCache();
     }
     // Otherwise, return the existing instance
     return ServiceFacade.instance;
   }
-
   static resetInstance(): void {
+    if (!ServiceFacade.instance) return;
+    // Clean up the timer if it exists
+    const friendService = ServiceFacade.instance.friendService;
+    if (friendService['refreshTimer'])
+        clearInterval(friendService['refreshTimer']);
+      
     ServiceFacade.instance = null;
   }
 
@@ -78,13 +85,19 @@ export default class ServiceFacade {
   async verifyToken(accessToken: string): Promise<TokenResult> {
     return await this.authService.verifyToken(accessToken, _baseAuthUrl);
   }
-
   async logout(): Promise<void> {
+    // Invalidate friend cache on logout
+    this.friendService.invalidateCache();
     await this.authService.logout();
   }
 
   async getFriends(): Promise<any> {
     return this.friendService.getFriends(this.user._id);
+  }
+  
+  // Expose a method to manually invalidate the friends cache
+  invalidateFriendsCache(): void {
+    this.friendService.invalidateCache();
   }
 
   // User methods
@@ -115,5 +128,9 @@ export default class ServiceFacade {
 
   async respondToFriendRequest(requestId: string | number, accept: boolean): Promise<any> {
    return await this.friendService.respondToFriendRequest(requestId, accept);
+  }
+
+  async refreshFriends(): Promise<void> {
+    await this.friendService.refreshFriendsCache();
   }
 }

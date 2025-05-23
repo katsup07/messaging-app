@@ -61,10 +61,11 @@ export const useFriendsData = (
     }
   }, [serviceFacade]);
 
-  const refreshData = useCallback(() => {
-    fetchFriends();
-    fetchPendingRequests();
-  }, [fetchFriends, fetchPendingRequests]);
+  const refreshData = useCallback(async() => {
+    await serviceFacade?.refreshFriends();
+    await fetchFriends();
+    await fetchPendingRequests();
+  }, [serviceFacade, fetchFriends, fetchPendingRequests]);
 
   useEffect(() => {
     if (serviceFacade) {

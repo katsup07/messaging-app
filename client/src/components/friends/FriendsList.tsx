@@ -31,7 +31,7 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
     refreshData();
   }, [refreshData]);
 
-  const handleRequestAccepted = useCallback(() => {
+  const handleRequestAccepted = useCallback(async() => {
     refreshData();
   }, [refreshData]);
 
