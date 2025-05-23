@@ -8,13 +8,12 @@ export class FriendService {
   private friendsCache: any[] | null = null;
   private lastFetchTime: number = 0;
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds - TTL = Time To Live
-  private refreshTimer: NodeJS.Timeout | null = null;
+  private refreshTimer: number | null = null;
   
   constructor(private user: User, private httpService: HttpService) {
     // Start the periodic refresh when the service is instantiated
     this.startPeriodicRefresh();
   }
-  
   private startPeriodicRefresh(): void {
     // Clear any existing timer to prevent duplicates
     if (this.refreshTimer)
@@ -25,7 +24,7 @@ export class FriendService {
       if (this.user._id !== 0)// Don't refresh for anonymous users
         this.refreshFriendsCache();
 
-    }, this.CACHE_TTL);
+    }, this.CACHE_TTL) as unknown as number;
   }
 
   async refreshFriendsCache(): Promise<void> {
