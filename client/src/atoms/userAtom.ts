@@ -1,7 +1,7 @@
 import { atomWithStorage } from 'jotai/utils';
 
 export interface User {
-  _id: number | string;
+  _id: string;
   username: string;
   email: string;
 }

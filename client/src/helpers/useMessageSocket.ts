@@ -9,7 +9,7 @@ import { Message } from '../types/message';
  * @param onMessageReceive - Callback function when a new message is received
  */
 export function useMessageSocket(
-  userId?: string | number,
+  userId?: string,
   onMessageReceive?: (message: Message) => void
 ) {
   useEffect(() => {

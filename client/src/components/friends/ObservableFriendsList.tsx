@@ -1,14 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { User } from '../../atoms/userAtom';
 import { MdPersonAdd } from 'react-icons/md';
 import { Friend } from '../../types/friend';
-import { useFriendsData } from '../../helpers/friends/useFriendsData';
+import { useObservableFriendsData } from '../../helpers/friends/useObservableFriendsData';
 import AddFriendForm from './AddFriendForm';
 import ConfirmationModal from '../ConfirmationModal';
 import PendingRequestsList from '../PendingRequestsList';
 import FriendsListView from './FriendsListView';
 import { useFriendStatusSocket } from '../../helpers/friends/useFriendStatusSocket';
-import { useFriendRequestSocket } from '../../helpers/friends/useFriendRequestSocket';
+import { useObservableFriendRequestSocket } from '../../helpers/friends/useObservableFriendRequestSocket';
 
 interface FriendsListProps {
   onSelectFriend: (friend: Friend) => void;
@@ -18,29 +18,25 @@ interface FriendsListProps {
   toggleFriendsListModal?: () => void;
 }
 
-const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFriend, user, isMobile, toggleFriendsListModal }) => {
+const ObservableFriendsList: React.FC<FriendsListProps> = ({ 
+  onSelectFriend, 
+  selectedFriend, 
+  user, 
+  isMobile, 
+  toggleFriendsListModal 
+}) => {
   const [onlineStatus, setOnlineStatus] = useState<{ [key: string]: boolean }>({});
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [targetUser, setTargetUser] = useState<Friend | null>(null);
   const [friendIdToValidate, setFriendIdToValidate] = useState<string>('');
 
-  const { friends, pendingRequests, users, error, setError, refreshData, serviceFacade } = useFriendsData(user, onSelectFriend, selectedFriend, isMobile);
-
-  const handleRequestReceived = useCallback(() => {
-    refreshData();
-  }, [refreshData]);
-
-  const handleRequestAccepted = useCallback(async() => {
-    refreshData();
-  }, [refreshData]);
+ 
+  const { friends, pendingRequests, users, error, setError, refreshData, serviceFacade } = 
+    useObservableFriendsData(user, onSelectFriend, selectedFriend, isMobile);
 
   useFriendStatusSocket(user?._id, setOnlineStatus);
-  useFriendRequestSocket(
-    user?._id, 
-    handleRequestReceived, 
-    handleRequestAccepted
-  );
+  useObservableFriendRequestSocket(user?._id, serviceFacade);
 
   const handleFriendSelect = (friend: Friend) => {
     onSelectFriend(friend);
@@ -155,4 +151,4 @@ const FriendsList: React.FC<FriendsListProps> = ({ onSelectFriend, selectedFrien
   );
 };
 
-export default FriendsList;
+export default ObservableFriendsList;

@@ -9,7 +9,7 @@ import { connectSocket, socketCleanup, socketSetup } from '../../socket-io-clien
  * @param onRequestAccepted - Callback function when a friend request is accepted
  */
 export function useFriendRequestSocket(
-  userId?: string | number,
+  userId?: string,
   onRequestReceived?: () => void,
   onRequestAccepted?: () => void
 ) {

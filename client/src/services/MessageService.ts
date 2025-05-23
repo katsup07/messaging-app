@@ -14,7 +14,7 @@ export class MessageService {
     this.selectedFriend = friend;
   }
 
-  async getMessages(userId: string | number): Promise<any> {
+  async getMessages(userId: string): Promise<any> {
       if (!this.selectedFriend)
         return [];
       

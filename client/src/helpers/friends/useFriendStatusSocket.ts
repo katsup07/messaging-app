@@ -8,7 +8,7 @@ import { connectSocket, socketCleanup, socketSetup } from '../../socket-io-clien
  * @param onStatusChange - Callback function that receives online status updates
  */
 export function useFriendStatusSocket(
-  userId?: string | number,
+  userId?: string,
   onStatusChange?: (statuses: { [key: string]: boolean }) => void
 ) {
   useEffect(() => {

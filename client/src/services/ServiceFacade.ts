@@ -5,6 +5,7 @@ import AuthService from "./AuthService";
 import { FriendService } from "./FriendService";
 import { HttpService } from "./HttpService";
 import { MessageService } from "./MessageService";
+import { Observable } from "./Observable";
 import { _baseAuthUrl } from "./urls";
 import { UserService } from "./UserService";
 
@@ -19,7 +20,7 @@ export default class ServiceFacade {
   private static instance: ServiceFacade | null = null;
 
   private constructor(user?: User) {
-    const anonymousUser = { _id: 0, username: 'anon-user', email: 'anon-user@email.com' };
+    const anonymousUser = { _id: "0", username: 'anon-user', email: 'anon-user@email.com' };
     this.user = user || anonymousUser;
     this.authService = new AuthService(this.user);
     this.httpService = new HttpService(this.authService);
@@ -36,7 +37,7 @@ export default class ServiceFacade {
       // Update the user in the existing instance if provided
       ServiceFacade.instance.user = user;
       // If user changed, refresh the friends cache
-      if (user._id !== 0)
+      if (user._id !== "0")
         ServiceFacade.instance.invalidateFriendsCache();
     }
     // Otherwise, return the existing instance
@@ -90,7 +91,6 @@ export default class ServiceFacade {
     this.friendService.invalidateCache();
     await this.authService.logout();
   }
-
   async getFriends(): Promise<any> {
     return this.friendService.getFriends(this.user._id);
   }
@@ -98,6 +98,15 @@ export default class ServiceFacade {
   // Expose a method to manually invalidate the friends cache
   invalidateFriendsCache(): void {
     this.friendService.invalidateCache();
+  }
+  
+  // Observable stream getters
+  getFriendsObservable(): Observable<any[]> {
+    return this.friendService.getFriendsObservable();
+  }
+  
+  getPendingRequestsObservable(): Observable<any[]> {
+    return this.friendService.getPendingRequestsObservable();
   }
 
   // User methods
@@ -122,11 +131,11 @@ export default class ServiceFacade {
    return await this.friendService.getPendingFriendRequests();
   }
 
-  async sendFriendRequest(toUserId: number | string): Promise<any> {
+  async sendFriendRequest(toUserId: string): Promise<any> {
     return await this.friendService.sendFriendRequest(toUserId);
   }
 
-  async respondToFriendRequest(requestId: string | number, accept: boolean): Promise<any> {
+  async respondToFriendRequest(requestId: string, accept: boolean): Promise<any> {
    return await this.friendService.respondToFriendRequest(requestId, accept);
   }
 

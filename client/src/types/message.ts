@@ -1,8 +1,8 @@
 export interface Message {
-  senderId: number | string;
+  senderId: string;
   sender: string;
   content: string;
-  receiverId: number | string;
+  receiverId: string;
   time: string;
   isRead?: boolean;
 }

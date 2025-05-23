@@ -1,11 +1,10 @@
-// filepath: c:\Users\katsup\Desktop\Programs\Apps\messaging-app\message-app\client\src\components\PendingRequestsList.tsx
 import React from 'react';
 import { Friend, FriendRequest } from '../types/friend';
 
 interface PendingRequestsListProps {
   pendingRequests: FriendRequest[];
-  users: { [key: number | string]: Friend };
-  onRespond: (requestId: string | number, accept: boolean) => void;
+  users: { [key: string]: Friend };
+  onRespond: (requestId: string, accept: boolean) => void;
 }
 
 const PendingRequestsList: React.FC<PendingRequestsListProps> = ({ pendingRequests, users, onRespond }) => {
