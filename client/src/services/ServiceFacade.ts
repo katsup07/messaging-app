@@ -8,6 +8,7 @@ import { MessageService } from "./MessageService";
 import { Observable } from "../lib/Observable";
 import { _baseAuthUrl } from "./urls";
 import { UserService } from "./UserService";
+import { Message } from "../types/message";
 
 // Singleton facade pattern
 export default class ServiceFacade {
@@ -58,16 +59,26 @@ export default class ServiceFacade {
     this.messageService.setSelectedFriend(friend);
   }
 
-  async onRefreshToken(): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
-    return await this.authService.onRefreshToken(_baseAuthUrl);
-  }
-
   async getMessages(): Promise<any> {
     return await this.messageService.getMessages(this.user._id);
   }
 
-  async sendMessage(message: { sender: string; content: string }): Promise<any> {
+  async sendMessage(message: Message): Promise<any> {
    return await this.messageService.sendMessage(message);
+  }
+
+   getMessagesObservable(friendId: string): Observable<Message[]> {
+    const conversationId = this.getConversationId(this.user._id, friendId);
+    return this.messageService.getMessagesObservable(conversationId);
+  }
+  
+  getConversationId(userId1: string, userId2: string): string {
+    return this.messageService.getConversationId(userId1, userId2);
+  }
+  
+  // Handle socket messages through the service
+  handleIncomingSocketMessage(message: Message): void {
+    this.messageService.updateCacheAndNotifyObservers(message);
   }
 
   // Auth methods
@@ -81,6 +92,10 @@ export default class ServiceFacade {
 
   async auth(credentials: { email: string; password: string, isSignup: boolean }): Promise<any> {
     return await this.authService.auth(credentials, _baseAuthUrl);
+  }
+
+  async onRefreshToken(): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
+    return await this.authService.onRefreshToken(_baseAuthUrl);
   }
 
   async verifyToken(accessToken: string): Promise<TokenResult> {

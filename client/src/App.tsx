@@ -48,7 +48,10 @@ function App() {
         <div className="main-content">
           <div className="friends-container">
             <FriendsList
-              onSelectFriend={setSelectedFriend}
+              onSelectFriend={(friend) => {
+                setSelectedFriend(friend);
+                setShowFriendsModal(false);
+              }}
               selectedFriend={selectedFriend}
               user={user}
               isMobile={mobileData.isMobile}

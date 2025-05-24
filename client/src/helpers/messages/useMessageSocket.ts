@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { connectSocket, socketCleanup, socketSetup } from '../socket-io-client';
-import { Message } from '../types/message';
+import { connectSocket, socketCleanup, socketSetup } from '../../socket-io-client';
+import ServiceFacade from '../../services/ServiceFacade';
 
 /**
  * Custom hook for managing socket connections related to messages
@@ -10,19 +10,19 @@ import { Message } from '../types/message';
  */
 export function useMessageSocket(
   userId?: string,
-  onMessageReceive?: (message: Message) => void
+  serviceFacade?: ServiceFacade | null,
 ) {
   useEffect(() => {
-    if (!userId || !onMessageReceive) return;
+    if (!userId || !serviceFacade) return;
     // Ensure socket is connected
     connectSocket();
     
     socketSetup('receive-message', (data) => {
-      onMessageReceive(data.message);
+       serviceFacade.handleIncomingSocketMessage(data.message);
     });
     // Clean up on unmount
     return () => {
       socketCleanup('receive-message');
     };
-  }, [userId, onMessageReceive]);
+  }, [userId, serviceFacade]);
 }
