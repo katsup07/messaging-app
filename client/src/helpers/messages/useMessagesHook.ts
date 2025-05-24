@@ -63,6 +63,7 @@ export const useMessages = (
   const sendMessage = useCallback(async (content: string) => {
     if (!serviceFacade || !selectedFriend || !user || !content.trim()) return;
 
+    const time = new Date().toISOString();
     try {
       const messageData = {
         senderId: user._id,
@@ -70,12 +71,17 @@ export const useMessages = (
         content: content.trim(),
         receiver: selectedFriend,
         receiverId: selectedFriend._id,
-        time: new Date().toISOString(),
+        time,
         isRead: false,
       };
-
+      // Optimistically update UI
+      setMessages((prevMessages) => [...prevMessages, messageData]);
       await serviceFacade.sendMessage(messageData);
     } catch (err) {
+      // Rollback optimistic update
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => msg.time !== time || msg.content !== content)
+      );
       setError(err instanceof Error ? err.message : 'Failed to send message');
       throw err;
     }
