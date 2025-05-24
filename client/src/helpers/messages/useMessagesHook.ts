@@ -15,21 +15,22 @@ export const useMessages = (
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onSetHasFriends = useCallback(async() => {
-    const friendsData = await serviceFacade?.getFriends();
-    setHasFriends(friendsData.length > 0);
-  }, [serviceFacade])
+  // Separate effect for managing hasFriends
+  useEffect(() => {
+    if (!serviceFacade) return;
+    
+    serviceFacade.getFriends().then(friendsData => {
+      setHasFriends(friendsData.length > 0);
+    });
+  }, [serviceFacade]);
 
-  // Initialize messages when selectedFriend changes
-  const initializeMessages = useCallback(() => {
+  // Main effect for loading messages when friend changes
+  useEffect(() => {
     if (!serviceFacade || !selectedFriend || !user) {
       setMessages([]);
       return;
     }
 
-    onSetHasFriends();
-    
-    // Initial load
     const loadMessages = async () => {
       try {
         setIsLoading(true);
@@ -45,20 +46,18 @@ export const useMessages = (
     };
 
     loadMessages();
+  }, [serviceFacade, selectedFriend, user]);
 
-    // Subscribe to updates
+  // Separate effect for subscribing to message updates
+  useEffect(() => {
+    if (!serviceFacade || !selectedFriend) return;
+
     const unsubscribe = serviceFacade
       .getMessagesObservable(selectedFriend._id)
       .subscribe(setMessages);
 
-    return () => {
-      unsubscribe();
-    };
-  }, [serviceFacade, selectedFriend, user, onSetHasFriends]);
-
-  useEffect(() => {
-    initializeMessages();
-  }, [initializeMessages]);
+    return unsubscribe;
+  }, [serviceFacade, selectedFriend]);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!serviceFacade || !selectedFriend || !user || !content.trim()) return;
