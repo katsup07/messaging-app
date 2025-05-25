@@ -1,5 +1,5 @@
 const { Server } = require('socket.io');
-const { logInfo, logError } = require('../middleware/logger');
+const { logInfo } = require('../middleware/logger');
 
 const onlineUsers = new Map();
 let io;

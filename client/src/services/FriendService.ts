@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "../atoms/userAtom";
-import { Friend, FriendRequest } from "../types/friend";
+import { Friend, FriendRequest, FriendRequestResponse, RespondToFriendRequestResponse } from "../types/friend";
 import { handleApiError } from "./ErrorService";
 import { HttpService } from "./HttpService";
 import { Observable } from "../lib/Observable";
@@ -10,12 +9,11 @@ export class FriendService {
   private friendsCache: Friend[] | null = null;
   private lastFetchTime: number = 0;
   private readonly CACHE_LIFE_LENGTH = 5 * 60 * 1000; // 5 minutes in milliseconds
-  private refreshTimer: number | null = null;
-  /*Observable streams for friends and pending requests
+  private refreshTimer: number | null = null;  /*Observable streams for friends and pending requests
     These will be used to notify subscribing components about changes
     The subscribers will notify the UI to re-render when data changes*/
-  private readonly friendsObservable = new Observable<any[]>();
-  private  readonly pendingRequestsObservable = new Observable<any[]>();
+  private readonly friendsObservable = new Observable<Friend[]>();
+  private  readonly pendingRequestsObservable = new Observable<FriendRequest[]>();
   
   constructor(private user: User, private httpService: HttpService) {
     // Start the periodic refresh when the service is instantiated
@@ -23,11 +21,11 @@ export class FriendService {
   }
   
   // Observable getters
-  getFriendsObservable(): Observable<any[]> {
+  getFriendsObservable(): Observable<Friend[]> {
     return this.friendsObservable;
   }
   
-  getPendingRequestsObservable(): Observable<any[]> {
+  getPendingRequestsObservable(): Observable<FriendRequest[]> {
     return this.pendingRequestsObservable;
   }
   
@@ -53,8 +51,7 @@ export class FriendService {
       
       return friends;
     }
-
-  async getPendingFriendRequests(): Promise<FriendRequest> {
+  async getPendingFriendRequests(): Promise<FriendRequest[]> {
       const response = await this.httpService.authorizedRequest(`${_baseFriendRequestUrl}/pending/${this.user._id}`);
       await handleApiError(response);
       const pendingRequests = await response.json();
@@ -63,8 +60,7 @@ export class FriendService {
       
       return pendingRequests;
     }
-
-  async sendFriendRequest(toUserId: string): Promise<any> {
+  async sendFriendRequest(toUserId: string): Promise<FriendRequestResponse> {
     const response = await this.httpService.authorizedRequest(`${_baseFriendRequestUrl}`, {
         method: 'POST',
         body: JSON.stringify({
@@ -73,10 +69,11 @@ export class FriendService {
         }),
       });
       
-    return await handleApiError(response);
+    await handleApiError(response);
+    return await response.json();
   }
 
-  async respondToFriendRequest(requestId: string, accept: boolean): Promise<any> {
+  async respondToFriendRequest(requestId: string, accept: boolean): Promise<RespondToFriendRequestResponse> {
     const response = await this.httpService.authorizedRequest(`${_baseFriendRequestUrl}/${requestId}/respond`, {
       method: 'POST',
       body: JSON.stringify({ accept }),

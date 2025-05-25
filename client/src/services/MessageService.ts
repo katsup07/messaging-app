@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "../atoms/userAtom";
 import { Observable } from "../lib/Observable";
 import { Message } from "../types/message";
@@ -33,8 +32,7 @@ export class MessageService {
   setSelectedFriend(friend: User | null) {
     this.selectedFriend = friend;
   }
-
-  async getMessages(userId: string): Promise<any> {
+  async getMessages(userId: string): Promise<Message[]> {
       if (!this.selectedFriend) return [];
 
       const conversationId = this.getConversationId(userId, this.selectedFriend._id);
@@ -62,7 +60,7 @@ export class MessageService {
       return messages;
     }
 
-    async sendMessage(message: Message): Promise<any> {
+    async sendMessage(message: Message): Promise<Message> {
       const response = await this.httpService.authorizedRequest(_baseMessageUrl, {
         method: 'POST',
         body: JSON.stringify(message),

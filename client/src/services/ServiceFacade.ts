@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "../atoms/userAtom";
 import { TokenResult } from "../types/token";
+import { AuthResponse, AuthCredentials, RefreshTokenResponse } from "../types/auth";
+import { Friend, FriendRequest, FriendRequestResponse, RespondToFriendRequestResponse } from "../types/friend";
 import AuthService from "./AuthService";
 import { FriendService } from "./FriendService";
 import { HttpService } from "./HttpService";
@@ -58,12 +59,11 @@ export default class ServiceFacade {
   setSelectedFriend(friend: User | null) {
     this.messageService.setSelectedFriend(friend);
   }
-
-  async getMessages(): Promise<any> {
+  async getMessages(): Promise<Message[]> {
     return await this.messageService.getMessages(this.user._id);
   }
 
-  async sendMessage(message: Message): Promise<any> {
+  async sendMessage(message: Message): Promise<Message> {
    return await this.messageService.sendMessage(message);
   }
 
@@ -89,12 +89,11 @@ export default class ServiceFacade {
   setRefreshToken(token: string | null) {
     this.authService.setRefreshToken(token);
   }
-
-  async auth(credentials: { email: string; password: string, isSignup: boolean }): Promise<any> {
+  async auth(credentials: AuthCredentials): Promise<AuthResponse | null> {
     return await this.authService.auth(credentials, _baseAuthUrl);
   }
 
-  async onRefreshToken(): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
+  async onRefreshToken(): Promise<RefreshTokenResponse | null> {
     return await this.authService.onRefreshToken(_baseAuthUrl);
   }
 
@@ -105,8 +104,7 @@ export default class ServiceFacade {
     // Invalidate friend cache on logout
     this.friendService.invalidateCache();
     await this.authService.logout();
-  }
-  async getFriends(): Promise<any> {
+  }  async getFriends(): Promise<Friend[]> {
     return this.friendService.getFriends(this.user._id);
   }
   
@@ -116,11 +114,11 @@ export default class ServiceFacade {
   }
   
   // Observable stream getters
-  getFriendsObservable(): Observable<any[]> {
+  getFriendsObservable(): Observable<Friend[]> {
     return this.friendService.getFriendsObservable();
   }
   
-  getPendingRequestsObservable(): Observable<any[]> {
+  getPendingRequestsObservable(): Observable<FriendRequest[]> {
     return this.friendService.getPendingRequestsObservable();
   }
 
@@ -128,8 +126,7 @@ export default class ServiceFacade {
   setUser(user: User) {
     this.user = user;
   }
-
-  async getUsers(): Promise<any> {
+  async getUsers(): Promise<User[]> {
     return await this.userService.getUsers();
   }
 
@@ -140,17 +137,14 @@ export default class ServiceFacade {
   async updateUserDetails(userId: string, userData: { username: string, email: string }): Promise<User> {
     return await this.userService.updateUserDetails(userId, userData);
   }
-
   // Friend methods
-  async getPendingFriendRequests(): Promise<any> {
+  async getPendingFriendRequests(): Promise<FriendRequest[]> {
    return await this.friendService.getPendingFriendRequests();
   }
-
-  async sendFriendRequest(toUserId: string): Promise<any> {
+  async sendFriendRequest(toUserId: string): Promise<FriendRequestResponse> {
     return await this.friendService.sendFriendRequest(toUserId);
   }
-
-  async respondToFriendRequest(requestId: string, accept: boolean): Promise<any> {
+  async respondToFriendRequest(requestId: string, accept: boolean): Promise<RespondToFriendRequestResponse> {
    return await this.friendService.respondToFriendRequest(requestId, accept);
   }
 

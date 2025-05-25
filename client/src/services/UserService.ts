@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "../atoms/userAtom";
 import { handleApiError } from "./ErrorService";
 import { HttpService } from "./HttpService";
@@ -8,7 +7,7 @@ export class UserService {
 
   constructor(private httpService: HttpService) {}
 
- async getUsers(): Promise<any> {
+ async getUsers(): Promise<User[]> {
      const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/users`);
      await handleApiError(response);
      return response.json();

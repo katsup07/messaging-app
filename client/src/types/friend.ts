@@ -1,5 +1,6 @@
-// filepath: c:\Users\katsup\Desktop\Programs\Apps\messaging-app\message-app\client\src\types\friend.ts
-export interface Friend {
+
+
+export type Friend = {
   _id: string;
   username: string;
   email: string;
@@ -8,10 +9,21 @@ export interface Friend {
   isRejected?: boolean;
 }
 
-export interface FriendRequest {
+type FriendRequestStatus = 'pending' | 'accepted' | 'rejected';
+export type FriendRequest = {
   _id: string;
   fromUserId: string;
   toUserId: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: FriendRequestStatus;
   createdAt: string;
+}
+
+export type FriendRequestResponse = Omit<FriendRequest, '_id'>;
+
+export type RespondToFriendRequestResponse = {
+  fromUserId: string;
+  toUserId: string;
+  status: FriendRequestStatus;
+  createdAt: string;
+  respondedAt: string;
 }

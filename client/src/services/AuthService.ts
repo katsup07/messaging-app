@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "../atoms/userAtom";
 import { TokenResult } from "../types/token";
+import { AuthResponse, AuthCredentials, RefreshTokenResponse } from "../types/auth";
 import { handleApiError } from "./ErrorService";
 import { HttpService } from "./HttpService";
 import { _baseAuthUrl } from "./urls";
@@ -50,8 +50,7 @@ export default class AuthService {
     this.refreshSubscribers.forEach(callback => callback(token));
     this.refreshSubscribers = [];
   }
-
-  async getUsers(): Promise<any> {
+  async getUsers(): Promise<User[]> {
     if (!this.httpService) {
       throw new Error('HttpService not initialized');
     }
@@ -60,7 +59,7 @@ export default class AuthService {
     return response.json();
   }
 
-  async onRefreshToken(baseAuthUrl: string): Promise<{ newAccessToken: string; newRefreshToken: string } | null> {
+  async onRefreshToken(baseAuthUrl: string): Promise<RefreshTokenResponse | null> {
     if (!this.refreshToken)
       throw new Error('No refresh token available');
 
@@ -79,7 +78,7 @@ export default class AuthService {
     return response.json();
   }
 
-  async auth(credentials: { email: string; password: string, isSignup: boolean }, baseAuthUrl: string): Promise<any> {
+  async auth(credentials: AuthCredentials, baseAuthUrl: string): Promise<AuthResponse | null> {
     const authUrl = baseAuthUrl + (credentials.isSignup ? '/signup' : '/login');
     
     const response = await fetch(`${authUrl}`, {
