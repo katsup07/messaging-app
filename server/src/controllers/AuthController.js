@@ -43,9 +43,9 @@ async function logout(req, res) {
 async function verifyToken(req, res) {
   const token = extractTokenFromHeaders(req.headers);
   const result = await authService.verifyToken(token);
-  if (!result.isValid) {
+  if (!result.isValid)
     return res.status(401).json(result);
-  }
+  
   res.json(result);
 }
 

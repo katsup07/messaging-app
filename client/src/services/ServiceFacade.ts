@@ -107,8 +107,13 @@ export default class ServiceFacade {
   }  async getFriends(): Promise<Friend[]> {
     return this.friendService.getFriends(this.user._id);
   }
+
+  getAuthExpiredObservable(): Observable<{ type: 'authExpired' }> {
+    return this.authService.getAuthExpiredObservable();
+  }
+
   
-  // Expose a method to manually invalidate the friends cache
+  // Friends
   invalidateFriendsCache(): void {
     this.friendService.invalidateCache();
   }

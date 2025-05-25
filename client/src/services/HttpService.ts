@@ -1,6 +1,6 @@
 import AuthService from "./AuthService";
 import { handleApiError } from "./ErrorService";
-import { _apiBaseUrl } from "./urls";
+import { _baseAuthUrl } from "./urls";
 
 export class HttpService {
 
@@ -11,15 +11,15 @@ export class HttpService {
       throw new Error('No access token available');
     // Attempt the request with current token
     const response = await this.performRequest(url, options);
-    // If successful, return the response
+
     if (response.ok) return response;
     // Check if it's an auth error that needs token refresh
     if (response.status === 401) {
       const errorData = await response.json();
-      // Handle expired token
+
       if (errorData.error === 'TokenExpired') {
         // Get a new token and retry the request
-        const newToken = await this.authService.handleTokenRefresh(_apiBaseUrl);
+        const newToken = await this.authService.handleTokenRefresh(_baseAuthUrl);
         if (newToken) {
           // Retry with the new token
           return this.performRequest(url, options);
@@ -32,9 +32,6 @@ export class HttpService {
   }
 
   private async performRequest(url: string, options: RequestInit = {}): Promise<Response> {
-    if (!this.authService.accessToken)
-      throw new Error('No access token available');
-
     // TODO: Add fingerprint to server to combat against XSS attacks
     // Browser fingerprint to help prevent token reuse on different devices
     // const fingerprint = this.getBrowserFingerprint();

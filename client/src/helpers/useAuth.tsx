@@ -30,6 +30,7 @@ export default function useAuth() {
     setUser(undefined);
     setIsAuthenticated(false);
   }, [setUser]);
+  
   const checkAuth = useCallback(async () => {
     try {
       const accessToken = localStorage.getItem('accessToken');
@@ -38,6 +39,7 @@ export default function useAuth() {
       if (!accessToken || !userData) {
         setIsLoading(false);
         setIsAuthenticated(false);
+        logout();
         return;
       }
         // Get user data
@@ -82,14 +84,19 @@ export default function useAuth() {
     } catch (error) {
       console.error('Auth check failed:', error);
       logout();
-    } finally {    setIsLoading(false);
+    } finally {    
+      setIsLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [logout, userData]);
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+
+    const unsubscribe = ServiceFacade.getInstance().getAuthExpiredObservable().subscribe(() => logout()); 
+
+    return unsubscribe;
+  }, [checkAuth, logout]);
 
   return { isLoading, isAuthenticated, logout };
 }

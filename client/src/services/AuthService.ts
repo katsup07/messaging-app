@@ -4,6 +4,7 @@ import { AuthResponse, AuthCredentials, RefreshTokenResponse } from "../types/au
 import { handleApiError } from "./ErrorService";
 import { HttpService } from "./HttpService";
 import { _baseAuthUrl } from "./urls";
+import { Observable } from "../lib/Observable";
 
 // TODO: Split off a user service that handles user-related operations and a token service that handles token-related operations. This will make the code cleaner and more maintainable.
 export default class AuthService {
@@ -13,6 +14,8 @@ export default class AuthService {
   private refreshPromise: Promise<{ newAccessToken: string; newRefreshToken: string } | null> | null = null;
   private refreshSubscribers: Array<(token: string) => void> = [];
   private httpService: HttpService | null = null;
+  // private eventBus = new EventTarget();
+  private authExpiredObservable = new Observable<{ type: 'authExpired' }>();
 
   constructor(private user: User) {
     this.accessToken = localStorage.getItem('accessToken');
@@ -20,6 +23,9 @@ export default class AuthService {
     this.user = user;
   }
 
+  getAuthExpiredObservable(): Observable<{ type: 'authExpired' }> {
+    return this.authExpiredObservable;
+  }
 
   setHttpService(httpService: HttpService) {
     this.httpService = httpService;
@@ -145,6 +151,8 @@ export default class AuthService {
       // If refresh failed, clear tokens and return null
       this.setAccessToken(null);
       this.setRefreshToken(null);
+      // this.eventBus.dispatchEvent(new CustomEvent('authExpired'));
+      this.authExpiredObservable.notify({ type: 'authExpired' });
       return null;
     } finally {
       this.isRefreshing = false;
