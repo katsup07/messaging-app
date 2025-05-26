@@ -1,7 +1,6 @@
 const { authService, userFacadeService } = require('../diContainer');
 const { extractTokenFromHeaders } = require('../middleware/auth');
 const { throwError } = require('../utils/throwError');
-const { logInfo } = require('../middleware/logger');
 
 async function signup(req, res) {
   const { email, password } = req.validatedBody || req.body;
@@ -31,7 +30,7 @@ async function findUserById(req, res) {
 
 async function logout(req, res) {
   const { userId } = req.params;
-  
+  console.log(`User ${req.user.userId} is attempting to logout user ${userId}`);
   // Authorization check - ensure user can only logout themselves
   if (req.user.userId.toString() !== userId.toString()) 
     throwError('Unauthorized attempt to logout another user', 403);

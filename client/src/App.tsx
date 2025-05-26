@@ -13,8 +13,8 @@ import { Friend } from './types/friend';
 import FriendsList from './components/friends/FriendsList';
 
 function App() {
-  const { isLoading } = useAuth();
   const user = useAtomValue(userAtom);
+  const { isLoading } = useAuth(user);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const isLoggedIn = !!user;

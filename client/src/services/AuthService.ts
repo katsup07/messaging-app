@@ -151,7 +151,7 @@ export default class AuthService {
       // If refresh failed, clear tokens and return null
       this.setAccessToken(null);
       this.setRefreshToken(null);
-      // this.eventBus.dispatchEvent(new CustomEvent('authExpired'));
+      
       this.authExpiredObservable.notify({ type: 'authExpired' });
       return null;
     } finally {

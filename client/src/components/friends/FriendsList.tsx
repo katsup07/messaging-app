@@ -43,6 +43,7 @@ const FriendsList: React.FC<FriendsListProps> = ({
   };
 
   const handleValidateAndConfirm = async (friendId: string) => {
+    console.log("Handling validate and confirm...")
     if (!serviceFacade) return;
     setFriendIdToValidate(friendId);
     try {
@@ -65,6 +66,7 @@ const FriendsList: React.FC<FriendsListProps> = ({
   };
 
   const handleSendFriendRequest = async () => {
+    console.log("Handling sending friend request...")
     if (!serviceFacade || !friendIdToValidate) return;
     try {
       setError(null);

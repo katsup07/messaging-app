@@ -11,17 +11,17 @@ export class MessageService {
   private lastFetchTimes: Map<string, number> = new Map();
   private readonly CACHE_LIFE_LENGTH = 2 * 60 * 1000; // 2 minutes
   // Observable for message updates - keyed by conversation
-  private readonly messageObservables: Map<string, Observable<Message[]>> = new Map(); // friendId -> Observable, which will set the callback to the setMessages function
+  private readonly messagesUpdateObservables: Map<string, Observable<Message[]>> = new Map(); // friendId -> Observable, which will set the callback to the setMessages function
 
   constructor(private httpService: HttpService) {
   }
 
    // Get or create observable for a specific conversation
-  getMessagesObservable(conversationId: string): Observable<Message[]> {
-    if (!this.messageObservables.has(conversationId))
-      this.messageObservables.set(conversationId, new Observable<Message[]>());
+  getMessagesUpdateObservable(conversationId: string): Observable<Message[]> {
+    if (!this.messagesUpdateObservables.has(conversationId))
+      this.messagesUpdateObservables.set(conversationId, new Observable<Message[]>());
     
-    return this.messageObservables.get(conversationId)!;
+    return this.messagesUpdateObservables.get(conversationId)!;
   }
   
   // Generate conversation ID from two user IDs (consistent ordering)
@@ -55,7 +55,7 @@ export class MessageService {
       this.lastFetchTimes.set(conversationId, Date.now());
       
       // Notify observers
-      this.getMessagesObservable(conversationId).notify(messages);
+      this.getMessagesUpdateObservable(conversationId).notify(messages);
       
       return messages;
     }
@@ -78,7 +78,7 @@ export class MessageService {
     const updatedMessages = [...cachedMessages, message];
     
     this.messagesCache.set(conversationId, updatedMessages);
-    this.getMessagesObservable(conversationId).notify(updatedMessages);
+    this.getMessagesUpdateObservable(conversationId).notify(updatedMessages);
   }
   
   // Clear cache for a conversation

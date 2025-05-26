@@ -53,7 +53,7 @@ export const useMessages = (
     if (!serviceFacade || !selectedFriend) return;
 
     const unsubscribe = serviceFacade
-      .getMessagesObservable(selectedFriend._id)
+      .getMessagesUpdateObservable(selectedFriend._id)
       .subscribe(setMessages);
 
     return unsubscribe;

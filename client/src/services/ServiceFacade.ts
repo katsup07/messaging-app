@@ -1,4 +1,5 @@
-import { User } from "../atoms/userAtom";
+import { User, userAtom } from "../atoms/userAtom";
+import { getDefaultStore } from 'jotai';
 import { TokenResult } from "../types/token";
 import { AuthResponse, AuthCredentials, RefreshTokenResponse } from "../types/auth";
 import { Friend, FriendRequest, FriendRequestResponse, RespondToFriendRequestResponse } from "../types/friend";
@@ -21,7 +22,7 @@ export default class ServiceFacade {
   private messageService: MessageService;
   private static instance: ServiceFacade | null = null;
 
-  private constructor(user?: User) {
+  private constructor(user: User | null) {
     const anonymousUser = { _id: "0", username: 'anon-user', email: 'anon-user@email.com' };
     this.user = user || anonymousUser;
     this.authService = new AuthService(this.user);
@@ -31,10 +32,13 @@ export default class ServiceFacade {
     this.friendService = new FriendService(this.user, this.httpService);
     this.messageService = new MessageService(this.httpService);
     this.userService = new UserService(this.httpService);
-  }
-  static getInstance(user?: User): ServiceFacade {
+  }  static getInstance(): ServiceFacade {
+    // Get the current user from the atom
+    const store = getDefaultStore();
+    const user = store.get(userAtom);
+    
     if (!ServiceFacade.instance) { // Create a new instance if it doesn't exist
-      ServiceFacade.instance = new ServiceFacade(user);
+      ServiceFacade.instance = new ServiceFacade(user || null);
     } else if (user) {
       // Update the user in the existing instance if provided
       ServiceFacade.instance.user = user;
@@ -67,9 +71,9 @@ export default class ServiceFacade {
    return await this.messageService.sendMessage(message);
   }
 
-   getMessagesObservable(friendId: string): Observable<Message[]> {
+   getMessagesUpdateObservable(friendId: string): Observable<Message[]> {
     const conversationId = this.getConversationId(this.user._id, friendId);
-    return this.messageService.getMessagesObservable(conversationId);
+    return this.messageService.getMessagesUpdateObservable(conversationId);
   }
   
   getConversationId(userId1: string, userId2: string): string {
@@ -119,8 +123,8 @@ export default class ServiceFacade {
   }
   
   // Observable stream getters
-  getFriendsObservable(): Observable<Friend[]> {
-    return this.friendService.getFriendsObservable();
+  getFriendsListUpdateObservable(): Observable<Friend[]> {
+    return this.friendService.getFriendsListUpdateObservable();
   }
   
   getPendingRequestsObservable(): Observable<FriendRequest[]> {

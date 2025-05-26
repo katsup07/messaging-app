@@ -19,7 +19,7 @@ const Chat: React.FC<Props> = ({ selectedFriend }) => {
   const [newMessage, setNewMessage] = useState<string>('');
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const user = useAtomValue(userAtom);
-  const serviceFacade = ServiceFacade.getInstance(user);
+  const serviceFacade = ServiceFacade.getInstance();
 
   const { messages, isLoading, error, sendMessage, hasFriends } = useMessages(
     user, 

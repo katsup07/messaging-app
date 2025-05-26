@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { userAtom } from '../atoms/userAtom';
+import { useSetAtom } from 'jotai';
+import { User, userAtom } from '../atoms/userAtom';
 import ServiceFacade from '../services/ServiceFacade';
 import { TokenResult } from '../types/token';
 import { disconnectSocket, registerForLiveUpdates } from '../socket-io-client';
@@ -10,12 +10,10 @@ const verifyTokenOnServer = async (token: string): Promise<TokenResult> => {
   return await serviceFacade.verifyToken(token);
 }
 
-export default function useAuth() {
+export default function useAuth(userData?: User) {
   const setUser = useSetAtom(userAtom);
-  const userData = useAtomValue(userAtom);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
   const logout = useCallback(() => {    
     // server-side logout
     const serviceFacade = ServiceFacade.getInstance();
@@ -28,9 +26,9 @@ export default function useAuth() {
     serviceFacade.setAccessToken(null);
     serviceFacade.setRefreshToken(null);
     setUser(undefined);
-    setIsAuthenticated(false);
+    setIsAuthenticated(false);  
   }, [setUser]);
-  
+
   const checkAuth = useCallback(async () => {
     try {
       const accessToken = localStorage.getItem('accessToken');
@@ -39,17 +37,10 @@ export default function useAuth() {
       if (!accessToken || !userData) {
         setIsLoading(false);
         setIsAuthenticated(false);
-        logout();
         return;
       }
-        // Get user data
-      if (!userData) {
-        logout();
-        return;
-      }
-        
-      // Set the tokens in the ServiceFacade for future authenticated requests
-      const serviceFacade = ServiceFacade.getInstance(userData);
+          // Set the tokens in the ServiceFacade for future authenticated requests
+      const serviceFacade = ServiceFacade.getInstance();
       serviceFacade.setAccessToken(accessToken);
       serviceFacade.setRefreshToken(refreshToken);
         
@@ -89,14 +80,14 @@ export default function useAuth() {
     }
 
   }, [logout, userData]);
-
+  
   useEffect(() => {
     checkAuth();
 
     const unsubscribe = ServiceFacade.getInstance().getAuthExpiredObservable().subscribe(() => logout()); 
 
     return unsubscribe;
-  }, [checkAuth, logout]);
+  }, [checkAuth, logout, userData]);
 
   return { isLoading, isAuthenticated, logout };
 }

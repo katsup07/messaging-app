@@ -12,7 +12,7 @@ export class FriendService {
   private refreshTimer: number | null = null;  /*Observable streams for friends and pending requests
     These will be used to notify subscribing components about changes
     The subscribers will notify the UI to re-render when data changes*/
-  private readonly friendsObservable = new Observable<Friend[]>();
+  private readonly friendsListUpdateObservable = new Observable<Friend[]>();
   private  readonly pendingRequestsObservable = new Observable<FriendRequest[]>();
   
   constructor(private user: User, private httpService: HttpService) {
@@ -21,8 +21,8 @@ export class FriendService {
   }
   
   // Observable getters
-  getFriendsObservable(): Observable<Friend[]> {
-    return this.friendsObservable;
+  getFriendsListUpdateObservable(): Observable<Friend[]> {
+    return this.friendsListUpdateObservable;
   }
   
   getPendingRequestsObservable(): Observable<FriendRequest[]> {
@@ -61,6 +61,7 @@ export class FriendService {
       return pendingRequests;
     }
   async sendFriendRequest(toUserId: string): Promise<FriendRequestResponse> {
+    console.log(`Sending friend request from ${this.user._id} to ${toUserId}`);
     const response = await this.httpService.authorizedRequest(`${_baseFriendRequestUrl}`, {
         method: 'POST',
         body: JSON.stringify({
@@ -110,7 +111,7 @@ export class FriendService {
       
       // Notify subscribers about the updated data
       // if (this.friendsCache)
-        this.friendsObservable.notify(this.friendsCache!);
+        this.friendsListUpdateObservable.notify(this.friendsCache!);
       
       console.log('Friends cache refreshed');
     } catch (error) {

@@ -22,7 +22,7 @@ export const useFriendsData = (
       return;
     }
     
-    setServiceFacade(ServiceFacade.getInstance(user));
+    setServiceFacade(ServiceFacade.getInstance());
   }, [user]);
 
   const fetchUsers = useCallback(async () => {
@@ -52,7 +52,7 @@ export const useFriendsData = (
       }
     });
     // Subscribe to updates
-    const unsubscribeFriends = serviceFacade.getFriendsObservable().subscribe(setFriends);
+    const unsubscribeFriends = serviceFacade.getFriendsListUpdateObservable().subscribe(setFriends);
     // Load users once
     fetchUsers();
   
