@@ -25,7 +25,6 @@ const FriendsList: React.FC<FriendsListProps> = ({
   isMobile, 
   toggleFriendsListModal 
 }) => {
-  const [onlineStatus, setOnlineStatus] = useState<{ [key: string]: boolean }>({});
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [targetUser, setTargetUser] = useState<Friend | null>(null);
@@ -35,7 +34,7 @@ const FriendsList: React.FC<FriendsListProps> = ({
   const { friends, pendingRequests, users, error, setError, refreshData, serviceFacade } = 
     useFriendsData(user, onSelectFriend, selectedFriend, isMobile);
 
-  useFriendStatusSocket(user?._id, setOnlineStatus);
+  const { onlineStatus } = useFriendStatusSocket(user?._id);
   useFriendRequestSocket(user?._id, serviceFacade);
 
   const handleFriendSelect = (friend: Friend) => {
