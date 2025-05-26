@@ -37,10 +37,11 @@ export default class ServiceFacade {
     const store = getDefaultStore();
     const user = store.get(userAtom);
     
-    if (!ServiceFacade.instance) { // Create a new instance if it doesn't exist
+    if (!ServiceFacade.instance) { 
+      // Create a new instance if it doesn't exist
       ServiceFacade.instance = new ServiceFacade(user || null);
     } else if (user && user._id !== ServiceFacade.instance.user._id) {
-      // Update the user and all services when user changes
+      
       ServiceFacade.instance.updateUser(user);
     }
 
@@ -142,17 +143,20 @@ export default class ServiceFacade {
   async updateUserDetails(userId: string, userData: { username: string, email: string }): Promise<User> {
     return await this.userService.updateUserDetails(userId, userData);
   }
-
   // Method to update user and recreate services with new user
   private updateUser(newUser: User): void {
     this.user = newUser;
     
+    // Clear all message caches when user changes to prevent stale data
+    this.messageService.invalidateAllCaches();
+    
     // Recreate FriendService with new user
     this.friendService = new FriendService(this.user, this.httpService);
-    // other services currently do not depend on user, 
+    
+    // Invalidate friends cache to ensure fresh data for new user
     this.invalidateFriendsCache();
   }
-  
+
   // Friend methods
   async getPendingFriendRequests(): Promise<FriendRequest[]> {
    return await this.friendService.getPendingFriendRequests();
