@@ -5,7 +5,7 @@ import { Friend } from '../../types/friend';
 import { useFriendsData } from '../../helpers/friends/useFriendsData';
 import AddFriendForm from './AddFriendForm';
 import ConfirmationModal from '../ConfirmationModal';
-import PendingRequestsList from '../PendingRequestsList';
+import PendingRequestsPopover from './PendingRequestsPopover';
 import FriendsListView from './FriendsListView';
 import { useFriendStatusSocket } from '../../helpers/friends/useFriendStatusSocket';
 import { useFriendRequestSocket } from '../../helpers/friends/useFriendRequestSocket';
@@ -98,12 +98,16 @@ const FriendsList: React.FC<FriendsListProps> = ({
       setError(err instanceof Error ? err.message : 'Failed to respond to friend request');
     }
   };
-
   return (
     <div className="friends-list">
       <div className="friends-header">
         <h3>{user.username}'s Friends</h3>
         <div className="friends-header-controls">
+          <PendingRequestsPopover
+            pendingRequests={pendingRequests}
+            users={users}
+            onRespond={handleRespondToRequest}
+          />
           <button
             className="icon-button"
             onClick={() => setShowAddFriend(!showAddFriend)}
@@ -134,15 +138,7 @@ const FriendsList: React.FC<FriendsListProps> = ({
           onConfirm={handleSendFriendRequest}
           onCancel={handleCancelConfirmation}
         />
-      )}
-
-      {error && <div className="error-message">{error}</div>}
-
-      <PendingRequestsList
-        pendingRequests={pendingRequests}
-        users={users}
-        onRespond={handleRespondToRequest}
-      />
+      )}      {error && <div className="error-message">{error}</div>}
 
       <FriendsListView
         friends={friends}
