@@ -1341,6 +1341,8 @@ body {
 
 .request-buttons {
   display: flex;
+  flex-direction: column;
+  justify-content: space-around;
   gap: 0.5rem;
 }
 
@@ -1350,19 +1352,18 @@ body {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
 .accept-button {
-  background-color: rgba(142, 68, 173, 0.15); /* Muted/pale version of purple */
+  background-color: rgba(41, 118, 233, 0.5); /* Muted/pale version of purple */
   color: var(--text-primary);
   border: 1px solid var(--subtle-bg);
 }
 
 .accept-button:hover {
-  background-color: rgba(142, 68, 173, 0.25);
-  border-color: var(--focus-purple);
+  border-color: rgb(67, 185, 253);
   transform: translateY(-1px);
 }
 

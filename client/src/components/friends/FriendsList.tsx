@@ -43,9 +43,9 @@ const FriendsList: React.FC<FriendsListProps> = ({
   };
 
   const handleValidateAndConfirm = async (friendId: string) => {
-    console.log("Handling validate and confirm...")
     if (!serviceFacade) return;
-    setFriendIdToValidate(friendId);
+      setFriendIdToValidate(friendId);
+
     try {
       setError(null);
       if (friendId === user._id) {
@@ -54,6 +54,7 @@ const FriendsList: React.FC<FriendsListProps> = ({
       }
       const usersList = await serviceFacade.getUsers();
       const targetUserFound = usersList.find((u: Friend) => u._id === friendId);
+      
       if (!targetUserFound) {
         setError("User not found");
         return;
@@ -66,8 +67,8 @@ const FriendsList: React.FC<FriendsListProps> = ({
   };
 
   const handleSendFriendRequest = async () => {
-    console.log("Handling sending friend request...")
     if (!serviceFacade || !friendIdToValidate) return;
+
     try {
       setError(null);
       await serviceFacade.sendFriendRequest(friendIdToValidate);

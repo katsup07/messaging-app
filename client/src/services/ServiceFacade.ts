@@ -39,14 +39,11 @@ export default class ServiceFacade {
     
     if (!ServiceFacade.instance) { // Create a new instance if it doesn't exist
       ServiceFacade.instance = new ServiceFacade(user || null);
-    } else if (user) {
-      // Update the user in the existing instance if provided
-      ServiceFacade.instance.user = user;
-      // If user changed, refresh the friends cache
-      if (user._id !== "0")
-        ServiceFacade.instance.invalidateFriendsCache();
+    } else if (user && user._id !== ServiceFacade.instance.user._id) {
+      // Update the user and all services when user changes
+      ServiceFacade.instance.updateUser(user);
     }
-    // Otherwise, return the existing instance
+
     return ServiceFacade.instance;
   }
   static resetInstance(): void {
@@ -130,7 +127,6 @@ export default class ServiceFacade {
   getPendingRequestsObservable(): Observable<FriendRequest[]> {
     return this.friendService.getPendingRequestsObservable();
   }
-
   // User methods
   setUser(user: User) {
     this.user = user;
@@ -146,6 +142,17 @@ export default class ServiceFacade {
   async updateUserDetails(userId: string, userData: { username: string, email: string }): Promise<User> {
     return await this.userService.updateUserDetails(userId, userData);
   }
+
+  // Method to update user and recreate services with new user
+  private updateUser(newUser: User): void {
+    this.user = newUser;
+    
+    // Recreate FriendService with new user
+    this.friendService = new FriendService(this.user, this.httpService);
+    // other services currently do not depend on user, 
+    this.invalidateFriendsCache();
+  }
+  
   // Friend methods
   async getPendingFriendRequests(): Promise<FriendRequest[]> {
    return await this.friendService.getPendingFriendRequests();

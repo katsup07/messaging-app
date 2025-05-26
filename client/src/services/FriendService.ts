@@ -61,7 +61,6 @@ export class FriendService {
       return pendingRequests;
     }
   async sendFriendRequest(toUserId: string): Promise<FriendRequestResponse> {
-    console.log(`Sending friend request from ${this.user._id} to ${toUserId}`);
     const response = await this.httpService.authorizedRequest(`${_baseFriendRequestUrl}`, {
         method: 'POST',
         body: JSON.stringify({

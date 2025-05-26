@@ -36,7 +36,6 @@ class FriendService {
   }
 
   async sendFriendRequest(fromUserId, toUserId) {
-    console.log(`Sending friend request from ${fromUserId} to ${toUserId}`);
     const fromUser = await this.authRepository.findById(fromUserId);
     const toUser = await this.authRepository.findById(toUserId);
     

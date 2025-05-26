@@ -34,7 +34,6 @@ class AuthRepository extends BaseAuthRepository{
   }
 
   async findById(id) {
-    console.log(`Finding user by ID: ${id}`);
     const usersCollection = await this.getUsersCollection();
     const user = await usersCollection.findOne({ _id: new ObjectId(id) });
     return user;
