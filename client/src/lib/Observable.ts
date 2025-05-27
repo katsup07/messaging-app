@@ -1,4 +1,4 @@
-// Simple Observable implementation for friends data streams
+// Simple Observable implementation for tracking data changes
 export type Observer<T> = (data: T) => void;
 
 export class Observable<T> {
