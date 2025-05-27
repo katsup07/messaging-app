@@ -25,7 +25,7 @@ export default class ServiceFacade {
   private constructor(user: User | null) {
     const anonymousUser = { _id: "0", username: 'anon-user', email: 'anon-user@email.com' };
     this.user = user || anonymousUser;
-    this.authService = new AuthService(this.user);
+    this.authService = new AuthService();
     this.httpService = new HttpService(this.authService);
     this.authService.setHttpService(this.httpService);
     

@@ -17,10 +17,9 @@ export default class AuthService {
   // private eventBus = new EventTarget();
   private authExpiredObservable = new Observable<{ type: 'authExpired' }>();
 
-  constructor(private user: User) {
+  constructor() {
     this.accessToken = localStorage.getItem('accessToken');
     this.refreshToken = localStorage.getItem('refreshToken');
-    this.user = user;
   }
 
   getAuthExpiredObservable(): Observable<{ type: 'authExpired' }> {
