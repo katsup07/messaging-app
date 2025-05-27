@@ -51,9 +51,10 @@ export default class ServiceFacade {
     if (!ServiceFacade.instance) return;
     // Clean up the timer if it exists
     const friendService = ServiceFacade.instance.friendService;
-    if (friendService['refreshTimer'])
-        clearInterval(friendService['refreshTimer']);
-      
+    const refreshTimer = friendService.getCacheManager()?.refreshTimer;
+    if (refreshTimer !== null)
+        clearInterval(refreshTimer);
+
     ServiceFacade.instance = null;
   }
 
@@ -69,7 +70,7 @@ export default class ServiceFacade {
    return await this.messageService.sendMessage(message);
   }
 
-   getMessagesUpdateObservable(friendId: string): Observable<Message[]> {
+  getMessagesUpdateObservable(friendId: string): Observable<Message[]> {
     const conversationId = this.getConversationId(this.user._id, friendId);
     return this.messageService.getMessagesUpdateObservable(conversationId);
   }
@@ -102,20 +103,22 @@ export default class ServiceFacade {
   async verifyToken(accessToken: string): Promise<TokenResult> {
     return await this.authService.verifyToken(accessToken, _baseAuthUrl);
   }
+
   async logout(): Promise<void> {
     // Invalidate friend cache on logout
     this.friendService.invalidateCache();
     await this.authService.logout();
-  }  async getFriends(): Promise<Friend[]> {
-    return this.friendService.getFriends(this.user._id);
-  }
+  }  
 
   getAuthExpiredObservable(): Observable<{ type: 'authExpired' }> {
     return this.authService.getAuthExpiredObservable();
   }
 
-  
   // Friends
+    async getFriends(): Promise<Friend[]> {
+    return this.friendService.getFriends(this.user._id);
+  }
+  
   invalidateFriendsCache(): void {
     this.friendService.invalidateCache();
   }

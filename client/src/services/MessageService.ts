@@ -1,15 +1,22 @@
 import { User } from "../atoms/userAtom";
+import { CacheManager } from "../lib/CacheManager";
 import { Observable } from "../lib/Observable";
 import { Message } from "../types/message";
 import { handleApiError } from "./ErrorService";
 import { HttpService } from "./HttpService";
 import { _baseMessageUrl } from "./urls";
 
+const THIRTY_MINUTES= 30 * 60 * 1000; // 30 minutes in milliseconds
 export class MessageService {
+  private cacheManager = new CacheManager<Map<string, Message[]>, Map<string, number>>
+  (
+    new Map(), // Initial messages cache
+    new Map(), // Last fetch time
+    THIRTY_MINUTES, // Cache life length: 30 minutes
+    null // Refresh timer
+  );
   private selectedFriend: User | null = null;
-  private messagesCache: Map<string, Message[]> = new Map(); // Key: conversationId, Value: messages
-  private lastFetchTimes: Map<string, number> = new Map();
-  private readonly CACHE_LIFE_LENGTH = 2 * 60 * 1000; // 2 minutes
+
   // Observable for message updates - keyed by conversation
   private readonly messagesUpdateObservables: Map<string, Observable<Message[]>> = new Map(); // friendId -> Observable, which will set the callback to the setMessages function
 
@@ -38,11 +45,11 @@ export class MessageService {
       const conversationId = this.getConversationId(userId, this.selectedFriend._id);
 
        // Check cache first
-    if (this.messagesCache.has(conversationId) && 
-        this.lastFetchTimes.has(conversationId) &&
-        (Date.now() - this.lastFetchTimes.get(conversationId)! < this.CACHE_LIFE_LENGTH)) {
+    if (this.cacheManager.cache.has(conversationId) && 
+        this.cacheManager.lastFetchTime.has(conversationId) &&
+        (Date.now() - this.cacheManager.lastFetchTime.get(conversationId)! < this.cacheManager.cacheLife)) {
       console.log('Returning messages from cache');
-      return this.messagesCache.get(conversationId)!;
+      return this.cacheManager.cache.get(conversationId)!;
     }
       
       // Cache miss, fetch from API
@@ -51,8 +58,8 @@ export class MessageService {
       const messages = await response.json();
 
       // Update cache
-      this.messagesCache.set(conversationId, messages);
-      this.lastFetchTimes.set(conversationId, Date.now());
+      this.cacheManager.cache.set(conversationId, messages);
+      this.cacheManager.lastFetchTime.set(conversationId, Date.now());
       
       // Notify observers
       this.getMessagesUpdateObservable(conversationId).notify(messages);
@@ -74,22 +81,22 @@ export class MessageService {
   // Handle incoming socket messages
   updateCacheAndNotifyObservers(message: Message): void {
     const conversationId = this.getConversationId(message.senderId, message.receiverId);
-    const cachedMessages = this.messagesCache.get(conversationId) || [];
+    const cachedMessages = this.cacheManager.cache.get(conversationId) || [];
     const updatedMessages = [...cachedMessages, message];
     
-    this.messagesCache.set(conversationId, updatedMessages);
+    this.cacheManager.cache.set(conversationId, updatedMessages);
     this.getMessagesUpdateObservable(conversationId).notify(updatedMessages);
   }
   
   // Clear cache for a conversation
   invalidateConversationCache(conversationId: string): void {
-    this.messagesCache.delete(conversationId);
-    this.lastFetchTimes.delete(conversationId);
+    this.cacheManager.cache.delete(conversationId);
+    this.cacheManager.lastFetchTime.delete(conversationId);
   }
   
   // Clear all message caches
   invalidateAllCaches(): void {
-    this.messagesCache.clear();
-    this.lastFetchTimes.clear();
+    this.cacheManager.cache.clear();
+    this.cacheManager.lastFetchTime.clear();
   }
 }
