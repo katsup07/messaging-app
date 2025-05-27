@@ -31,10 +31,10 @@ const FriendsList: React.FC<FriendsListProps> = ({
   const [friendIdToValidate, setFriendIdToValidate] = useState<string>('');
 
  
-  const { friends, pendingRequests, users, error, setError, refreshData, serviceFacade } = 
+  const { friends, pendingRequests, users, error, setError, refreshData, serviceFacade, onlineStatus } = 
     useFriendsData(user, onSelectFriend, selectedFriend, isMobile);
 
-  const { onlineStatus } = useFriendStatusSocket(user?._id);
+  useFriendStatusSocket(serviceFacade, user?._id);
   useFriendRequestSocket(user?._id, serviceFacade);
 
   const handleFriendSelect = (friend: Friend) => {

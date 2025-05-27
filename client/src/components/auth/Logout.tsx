@@ -10,7 +10,7 @@ interface Props{
 }
 
 const Logout: React.FC<Props> = ({ user, isMobile }: Props) => {
-  const { logout }  = useAuth();
+  const { logout }  = useAuth(user);
   const setUser = useSetAtom(userAtom);
   const [showModal, setShowModal] = useState(false);
 

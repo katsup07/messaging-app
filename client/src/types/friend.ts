@@ -27,3 +27,5 @@ export type RespondToFriendRequestResponse = {
   createdAt: string;
   respondedAt: string;
 }
+
+export type OnlineStatus = 'online' | 'offline';

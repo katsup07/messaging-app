@@ -32,7 +32,9 @@ export default class ServiceFacade {
     this.friendService = new FriendService(this.user, this.httpService);
     this.messageService = new MessageService(this.httpService);
     this.userService = new UserService(this.httpService);
-  }  static getInstance(): ServiceFacade {
+  }  
+  
+  static getInstance(): ServiceFacade {
     // Get the current user from the atom
     const store = getDefaultStore();
     const user = store.get(userAtom);
@@ -47,6 +49,7 @@ export default class ServiceFacade {
 
     return ServiceFacade.instance;
   }
+  
   static resetInstance(): void {
     if (!ServiceFacade.instance) return;
     // Clean up the timer if it exists
@@ -104,10 +107,10 @@ export default class ServiceFacade {
     return await this.authService.verifyToken(accessToken, _baseAuthUrl);
   }
 
-  async logout(): Promise<void> {
+  async logout(userId?: string): Promise<void> {
     // Invalidate friend cache on logout
     this.friendService.invalidateCache();
-    await this.authService.logout();
+    await this.authService.logout(userId);
   }  
 
   getAuthExpiredObservable(): Observable<{ type: 'authExpired' }> {
@@ -115,10 +118,19 @@ export default class ServiceFacade {
   }
 
   // Friends
-    async getFriends(): Promise<Friend[]> {
+  async getFriends(): Promise<Friend[]> {
     return this.friendService.getFriends(this.user._id);
   }
-  
+
+  updateFriendOnlineStatus(friendId: string, isOnline: boolean): void {
+    this.friendService.updateFriendOnlineStatus(friendId, isOnline);
+  }
+
+  updateAllFriendsOnlineStatuses(statuses: {[friendId: string]: boolean}): void {
+    this.friendService.updateAllFriendsOnlineStatuses(statuses);
+  }
+
+
   invalidateFriendsCache(): void {
     this.friendService.invalidateCache();
   }
@@ -131,6 +143,11 @@ export default class ServiceFacade {
   getPendingRequestsObservable(): Observable<FriendRequest[]> {
     return this.friendService.getPendingRequestsObservable();
   }
+
+  getFriendsOnlineStatusObservable(): Observable<{ [friendId: string]: boolean }> {
+    return this.friendService.getFriendsOnlineStatusObservable();
+  }
+
   // User methods
   setUser(user: User) {
     this.user = user;

@@ -173,14 +173,14 @@ export default class AuthService {
         //  return await this.authService.handleTokenRefresh(this._baseAuthUrl);
         // }
 
-  async logout(): Promise<void> {
+  async logout(userId?: string): Promise<void> {
     if (!this.httpService) {
       throw new Error('HttpService not initialized');
     }
-    const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/logout/${this.user?._id}`, {
+    const response = await this.httpService.authorizedRequest(`${_baseAuthUrl}/logout/${userId}`, {
       method: 'POST',
       body: JSON.stringify({
-        userId: this.user?._id,
+        userId,
       }),
     });
     

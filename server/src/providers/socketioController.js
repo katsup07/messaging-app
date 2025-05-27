@@ -30,6 +30,7 @@ const socketIoController = {
                 logInfo(`New client connected: ${socket.id}`);
                 
                 socket.on('disconnect', async() => {
+                  console.log('Disconnecting socket:', socket.id);
                     let disconnectedUserId = null;
                     for (const [userId, socketId] of onlineUsers.entries()) {
                       if (socketId !== socket.id) continue;
@@ -41,11 +42,11 @@ const socketIoController = {
 
                     if (!disconnectedUserId) return;
                     
-                    // Remove from online users
                     onlineUsers.delete(disconnectedUserId);
                     
                     // Notify friends that user is offline
                     if (notificationService && friendService) {
+                        logInfo(`Notifying friends of user ${disconnectedUserId} that they are offline`);
                         await notificationService.notifyStatusChange(
                             disconnectedUserId, 
                             false,
@@ -54,16 +55,22 @@ const socketIoController = {
                     }
                     
                     logInfo(`Client disconnected: ${socket.id}`);
-                });
-
-                socket.on('register-user', async(userId) => {
+                });                socket.on('register-user', async(userId) => {
                     socket.join(`user_${userId}`);
-                    // Store user as online
-                    onlineUsers.set(userId, socket.id);
+                 
+                    onlineUsers.set(userId.toString(), socket.id);
                     logInfo(`user_${userId} registered for notifications`);
                     
-                    // Notify friends that user is online using notification service
+                    // Send current friends' online status to the newly connected user
                     if (notificationService && friendService) {
+                        try {
+                            const friends = await friendService.getFriendsList(userId);
+                            notificationService.notifyFriendsListOnlineStatus(userId, friends);
+                        } catch (err) {
+                            console.error('Error sending initial friends status:', err);
+                        }
+                        
+                        // Notify friends that user is online using notification service
                         await notificationService.notifyStatusChange(
                             userId, 
                             true,

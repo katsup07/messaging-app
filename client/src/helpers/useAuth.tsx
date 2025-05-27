@@ -17,7 +17,7 @@ export default function useAuth(userData?: User) {
   const logout = useCallback(() => {    
     // server-side logout
     const serviceFacade = ServiceFacade.getInstance();
-    serviceFacade.logout();
+    serviceFacade.logout(userData?._id);
 
     disconnectSocket();
     // Reset the singleton after logout

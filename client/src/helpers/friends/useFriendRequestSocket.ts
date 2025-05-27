@@ -20,13 +20,13 @@ export function useFriendRequestSocket(
     
     socketSetup('received-friend-request', async (data) => {
       console.log('Friend request received:', data);
-      // This will fetch and trigger emit to all subscribers including the pendingRequests observable
+      // This will fetch and trigger emit to the pendingRequests observable
       await serviceFacade.getPendingFriendRequests();
     });
    
     socketSetup('accepted-friend-request', async (data) => {
       console.log('Friend request accepted:', data);
-      // This will fetch and trigger emit to all subscribers including the friends observable
+      // This will fetch and trigger emit to the friends observable
       await serviceFacade.refreshFriends();
     });
     

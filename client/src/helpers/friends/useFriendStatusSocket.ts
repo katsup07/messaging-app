@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { connectSocket, socketCleanup, socketSetup } from '../../socket-io-client';
+import ServiceFacade from '../../services/ServiceFacade';
 
 /**
  * Custom hook for managing socket connections related to friend online status
@@ -7,8 +8,7 @@ import { connectSocket, socketCleanup, socketSetup } from '../../socket-io-clien
  * @param userId - The current user's ID
  * @returns onlineStatus object and setOnlineStatus function
  */
-export function useFriendStatusSocket(userId?: string) {
-  const [onlineStatus, setOnlineStatus] = useState<{ [key: string]: boolean }>({});
+export function useFriendStatusSocket(serviceFacade: ServiceFacade | null, userId?: string) {
 
   useEffect(() => {
     if (!userId) return;
@@ -17,15 +17,12 @@ export function useFriendStatusSocket(userId?: string) {
     
     // Listen for initial friends status (sent when requesting friends list)
     socketSetup('get-friends-status', (statuses) => {
-      setOnlineStatus(statuses);
+      serviceFacade?.updateAllFriendsOnlineStatuses(statuses);
     });
     
     // Listen for individual friend status changes (when friends come online/offline)
     socketSetup('user-status-change', ({ userId: friendId, isOnline }) => {
-      setOnlineStatus(prevStatuses => ({
-        ...prevStatuses,
-        [friendId]: isOnline
-      }));
+      serviceFacade?.updateFriendOnlineStatus(friendId, isOnline);
     });
     
     // Clean up on unmount
@@ -33,7 +30,5 @@ export function useFriendStatusSocket(userId?: string) {
       socketCleanup('get-friends-status');
       socketCleanup('user-status-change');
     };
-  }, [userId]);
-
-  return { onlineStatus, setOnlineStatus };
+  }, [userId, serviceFacade]);
 }

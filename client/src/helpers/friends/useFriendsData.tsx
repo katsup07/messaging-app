@@ -14,6 +14,7 @@ export const useFriendsData = (
   const [users, setUsers] = useState<{ [key: string]: Friend }>({});
   const [error, setError] = useState<string | null>(null);
   const [serviceFacade, setServiceFacade] = useState<ServiceFacade | null>(null);
+  const [onlineStatus, setOnlineStatus] = useState<{ [key: string]: boolean }>({});
 
   // Set user (rarely changes)
   useEffect(() => {
@@ -76,6 +77,22 @@ export const useFriendsData = (
     };
   }, [serviceFacade]);
 
+  // useEffect(() => {
+  //   if (!serviceFacade) return;
+  //   // Subscribe to user updates
+  //   const unsubscribe = serviceFacade.getFriendsOnlineStatusObservable
+
+  useEffect(() => {
+    if (!serviceFacade) return;
+
+    // subscribe to online status updates
+    const unsubscribeFriendsOnlineStatus = serviceFacade.getFriendsOnlineStatusObservable().subscribe(setOnlineStatus);
+
+    return () => {
+      unsubscribeFriendsOnlineStatus();
+    };
+  }, [serviceFacade]);
+
   // Uses observable pattern internally
   const refreshData = useCallback(async() => {
     if (!serviceFacade) return;
@@ -92,5 +109,6 @@ export const useFriendsData = (
     setError,
     refreshData,
     serviceFacade,
+    onlineStatus,
   };
 };

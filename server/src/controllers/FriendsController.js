@@ -5,8 +5,6 @@ async function getFriends(req, res) {
 
   const friends = await friendService.getFriendsList(userId);
 
-  notificationService.notifyFriendsListOnlineStatus(userId, friends);
-
   res.json(friends);
 }
 

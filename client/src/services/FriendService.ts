@@ -15,12 +15,14 @@ export class FriendService {
     FOUR_HOURS, // Cache life length
     null // Refresh timer
   )
+  private currentOnlineStatuses: { [friendId: string]: boolean } = {}; // Track online statuses
   
   /*Observable streams for friends and pending requests
     These will be used to notify subscribing components about changes
     The subscribers will notify the UI to re-render when data changes*/
   private readonly friendsListUpdateObservable = new Observable<Friend[]>();
   private  readonly pendingRequestsObservable = new Observable<FriendRequest[]>();
+  private readonly friendsOnlineStatusObservable = new Observable<{ [friendId: string]: boolean }>();
   
   constructor(private user: User, private httpService: HttpService) {
     // Start the periodic refresh when the service is instantiated
@@ -34,10 +36,27 @@ export class FriendService {
   
   getPendingRequestsObservable(): Observable<FriendRequest[]> {
     return this.pendingRequestsObservable;
-  }  getCacheManager(): CacheManager<Friend[] | null, number> {
+  }  
+  
+  getFriendsOnlineStatusObservable(): Observable<{ [friendId: string]: boolean }> {
+    return this.friendsOnlineStatusObservable;
+  }
+  
+  getCacheManager(): CacheManager<Friend[] | null, number> {
     return this.cacheManager;
   }
-    async getFriends(userId: string): Promise<Friend[]> {
+
+  updateFriendOnlineStatus(friendId: string, isOnline: boolean): void {
+    this.currentOnlineStatuses[friendId] = isOnline;
+    this.friendsOnlineStatusObservable.notify({...this.currentOnlineStatuses});
+  }
+
+  updateAllFriendsOnlineStatuses(statuses: {[friendId: string]: boolean}): void {
+    this.currentOnlineStatuses = {...statuses};
+    this.friendsOnlineStatusObservable.notify({...this.currentOnlineStatuses});
+  }
+
+  async getFriends(userId: string): Promise<Friend[]> {
       // Check if the request is for the current user and we have a valid cache
       if (userId === this.user._id && 
           this.cacheManager.cache && 
@@ -45,7 +64,6 @@ export class FriendService {
         console.log('Returning friends from cache');
         return this.cacheManager.cache;
       }
-      
       // Cache miss or different user, fetch from API
       const response = await this.httpService.authorizedRequest(`${_baseFriendsUrl}/${userId}`);
       await handleApiError(response);
