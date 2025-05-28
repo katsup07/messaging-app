@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { connectSocket, socketCleanup, socketSetup } from '../../socket-io-client';
 import ServiceFacade from '../../services/ServiceFacade';
+import { Friend } from '../../types/friend';
 
 /**
  * Enhanced version of the friend request socket hook that directly triggers
@@ -10,8 +11,10 @@ import ServiceFacade from '../../services/ServiceFacade';
  * @param serviceFacade - Instance of ServiceFacade
  */
 export function useFriendRequestSocket(
+  selectFirstFriendForNewUser: (friends: Friend[]) => void,
   userId?: string,
-  serviceFacade?: ServiceFacade | null
+  serviceFacade?: ServiceFacade | null,
+  
 ) {
   useEffect(() => {
     if (!userId || !serviceFacade) return;
@@ -28,12 +31,14 @@ export function useFriendRequestSocket(
       console.log('Friend request accepted:', data);
       // This will fetch and trigger emit to the friends observable
       await serviceFacade.refreshFriends();
+      const updatedFriends = await serviceFacade.getFriends();
+      selectFirstFriendForNewUser(updatedFriends);
     });
-    
+
     // Clean up on unmount
     return () => {
       socketCleanup('received-friend-request');
       socketCleanup('accepted-friend-request');
     };
-  }, [userId, serviceFacade]);
+  }, [userId, serviceFacade, selectFirstFriendForNewUser]);
 }

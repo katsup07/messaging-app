@@ -35,7 +35,13 @@ const FriendsList: React.FC<FriendsListProps> = ({
     useFriendsData(user, onSelectFriend, selectedFriend, isMobile);
 
   useFriendStatusSocket(serviceFacade, user?._id);
-  useFriendRequestSocket(user?._id, serviceFacade);
+
+  const selectFirstFriendForNewUser = (friends: Friend[]) => {
+     if(friends.length === 1) 
+        onSelectFriend?.(friends[0]);
+  }
+
+  useFriendRequestSocket(selectFirstFriendForNewUser, user?._id, serviceFacade);
 
   const handleFriendSelect = (friend: Friend) => {
     onSelectFriend(friend);

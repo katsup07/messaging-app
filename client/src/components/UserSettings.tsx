@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { User } from '../atoms/userAtom';
 import { useSetAtom } from 'jotai';
 import { userAtom } from '../atoms/userAtom';
 import ServiceFacade from '../services/ServiceFacade';
-import { validatePassword } from '../helpers/validation-utils';
 import { useIsMobile } from '../helpers/useIsMobile';
+import { userSettingsSchema, UserSettingsForm } from '../schemas/validation';
 
 interface Props {
   user: User;
@@ -14,88 +16,66 @@ interface Props {
 const UserSettings: React.FC<Props> = ({ user, onClose }) => {
   const setUser = useSetAtom(userAtom);
   const { isMobile } = useIsMobile();
-  const [formData, setFormData] = useState({
-    username: user.username,
-    email: user.email,
-    password: '',
-    confirmPassword: ''
-  });
-  const [errors, setErrors] = useState<{username?: string, email?: string, password?: string, confirmPassword?: string}>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    reset,
+    watch
+  } = useForm<UserSettingsForm>({
+    resolver: zodResolver(userSettingsSchema),
+    defaultValues: {
+      username: user.username,
+      email: user.email,
+      password: '',
+      confirmPassword: ''
+    },
+    mode: 'onBlur'
+  });
 
-  const validate = () => {
-    const newErrors: {username?: string, email?: string, password?: string, confirmPassword?: string} = {};
-    
-    if (!formData.username.trim())
-      newErrors.username = 'Username is required';
-    
-    if (!formData.email.trim())
-      newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = 'Email format is invalid';
-    
-    // Only validate password if user is trying to update it
-    if (formData.password) {
-      const passwordValidation = validatePassword(formData.password);
-      if (!passwordValidation.isValid)
-        newErrors.password = passwordValidation.message;
-
-      if (formData.password !== formData.confirmPassword)
-        newErrors.confirmPassword = 'Passwords do not match';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validate()) return;
-    
-    setIsSubmitting(true);
+  const watchedPassword = watch('password');  const onSubmit = async (data: UserSettingsForm) => {
     try {
       const serviceFacade = ServiceFacade.getInstance();
       // Only include password in update if it was entered
       const updateData = {
-        username: formData.username,
-        email: formData.email,
-        ...(formData.password && { password: formData.password })
+        username: data.username,
+        email: data.email,
+        ...(data.password && { password: data.password })
       };
-        const updatedUser = await serviceFacade.updateUserDetails(user._id.toString(), updateData);
+      
+      const updatedUser = await serviceFacade.updateUserDetails(user._id.toString(), updateData);
       // update global state (will automatically persist to storage)
       setUser(updatedUser);
       
       setUpdateSuccess(true);
       
       // Clear password fields
-      setFormData(prev => ({
-        ...prev,
+      reset({
+        username: data.username,
+        email: data.email,
         password: '',
         confirmPassword: ''
-      }));
+      });
       
       setTimeout(() => {
         setUpdateSuccess(false);
       }, 3000);
     } catch (error) {
       console.error('Failed to update user details:', error);
-      setErrors({ 
-        username: (error as Error).message.includes('username') ? (error as Error).message : undefined,
-        email: (error as Error).message.includes('email') ? (error as Error).message : undefined,
-        password: (error as Error).message.includes('Password') ? (error as Error).message : undefined
-      });
-    } finally {
-      setIsSubmitting(false);
+      const message = error instanceof Error ? error.message : 'Update failed';
+      
+      if (message.includes('username')) {
+        setError('username', { message });
+      } else if (message.includes('email')) {
+        setError('email', { message });
+      } else if (message.includes('Password')) {
+        setError('password', { message });
+      } else {
+        setError('root', { message });
+      }
     }
   };
 
@@ -113,8 +93,7 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
           <h2>User Settings</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
-        
-        <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
           <div className="form-group">
             <label htmlFor="userId">User ID</label>
             <input 
@@ -132,12 +111,10 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
             <input 
               type="text" 
               id="username" 
-              name="username" 
-              value={formData.username} 
-              onChange={handleChange}
+              {...register('username')}
               className={errors.username ? 'error' : ''}
             />
-            {errors.username && <div className="error-message">{errors.username}</div>}
+            {errors.username && <div className="error-message">{errors.username.message}</div>}
           </div>
           
           <div className="form-group">
@@ -145,12 +122,10 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
             <input 
               type="email" 
               id="email" 
-              name="email" 
-              value={formData.email} 
-              onChange={handleChange}
+              {...register('email')}
               className={errors.email ? 'error' : ''}
             />
-            {errors.email && <div className="error-message">{errors.email}</div>}
+            {errors.email && <div className="error-message">{errors.email.message}</div>}
           </div>
           
           <div className="form-section">
@@ -163,13 +138,11 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
             <input 
               type="password" 
               id="password" 
-              name="password" 
-              value={formData.password} 
-              onChange={handleChange}
+              {...register('password')}
               className={errors.password ? 'error' : ''}
               placeholder="•••••••••"
             />
-            {errors.password && <div className="error-message">{errors.password}</div>}
+            {errors.password && <div className="error-message">{errors.password.message}</div>}
           </div>
           
           <div className="form-group">
@@ -177,16 +150,21 @@ const UserSettings: React.FC<Props> = ({ user, onClose }) => {
             <input 
               type="password" 
               id="confirmPassword" 
-              name="confirmPassword" 
-              value={formData.confirmPassword} 
-              onChange={handleChange}
+              {...register('confirmPassword')}
               className={errors.confirmPassword ? 'error' : ''}
               placeholder="•••••••••"
+              disabled={!watchedPassword}
             />
-            {errors.confirmPassword && <div className="error-message">{errors.confirmPassword}</div>}
+            {errors.confirmPassword && <div className="error-message">{errors.confirmPassword.message}</div>}
           </div>
-          
-          {updateSuccess && <div className="success-message">User details updated successfully!</div>}
+
+          {errors.root && (
+            <div className="error-message">{errors.root.message}</div>
+          )}
+
+          {updateSuccess && (
+            <div className="success-message">Profile updated successfully!</div>
+          )}
           
           <div className="button-group">
             <button 

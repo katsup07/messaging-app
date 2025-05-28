@@ -1,42 +1,19 @@
-export const validateUsername = (username: string): boolean => {
-  return username.length >= 1;
+import { ZodError } from 'zod';
+
+/**
+ * Extract error message from Zod validation error
+ * @param error - The error object from try-catch
+ * @returns The first validation error message or a default message
+ */
+export const extractValidationError = (error: unknown): string => {
+  if (error instanceof ZodError) {
+    return error.errors[0]?.message || 'Validation error';
+  }
+  
+  if (error && typeof error === 'object' && 'errors' in error) {
+    const zodError = error as { errors: Array<{ message: string }> };
+    return zodError.errors?.[0]?.message || 'Validation error';
+  }
+  
+  return 'Validation error';
 };
-
-export const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-interface ValidationResult {
-  isValid: boolean;
-  message?: string;
-}
-
-export const validatePassword = (password: string): ValidationResult => {
-  // Minimum 8 characters
-  if (password.length < 8) {
-    return { isValid: false, message: 'Password must be at least 8 characters' };
-  }
-
-  // Require uppercase letters
-  if (!/[A-Z]/.test(password)) {
-    return { isValid: false, message: 'Password must contain at least one uppercase letter' };
-  }
-
-  // Require lowercase letters
-  if (!/[a-z]/.test(password)) {
-    return { isValid: false, message: 'Password must contain at least one lowercase letter' };
-  }
-
-  // Require numbers
-  if (!/[0-9]/.test(password)) {
-    return { isValid: false, message: 'Password must contain at least one number' };
-  }
-
-  // Require special characters
-  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
-    return { isValid: false, message: 'Password must contain at least one special character' };
-  }
-
-  return { isValid: true };
-}

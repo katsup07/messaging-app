@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Friend, FriendRequest } from '../../types/friend';
 import { MdNotifications, MdClose } from 'react-icons/md';
+import { friendRequestResponseSchema } from '../../schemas/validation';
+import { extractValidationError } from '../../helpers/validation-utils';
 
 interface PendingRequestsPopoverProps {
   pendingRequests: FriendRequest[];
@@ -14,6 +16,7 @@ const PendingRequestsPopover: React.FC<PendingRequestsPopoverProps> = ({
   onRespond 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -37,16 +40,26 @@ const PendingRequestsPopover: React.FC<PendingRequestsPopoverProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
-
   const handleToggle = () => {
     setIsOpen(!isOpen);
+    // Clear any validation errors when opening/closing
+    if (validationError) 
+      setValidationError(null);
+  
   };
+  
   const handleRespond = (requestId: string, accept: boolean) => {
-    onRespond(requestId, accept);
-    // Keep popover open so user can see the result and handle multiple requests
+    try {
+      // Validate the response using the schema
+      friendRequestResponseSchema.parse({ accept });
+      setValidationError(null);
+      onRespond(requestId, accept);
+      // Keep popover open so user can see the result and handle multiple requests
+    } catch (error: unknown) {
+      setValidationError(extractValidationError(error));
+    }
   };
 
-  // Always render the button, even with 0 requests, for testing
   const hasRequests = pendingRequests.length > 0;
 
   return (
@@ -64,8 +77,7 @@ const PendingRequestsPopover: React.FC<PendingRequestsPopoverProps> = ({
       </button>
 
       {isOpen && (
-        <div ref={popoverRef} className="pending-requests-popover">
-          <div className="popover-header">
+        <div ref={popoverRef} className="pending-requests-popover">          <div className="popover-header">
             <h4>Friend Requests</h4>
             <button
               className="close-popover-button"
@@ -75,6 +87,11 @@ const PendingRequestsPopover: React.FC<PendingRequestsPopoverProps> = ({
               <MdClose size={16} />
             </button>
           </div>
+          {validationError && (
+            <div className="validation-error" style={{ color: 'red', fontSize: '0.875rem', margin: '0.5rem', textAlign: 'center' }}>
+              {validationError}
+            </div>
+          )}
             <div className="popover-content">
             {hasRequests ? (
               pendingRequests.map((request, index) => (

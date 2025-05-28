@@ -1,9 +1,10 @@
 const { throwError } = require('../utils/throwError');
 
 class FriendService {
-  constructor(friendRepository, authRepository) {
+  constructor(friendRepository, authRepository, notificationService = null) {
     this.friendRepository = friendRepository;
     this.authRepository = authRepository;
+    this.notificationService = notificationService;
   }
 
   async getFriendRequestById(requestId) {
@@ -150,8 +151,14 @@ class FriendService {
         isPending: false,
         isRejected: false,
       };
-      await this.friendRepository.updateOrCreateFriendship(user2._id, user2.username, user2FriendData);
-      
+      await this.friendRepository.updateOrCreateFriendship(user2._id, user2.username, user2FriendData);      // tifyStatusChange(userId, isOnline, friendService
+      console.log(`Friendship added between ${user1.username} and ${user2.username}`);
+      console.log("Notifying friends of user", user1._id, "that they are online");
+      // Notify both users about the new friendship
+      if (this.notificationService) {
+        await this.notificationService.notifyStatusChange(user1._id, true, this);
+      }
+
       return true;
     } catch (error) {
       throwError(`Failed to add friendship: ${error.message}`, 500);

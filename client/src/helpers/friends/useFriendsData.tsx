@@ -77,11 +77,6 @@ export const useFriendsData = (
     };
   }, [serviceFacade]);
 
-  // useEffect(() => {
-  //   if (!serviceFacade) return;
-  //   // Subscribe to user updates
-  //   const unsubscribe = serviceFacade.getFriendsOnlineStatusObservable
-
   useEffect(() => {
     if (!serviceFacade) return;
 

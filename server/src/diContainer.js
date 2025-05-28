@@ -25,9 +25,9 @@ const validatedMessageRepository = validateRepository(MessageRepository.instance
 
 const authService = new AuthService(validatedAuthRepository);
 const messageService = new MessageService(validatedMessageRepository);
-const friendService = new FriendService(validatedFriendRepository, validatedAuthRepository);
-const userFacadeService = new UserFacadeService(authService, friendService);
 const notificationService = new NotificationService(socketIoController);
+const friendService = new FriendService(validatedFriendRepository, validatedAuthRepository, notificationService);
+const userFacadeService = new UserFacadeService(authService, friendService);
 
 module.exports = { 
   authService, 

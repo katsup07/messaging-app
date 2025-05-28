@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { messageContentSchema } from '../../schemas/validation';
+import { extractValidationError } from '../../helpers/validation-utils';
 
 interface MessageInputProps {
   newMessage: string;
@@ -15,31 +17,57 @@ const MessageInput: React.FC<MessageInputProps> = ({
   isLoading,
   hasFriends
 }) => {
-  if (!hasFriends) return null;
-  
+  const [validationError, setValidationError] = useState<string | null>(null);  const validateAndSend = () => {
+    try {
+      // Validate message content
+      messageContentSchema.parse({ content: newMessage });
+      setValidationError(null);
+      handleSendMessage();
+    } catch (error: unknown) {
+      setValidationError(extractValidationError(error));
+    }
+  };
+
+  const handleInputChange = (value: string) => {
+    setNewMessage(value);
+    // Clear validation error when user starts typing
+    if (validationError) {
+      setValidationError(null);
+    }
+  };
+
+  if (!hasFriends) return null;  
   return (
     <div className="message-input-container">
+      <div className='message-input-and-button'>
       <textarea
         value={newMessage}
-        onChange={(e) => setNewMessage(e.target.value)}
+        onChange={(e) => handleInputChange(e.target.value)}
         placeholder="Type your message"
         className="message-input"
         disabled={isLoading}
         onKeyPress={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            handleSendMessage();
+            validateAndSend();
           }
         }}
         rows={1}
       />
+      
       <button
-        onClick={handleSendMessage}
+        onClick={validateAndSend}
         className="send-button"
         disabled={isLoading || !newMessage.trim()}
       >
         Send
       </button>
+      </div>
+       {validationError && (
+        <div className="validation-error" >
+          {validationError}
+        </div>
+      )}
     </div>
   );
 };

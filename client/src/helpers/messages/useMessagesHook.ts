@@ -15,13 +15,22 @@ export const useMessages = (
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Separate effect for managing hasFriends
   useEffect(() => {
     if (!serviceFacade) return;
     
+    // Initial load
     serviceFacade.getFriends().then(friendsData => {
       setHasFriends(friendsData.length > 0);
     });
+    
+    // Subscribe to friends list updates needed to update hasFriends and allow message sending
+    const unsubscribe = serviceFacade.getFriendsListUpdateObservable().subscribe(friendsData => {
+      setHasFriends(friendsData.length > 0);
+    });
+    
+    return () => {
+      unsubscribe();
+    };
   }, [serviceFacade]);
 
   // Main effect for loading messages when friend changes

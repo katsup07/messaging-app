@@ -55,7 +55,9 @@ const socketIoController = {
                     }
                     
                     logInfo(`Client disconnected: ${socket.id}`);
-                });                socket.on('register-user', async(userId) => {
+                });                
+                
+                socket.on('register-user', async(userId) => {
                     socket.join(`user_${userId}`);
                  
                     onlineUsers.set(userId.toString(), socket.id);
