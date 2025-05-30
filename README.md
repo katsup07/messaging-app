@@ -58,15 +58,18 @@ From the root folder, you can run both the client and server with a single comma
 ### Press Play to Watch GIF ▶️
 ![message-app](https://github.com/user-attachments/assets/ef3ad7ee-6e4f-4e0a-ab7f-8f1814b5307c)
 ### Friends List and Chat
-![Vite-React-TS-02-16-2025_07_04_PM](https://github.com/user-attachments/assets/cf701d83-cea5-4475-a957-8f7521141339)
+![Vite-React-TS-05-30-2025_03_46_PM](https://github.com/user-attachments/assets/bc384d17-2612-41ac-aeaf-a77aaeea9ce8)
 ### Invite Friends
-![Vite-React-TS-02-16-2025_07_09_PM](https://github.com/user-attachments/assets/be4d376b-47c1-4eae-a6f8-a93b388d7971)
+![Vite-React-TS-05-30-2025_03_49_PM](https://github.com/user-attachments/assets/871b5b18-6085-4695-887d-f87bd5eaddda)
+### Request Notifications
+![Vite-React-TS-05-30-2025_03_52_PM](https://github.com/user-attachments/assets/6bd517bb-c703-486f-b883-373807bd8d73)
 ### User Settings
-![settings](https://github.com/user-attachments/assets/9c263353-3fb6-4fe3-9830-c72c9a45e15c)
+![Vite-React-TS-05-30-2025_03_47_PM (1)](https://github.com/user-attachments/assets/2f8425fe-5fbb-400d-9534-8b14c700e996)
 ### Login Screen
-![new-signup-screen](https://github.com/user-attachments/assets/0e0b44ca-c163-4580-bf0e-ef02276a6b65)
+![Vite-React-TS-05-30-2025_03_53_PM](https://github.com/user-attachments/assets/5c7dd293-3386-4ab0-bc9f-1d9b03a77dcc)
 ### Light Theme
-![light-theme](https://github.com/user-attachments/assets/bf5602fb-b747-4452-9ce5-7b8dafeb8fa7)
+![Vite-React-TS-05-30-2025_03_47_PM](https://github.com/user-attachments/assets/3b63327f-4c66-4b37-a78f-3d03b7e2f736)
+
 
 ### 📋 Details
 Frontend (React + TypeScript)
