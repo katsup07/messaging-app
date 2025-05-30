@@ -51,8 +51,11 @@ class AuthService {
   }
 
   async signup(email, password){
+    console.log('email:', email);
+    console.log('password:', password);
     try {    
       const existingUser = await this.authRepository.findByEmail(email);
+      console.log('existingUser:', existingUser);
       if (existingUser)
         throw new Error('Email already in use');
 

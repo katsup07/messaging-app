@@ -61,7 +61,7 @@ export class FriendService {
       if (userId === this.user._id && 
           this.cacheManager.cache && 
           (Date.now() - this.cacheManager.lastFetchTime < this.cacheManager.cacheLife)) {
-        console.log('Returning friends from cache');
+   
         return this.cacheManager.cache;
       }
       // Cache miss or different user, fetch from API

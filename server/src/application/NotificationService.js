@@ -11,7 +11,7 @@ class NotificationService {
     const friendsStatus = {};
     for (const friend of friends)
       friendsStatus[friend._id] = onlineUsers.has(friend._id.toString());
-    console.log(`Friends status for user ${userId}:`, friendsStatus);
+   
     io.to(`user_${userId}`).emit('get-friends-status', friendsStatus);
   }
 
@@ -40,22 +40,20 @@ class NotificationService {
     // Notify sender
     if (message.senderId)
       io.to(`user_${message.senderId}`).emit('receive-message', { message });
-  }
-  // Status change notifications
+  }  // Status change notifications
   async notifyStatusChange(userId, isOnline, friendService) {
     try {
       const friends = await friendService.getFriendsList(userId);
-      console.log(`Notifying friends of user ${userId} that they are ${isOnline ? 'online' : 'offline'}`);
       const io = this.socketProvider.getIO();
       const onlineUsers = this.socketProvider.getOnlineUsers();
       
       for (const friend of friends) {
-        // Ensure consistent string comparison
+        // Check if friend is online before notifying
         const friendSocketId = onlineUsers.get(friend._id.toString());
-        console.log(`Online users map:`, onlineUsers);
         if (!friendSocketId) continue;
-        console.log(`Notifying friend ${friend._id} about user ${userId} status change to ${isOnline}`);
-        io.to(friendSocketId).emit('user-status-change', {
+        
+        // Emit to the friend's room, not directly to socket ID
+        io.to(`user_${friend._id}`).emit('user-status-change', {
           userId,
           isOnline,
         });

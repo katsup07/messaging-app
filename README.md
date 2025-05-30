@@ -68,61 +68,37 @@ From the root folder, you can run both the client and server with a single comma
 ### Light Theme
 ![light-theme](https://github.com/user-attachments/assets/bf5602fb-b747-4452-9ce5-7b8dafeb8fa7)
 
-### 📋 Details
-Frontend (React + TypeScript)
-- Built with React, TypeScript, and Vite
-- Uses Jotai for state management (a more modern alternative to Redux)
-- Implements responsive design with light/dark theme support
-- Features comprehensive UI components for messaging, friend requests, and user authentication
-- Structured code organization with proper separation of concerns
+### 📋 Key Features
+- **Authentication**: Complete signup/login workflows with JWT refresh token mechanism
+- **Friend System**: Send, accept, and reject friend requests with real-time notifications
+- **Real-time Messaging**: Live chat with typing indicators and message status tracking
+- **User Status**: Online/offline status tracking for friends
+- **Responsive Design**: Works seamlessly across desktop and mobile devices
+- **Theme Support**: Light and dark mode toggle
+- **Security**: Password hashing, token versioning, and comprehensive auth middleware
 
-Backend (Node.js + Express)
-- Express server with RESTful API endpoints
-- MongoDB integration with proper repository patterns
-- JWT authentication with refresh token mechanism
-- Socket.io implementation for real-time communication
-- Dependency injection
+## 🏗️ Architecture & Implementation
 
-Security Implementations
-- JWT with separate access and refresh tokens for enhanced security
-- Password hashing with bcrypt using salt rounds
-- Token versioning mechanism for invalidation (preventing reuse of old tokens)
-- Comprehensive auth middleware with error handling
+This project follows **Clean Architecture** and **Domain-Driven Design** principles with clear separation of concerns:
 
-Architecture
-- Clear separation between frontend and backend
-- Repository pattern for data access abstraction
-- Service layer for business logic encapsulation
-- Controller layer handling API endpoints
-- Proper error handling and status codes
+### Backend Architecture
+- **Interface Layer**: Controllers and routes handling HTTP requests
+- **Application Layer**: Services coordinating domain actions  
+- **Repository Layer**: Data access abstraction for MongoDB
+- **Dependency Injection**: Services receive dependencies rather than creating them
+- **NotificationService**: Abstracts Socket.IO communication from business logic
 
-Features
-- User authentication with signup/login workflows
-- Friend request system with accept/reject functionality
-- Real-time messaging with message status indicators(Currently in progress)
-- User online status tracking
-- Responsive UI that works across device sizes
+### Frontend Architecture  
+- **Component-based**: React with TypeScript for type safety
+- **State Management**: Jotai for efficient, atomic state updates
+- **Service Layer**: Dedicated services for API communication and caching
+- **Observable Pattern**: Real-time updates using custom Observable implementation
 
-## 🏗️ Clean Architecture Implementation
-This project follows Domain-Driven Design and Clean Architecture principles:
-
-- **Interface Layer**: Controllers and routes that handle HTTP requests
-- **Application Layer**: Services that coordinate domain actions
-- **Repository Layer**: External concerns like databases and messaging
-
-The architecture employs the Dependency Inversion Principle, ensuring high-level modules don't depend on low-level implementations. Key architectural features include:
-
-- **NotificationService**: Abstracts all real-time communication, decoupling controllers from Socket.IO
-- **Strong boundary enforcement**: Each layer has a clear responsibility
-- **Dependency injection**: Services receive their dependencies rather than creating them
-- **Loose coupling**: Components depend on abstractions rather than concrete implementations
-
-## 💻 Real-time Communication
-- Socket.IO implementation with clean architectural separation
-- Centralized notification system for consistent real-time events
-- Proper handling of user connection/disconnection events
-- Live status updates for friends
-- Real-time message delivery with typing indicators
+### Security Features
+- **JWT Authentication**: Separate access/refresh tokens with versioning
+- **Password Security**: bcrypt hashing with salt rounds
+- **Token Management**: Automatic refresh and invalidation mechanisms
+- **Request Validation**: Zod schemas for input validation
 
 ## 🔮 Future Enhancements(Coming in the future)
 - Enhanced notifications and real-time features

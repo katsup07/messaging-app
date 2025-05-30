@@ -151,9 +151,7 @@ class FriendService {
         isPending: false,
         isRejected: false,
       };
-      await this.friendRepository.updateOrCreateFriendship(user2._id, user2.username, user2FriendData);      // tifyStatusChange(userId, isOnline, friendService
-      console.log(`Friendship added between ${user1.username} and ${user2.username}`);
-      console.log("Notifying friends of user", user1._id, "that they are online");
+      await this.friendRepository.updateOrCreateFriendship(user2._id, user2.username, user2FriendData);      
       // Notify both users about the new friendship
       if (this.notificationService) {
         await this.notificationService.notifyStatusChange(user1._id, true, this);
