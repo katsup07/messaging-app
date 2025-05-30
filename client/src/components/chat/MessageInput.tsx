@@ -46,13 +46,15 @@ const MessageInput: React.FC<MessageInputProps> = ({
         placeholder="Type your message"
         className="message-input"
         disabled={isLoading}
+        spellCheck
         onKeyPress={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             validateAndSend();
           }
         }}
-        rows={1}
+        rows={3}
+        style={{ resize: 'vertical', width: '100%' }}
       />
       
       <button
