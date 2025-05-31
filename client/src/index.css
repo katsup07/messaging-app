@@ -109,6 +109,9 @@ button:focus-visible {
   border: 1px solid #131518;
   background-color: #131518;
   color: #fff;
+  display: flex;
+  align-self: flex-end;
+  margin-bottom: 10px;
 }
 
 .sender {
