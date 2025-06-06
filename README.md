@@ -72,12 +72,12 @@ From the root folder, you can run both the client and server with a single comma
 
 
 ### 📋 Key Features
-- **Authentication**: Complete signup/login workflows with JWT refresh token mechanism
 - **Friend System**: Send, accept, and reject friend requests with real-time notifications
-- **Real-time Messaging**: Live chat with typing indicators and message status tracking
+- **Real-time Messaging**: Live chat
 - **User Status**: Online/offline status tracking for friends
 - **Responsive Design**: Works seamlessly across desktop and mobile devices
 - **Theme Support**: Light and dark mode toggle
+- **Authentication**: Complete signup/login workflows with JWT refresh token mechanism
 - **Security**: Password hashing, token versioning, and comprehensive auth middleware
 
 ## 🏗️ Architecture & Implementation
