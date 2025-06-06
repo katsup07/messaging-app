@@ -45,7 +45,7 @@ From the root folder, you can run both the client and server with a single comma
 🛢️ A mongoDB database needs to be connected to use this project as is.
 
 ## 🧰 Tech Stack
-- **Frontend**: React.js, TypeScript, Jotai (state management) 
+- **Frontend**: React.js, TypeScript, Socket.IO, Jotai (state management), Zod (validation) 
   _(deployed on Vercel)_
 - **Backend**: Node.js, Express.js, Socket.IO, JavaScript, Zod (validation)  
   _(deployed on Railway)_
