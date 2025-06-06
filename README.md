@@ -104,7 +104,6 @@ This project follows **Clean Architecture** and **Domain-Driven Design** princip
 - **Request Validation**: Zod schemas for input validation
 
 ## 🔮 Future Enhancements(Coming in the future)
-- Enhanced notifications and real-time features
 - End-to-end encryption for messages
 - Additional profile features
 - Group chat functionality
